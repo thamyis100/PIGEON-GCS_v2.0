@@ -1,0 +1,93 @@
+﻿<Window x:Class="Pigeon_WPF_cs.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Pigeon_WPF_cs"
+        mc:Ignorable="d"
+        
+        Title="PIGEON GCS" Height="720" Width="1280" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png">
+    <Grid MouseLeftButtonDown="clickedWindow">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="373"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="16*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Background="#FF1F1F1F" Grid.RowSpan="2" Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32*"/>
+                <RowDefinition Height="32*"/>
+                <RowDefinition Height="32*"/>
+                <RowDefinition Height="32*"/>
+                <RowDefinition Height="32*"/>
+                <RowDefinition Height="32*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.ColumnSpan="4" Margin="0" VerticalAlignment="Top" Height="78">
+                <Grid.Background>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <GradientStop Color="#FF6A6A6A" Offset="0.316"/>
+                        <GradientStop Color="#FF1F1F1F" Offset="1"/>
+                        <GradientStop Color="#FF8F8F8F"/>
+                    </LinearGradientBrush>
+                </Grid.Background>
+                <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Top" Margin="8,8,8,0" Grid.ColumnSpan="4" UseLayoutRounding="False">
+                    <Image.Effect>
+                        <DropShadowEffect ShadowDepth="3" Direction="275" BlurRadius="0"/>
+                    </Image.Effect>
+                </Image>
+                <DockPanel Margin="8,0" Grid.ColumnSpan="4" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                    <Label x:Name="logo_label_an" Content="an" VerticalAlignment="Top" Padding="0,0,0,4" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" HorizontalAlignment="Center" Foreground="#FFBBBBBB" FontWeight="Bold" FontFamily="Segoe UI Semibold"/>
+                    <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="4,0,0,0" DockPanel.Dock="Right" UseLayoutRounding="False">
+                        <Image.Effect>
+                            <DropShadowEffect ShadowDepth="1" Direction="208" BlurRadius="0" Color="White"/>
+                        </Image.Effect>
+                    </Image>
+                </DockPanel>
+            </Grid>
+            <Button x:Name="btn_flight" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
+                <Grid Margin="0">
+                    <Rectangle x:Name="rect_flight" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
+                    <Image x:Name="icon_flight" Source="Resources/icons/icons8-wasp.png" Margin="-25,0,0,0" Stretch="None"/>
+                </Grid>
+            </Button>
+            <Button x:Name="btn_map" Grid.ColumnSpan="4" Margin="0,5" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
+                <Grid Margin="0">
+                    <Rectangle x:Name="rect_map" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
+                    <Image x:Name="icon_map" Margin="-25,0,0,0" Stretch="None" Source="Resources/icons/icons8-waypoint-map-50.png"/>
+                </Grid>
+            </Button>
+            <Button x:Name="btn_stats" Grid.ColumnSpan="4" Margin="0,5" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
+                <Grid Margin="0">
+                    <Rectangle x:Name="rect_stats" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
+                    <Image x:Name="icon_stats" Margin="-25,0,0,0" Stretch="None" Source="Resources/icons/icons8-statistics-50.png"/>
+                </Grid>
+            </Button>
+            <Button x:Name="btn_track" Grid.ColumnSpan="4" Margin="0,5" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
+                <Grid Margin="0">
+                    <Rectangle x:Name="rect_track" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" Margin="0" Width="10"/>
+                    <Image x:Name="icon_track" Margin="-25,0,0,0" Stretch="None" Source="Resources/icons/icons8-gps-antenna-100.png" DockPanel.Dock="Right"/>
+                </Grid>
+            </Button>
+        </Grid>
+        <Image x:Name="image" VerticalAlignment="Top" Source="Resources/Header.png" Grid.ColumnSpan="10" Grid.Column="1" Margin="0" Height="80"/>
+
+    </Grid>
+</Window>
