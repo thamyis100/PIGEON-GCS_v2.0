@@ -55,6 +55,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="exitPop.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -62,6 +66,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="exitPop.xaml.cs">
+      <DependentUpon>exitPop.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -105,13 +112,21 @@
     <Resource Include="Resources\Header.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\icons\icons8-battery-level-50.png" />
     <Resource Include="Resources\icons\icons8-connected-80.png" />
     <Resource Include="Resources\icons\icons8-disconnected-80.png" />
     <Resource Include="Resources\icons\icons8-gps-antenna-100.png" />
     <Resource Include="Resources\icons\icons8-statistics-50.png" />
     <Resource Include="Resources\icons\icons8-wasp.png" />
     <Resource Include="Resources\icons\icons8-waypoint-map-50.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons\icons8-shutdown-50.png" />
+    <Resource Include="Resources\icons\icons8-wi-fi-50.png" />
+    <Resource Include="Resources\icons\icons8-wi-fi-filled-50.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons\bat-empty.png" />
+    <Resource Include="Resources\icons\bat-full.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

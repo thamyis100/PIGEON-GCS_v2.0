@@ -6,26 +6,18 @@
         xmlns:local="clr-namespace:Pigeon_WPF_cs"
         mc:Ignorable="d"
         
-        Title="PIGEON GCS" Height="720" Width="1280" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png">
-    <Grid MouseLeftButtonDown="clickedWindow">
+        Title="PIGEON GCS" Height="540" Width="960" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="960" MinHeight="540" Icon="Resources/logo/pigeonlogo.png">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="373"/>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="292.667"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
-            <ColumnDefinition Width="16*"/>
+            <ColumnDefinition Width="19*"/>
+            <ColumnDefinition Width="173*"/>
         </Grid.ColumnDefinitions>
-        <Grid Background="#FF1F1F1F" Grid.RowSpan="2" Margin="0">
+        <Grid Background="#FF1F1F1F" Grid.RowSpan="3" Margin="0" MouseLeftButtonDown="clickedWindow">
             <Grid.RowDefinitions>
                 <RowDefinition Height="32*"/>
                 <RowDefinition Height="32*"/>
@@ -40,7 +32,7 @@
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
-            <Grid Grid.ColumnSpan="4" Margin="0" VerticalAlignment="Top" Height="78">
+            <Grid Grid.ColumnSpan="4" Margin="0" VerticalAlignment="Top" Height="59">
                 <Grid.Background>
                     <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                         <GradientStop Color="#FF6A6A6A" Offset="0.316"/>
@@ -53,9 +45,9 @@
                         <DropShadowEffect ShadowDepth="3" Direction="275" BlurRadius="0"/>
                     </Image.Effect>
                 </Image>
-                <DockPanel Margin="8,0" Grid.ColumnSpan="4" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                    <Label x:Name="logo_label_an" Content="an" VerticalAlignment="Top" Padding="0,0,0,4" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" HorizontalAlignment="Center" Foreground="#FFBBBBBB" FontWeight="Bold" FontFamily="Segoe UI Semibold"/>
-                    <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="4,0,0,0" DockPanel.Dock="Right" UseLayoutRounding="False">
+                <DockPanel Margin="3,0" Grid.ColumnSpan="4" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                    <Label x:Name="logo_label_an" Content="an" VerticalAlignment="Top" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" HorizontalAlignment="Center" Foreground="#FFBBBBBB" FontWeight="Bold" FontFamily="Segoe UI Semibold" FontSize="8"/>
+                    <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="3,0,0,0" DockPanel.Dock="Right" UseLayoutRounding="False">
                         <Image.Effect>
                             <DropShadowEffect ShadowDepth="1" Direction="208" BlurRadius="0" Color="White"/>
                         </Image.Effect>
@@ -65,29 +57,85 @@
             <Button x:Name="btn_flight" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
                 <Grid Margin="0">
                     <Rectangle x:Name="rect_flight" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <Image x:Name="icon_flight" Source="Resources/icons/icons8-wasp.png" Margin="-25,0,0,0" Stretch="None"/>
+                    <Image x:Name="icon_flight" Source="Resources/icons/icons8-wasp.png" Margin="5"/>
                 </Grid>
             </Button>
-            <Button x:Name="btn_map" Grid.ColumnSpan="4" Margin="0,5" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
+            <Button x:Name="btn_map" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
                 <Grid Margin="0">
                     <Rectangle x:Name="rect_map" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <Image x:Name="icon_map" Margin="-25,0,0,0" Stretch="None" Source="Resources/icons/icons8-waypoint-map-50.png"/>
+                    <Image x:Name="icon_map" Margin="5" Source="Resources/icons/icons8-waypoint-map-50.png"/>
                 </Grid>
             </Button>
-            <Button x:Name="btn_stats" Grid.ColumnSpan="4" Margin="0,5" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
+            <Button x:Name="btn_stats" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
                 <Grid Margin="0">
                     <Rectangle x:Name="rect_stats" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <Image x:Name="icon_stats" Margin="-25,0,0,0" Stretch="None" Source="Resources/icons/icons8-statistics-50.png"/>
+                    <Image x:Name="icon_stats" Margin="5" Source="Resources/icons/icons8-statistics-50.png"/>
                 </Grid>
             </Button>
-            <Button x:Name="btn_track" Grid.ColumnSpan="4" Margin="0,5" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
+            <Button x:Name="btn_track" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal" BorderBrush="{x:Null}">
                 <Grid Margin="0">
                     <Rectangle x:Name="rect_track" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" Margin="0" Width="10"/>
-                    <Image x:Name="icon_track" Margin="-25,0,0,0" Stretch="None" Source="Resources/icons/icons8-gps-antenna-100.png" DockPanel.Dock="Right"/>
+                    <Image x:Name="icon_track" Margin="5" Source="Resources/icons/icons8-gps-antenna-100.png" DockPanel.Dock="Right"/>
                 </Grid>
             </Button>
+            <Button x:Name="btn_help" Content="?" Margin="10,10,0,0" Grid.Row="5" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="White" FontFamily="UD Digi Kyokasho N-B" FontWeight="Bold" RenderTransformOrigin="0.067,1.037" HorizontalAlignment="Left" Width="10" ToolTip="Help about Pigeon"/>
         </Grid>
-        <Image x:Name="image" VerticalAlignment="Top" Source="Resources/Header.png" Grid.ColumnSpan="10" Grid.Column="1" Margin="0" Height="80"/>
+        <Grid Margin="0,0,-1,0" Grid.Column="1" MouseLeftButtonDown="clickedWindow">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+            <Rectangle Fill="#FFF2F2F2" Margin="0,0,-0.333,20" Stroke="Black" StrokeThickness="0" Grid.ColumnSpan="2"/>
+            <Image x:Name="header" VerticalAlignment="Top" Source="Resources/Header.png" Margin="0,0,-0.333,0" Height="80" Grid.ColumnSpan="2"/>
+            <Grid Height="54" Margin="0,7,0,0" VerticalAlignment="Top" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <DockPanel LastChildFill="False" Margin="0" VerticalAlignment="Center" Height="30" HorizontalAlignment="Center" Width="112">
+                    <Image x:Name="logo_efalcon_status" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/logo/efalcon.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="Commando" FontSize="18" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                </DockPanel>
+                <DockPanel Grid.Column="1" Margin="0,-5,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" Height="46">
+                    <Grid Margin="12,0,14.667,0" DockPanel.Dock="Top">
+                        <Image x:Name="icon_signal_0" HorizontalAlignment="Center" Height="30" Margin="0" VerticalAlignment="Center" Width="30" Source="Resources/icons/icons8-wi-fi-50.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image x:Name="icon_signal_1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/icons8-wi-fi-filled-50.png" Height="30" Width="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Grid>
+                    <Label x:Name="lbl_signal" Content="Signal" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11"/>
+                    <Label x:Name="val_signal" Content="(dBm)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11"/>
+                </DockPanel>
+                <DockPanel Grid.Column="2" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="40" Width="59">
+                    <Label x:Name="lbl_flightTime" Content="Flight Time" HorizontalAlignment="Center" Margin="0" Padding="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top"/>
+                    <Label x:Name="val_flightTime" Content="00:00" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0,3,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontFamily="UD Digi Kyokasho NP-B" DockPanel.Dock="Top"/>
+                </DockPanel>
+                <Button x:Name="btn_exit" Height="30" Margin="14.667,13,15.333,11" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="4" HorizontalAlignment="Center" Width="30" Click="closeApp">
+                    <Image x:Name="icon_exit" Source="Resources/icons/icons8-shutdown-50.png" RenderOptions.BitmapScalingMode="HighQuality" />
+                </Button>
+                <Grid Grid.Column="3" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Image x:Name="icon_bat_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/bat-empty.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality" Height="30"/>
+                    <Image x:Name="icon_bat_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Source="Resources/icons/bat-full.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality" Height="30"/>
+                </Grid>
+            </Grid>
+
+
+        </Grid>
+        <TabControl x:Name="tabControl" Grid.Column="1" Margin="4.333,5,-1,5" Grid.RowSpan="2" Grid.Row="1">
+            <TabItem Header="Flight">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Map">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Stats">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem Header="Track">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+        </TabControl>
 
     </Grid>
 </Window>
