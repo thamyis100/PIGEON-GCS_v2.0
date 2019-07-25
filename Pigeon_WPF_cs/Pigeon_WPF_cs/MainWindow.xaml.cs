@@ -34,49 +34,27 @@ namespace Pigeon_WPF_cs
             Console.WriteLine("Window clicked");
         }
 
-        private void popRight(object sender, MouseEventArgs e)
-        {
-            Button the_btn = (Button)sender;
-            Thickness pop = new Thickness(25,5,5,5);
-            the_btn.Background = Brushes.Black;
-            switch (the_btn.Name)
-            {
-                case "btn_flight":
-                    icon_flight.Margin = pop;
-                    break;
-                case "btn_map":
-                    icon_map.Margin = pop;
-                    break;
-                case "btn_stats":
-                    icon_stats.Margin = pop;
-                    break;
-                case "btn_track":
-                    icon_track.Margin = pop;
-                    break;
-            }
-        }
-
-        private void normal(object sender, MouseEventArgs e)
-        {
-            Button the_btn = (Button)sender;
-            Thickness back = new Thickness(5, 5, 5, 5);
-            the_btn.Background = Brushes.Transparent;
-            switch (the_btn.Name)
-            {
-                case "btn_flight":
-                    icon_flight.Margin = back;
-                    break;
-                case "btn_map":
-                    icon_map.Margin = back;
-                    break;
-                case "btn_stats":
-                    icon_stats.Margin = back;
-                    break;
-                case "btn_track":
-                    icon_track.Margin = back;
-                    break;
-            }
-        }
+        //private void normal(object sender, MouseEventArgs e)
+        //{
+        //    Button the_btn = (Button)sender;
+        //    Thickness back = new Thickness(5, 0, 0, 0);
+        //    the_btn.Background = Brushes.Transparent;
+        //    switch (the_btn.Name)
+        //    {
+        //        case "btn_flight":
+        //            icon_flight.Margin = back;
+        //            break;
+        //        case "btn_map":
+        //            icon_map.Margin = back;
+        //            break;
+        //        case "btn_stats":
+        //            icon_stats.Margin = back;
+        //            break;
+        //        case "btn_track":
+        //            icon_track.Margin = back;
+        //            break;
+        //    }
+        //}
 
         private void closeApp(object sender, RoutedEventArgs e)
         {
@@ -92,6 +70,44 @@ namespace Pigeon_WPF_cs
             byte code = 0;
             if (connected) code = 1;
             return code;
+        }
+
+        private void hoverButton(object sender, MouseEventArgs e)
+        {
+            Button it = (Button)sender;
+            it.Background = Brushes.DarkSlateGray;
+        }
+
+        private void dehoverButton(object sender, MouseEventArgs e)
+        {
+            SolidColorBrush color = new SolidColorBrush();
+            Button it = (Button)sender;
+            it.Background = color;
+        }
+
+        private void selectTab(object sender, MouseButtonEventArgs e)
+        {
+            Button the_btn = (Button)sender;
+            switch (the_btn.Name)
+            {
+                case "btn_flight":
+                    tabControl.SelectedIndex = 0;
+                    break;
+                case "btn_map":
+                    tabControl.SelectedIndex = 1;
+                    break;
+                case "btn_stats":
+                    tabControl.SelectedIndex = 2;
+                    break;
+                case "btn_track":
+                    tabControl.SelectedIndex = 3;
+                    break;
+            }
+        }
+
+        private void selectTab(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

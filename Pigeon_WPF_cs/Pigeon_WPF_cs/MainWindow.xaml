@@ -7,17 +7,29 @@
         mc:Ignorable="d"
         
         Title="PIGEON GCS" Height="540" Width="960" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="960" MinHeight="540" Icon="Resources/logo/pigeonlogo.png">
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}" x:Key="leftPaneButtonStyle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="80"/>
-            <RowDefinition Height="292.667"/>
-            <RowDefinition/>
+            <RowDefinition Height="460"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="19*"/>
             <ColumnDefinition Width="173*"/>
         </Grid.ColumnDefinitions>
-        <Grid Background="#FF1F1F1F" Grid.RowSpan="3" Margin="0" MouseLeftButtonDown="clickedWindow">
+        <Grid Background="#FF1F1F1F" Grid.RowSpan="2" Margin="0" MouseLeftButtonDown="clickedWindow">
             <Grid.RowDefinitions>
                 <RowDefinition Height="32*"/>
                 <RowDefinition Height="32*"/>
@@ -54,31 +66,83 @@
                     </Image>
                 </DockPanel>
             </Grid>
-            <Button x:Name="btn_flight" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
-                <Grid Margin="0">
-                    <Rectangle x:Name="rect_flight" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <Image x:Name="icon_flight" Source="Resources/icons/icons8-wasp.png" Margin="5"/>
+            <Button x:Name="btn_flight" Style="{StaticResource leftPaneButtonStyle}"  Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" HorizontalAlignment="Center">
+                <Grid Margin="0" Height="60">
+                    <Rectangle x:Name="rect_flight" Fill="#FF008C8C" Stroke="Black" Width="5" StrokeThickness="0" HorizontalAlignment="Left"/>
+                    <DockPanel Margin="0">
+                        <Label x:Name="lbl_flight" Content="Flight" HorizontalAlignment="Center" Margin="-2,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White">
+                            <Label.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="-90"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Label.RenderTransform>
+                        </Label>
+                        <Image x:Name="icon_flight" Source="Resources/icons/icons8-wasp.png" Margin="0,0,10,0" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+                    </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_map" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
-                <Grid Margin="0">
-                    <Rectangle x:Name="rect_map" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <Image x:Name="icon_map" Margin="5" Source="Resources/icons/icons8-waypoint-map-50.png"/>
+            <Button x:Name="btn_map" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseLeave="dehoverButton" MouseEnter="hoverButton" HorizontalAlignment="Center" Click="selectTab" ToolTip="Waypoint Tab">
+                <Grid Margin="0" Height="60">
+                    <Rectangle x:Name="rect_map" Fill="#FF008C8C" Stroke="Black" Width="5" StrokeThickness="0" HorizontalAlignment="Left"/>
+                    <DockPanel Margin="0">
+                        <Label x:Name="lbl_map" Content="Waypoint" HorizontalAlignment="Center" Margin="-10,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="11">
+                            <Label.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="-90"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Label.RenderTransform>
+                        </Label>
+                        <Image x:Name="icon_map" Margin="0,0,10,0" Source="Resources/icons/icons8-waypoint-map-50.png" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+                    </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_stats" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal">
-                <Grid Margin="0">
-                    <Rectangle x:Name="rect_stats" Fill="#FF008C8C" Stroke="Black" Width="10" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <Image x:Name="icon_stats" Margin="5" Source="Resources/icons/icons8-statistics-50.png"/>
+            <Button x:Name="btn_stats" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" HorizontalAlignment="Center">
+                <Grid Margin="0" Height="60">
+                    <Rectangle x:Name="rect_stats" Fill="#FF008C8C" Stroke="Black" Width="5" StrokeThickness="0" HorizontalAlignment="Left"/>
+                    <DockPanel Margin="0">
+                        <Label x:Name="lbl_stats" Content="Stats" HorizontalAlignment="Center" Margin="1,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="11">
+                            <Label.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="-90"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Label.RenderTransform>
+                        </Label>
+                        <Image x:Name="icon_stats" Margin="0,0,10,0" Source="Resources/icons/icons8-statistics-50.png" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right"/>
+                    </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_track" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="popRight" MouseLeave="normal" BorderBrush="{x:Null}">
-                <Grid Margin="0">
-                    <Rectangle x:Name="rect_track" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" Margin="0" Width="10"/>
-                    <Image x:Name="icon_track" Margin="5" Source="Resources/icons/icons8-gps-antenna-100.png" DockPanel.Dock="Right"/>
+            <Button x:Name="btn_track" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" BorderBrush="{x:Null}" MouseEnter="hoverButton" MouseLeave="dehoverButton" HorizontalAlignment="Center">
+                <Grid Margin="0" Height="60">
+                    <Rectangle x:Name="rect_track" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" Margin="0" Width="5"/>
+                    <DockPanel Margin="0">
+                        <Label x:Name="lbl_track" Content="Tracker" HorizontalAlignment="Center" Margin="-5,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="11">
+                            <Label.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform/>
+                                    <SkewTransform/>
+                                    <RotateTransform Angle="-90"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Label.RenderTransform>
+                        </Label>
+                        <Image x:Name="icon_track" Margin="0,0,10,0" Source="Resources/icons/icons8-gps-antenna-100.png" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_help" Content="?" Margin="10,10,0,0" Grid.Row="5" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="White" FontFamily="UD Digi Kyokasho N-B" FontWeight="Bold" RenderTransformOrigin="0.067,1.037" HorizontalAlignment="Left" Width="10" ToolTip="Help about Pigeon"/>
+            <Button x:Name="btn_help" Content="?" Style="{StaticResource leftPaneButtonStyle}" Margin="10,10,0,0" Grid.Row="5" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="White" FontFamily="Unispace" FontWeight="Bold" RenderTransformOrigin="0.067,1.037" HorizontalAlignment="Left" ToolTip="Help about Pigeon" MouseEnter="hoverButton" MouseLeave="dehoverButton" Padding="0" Width="20" Height="25" VerticalContentAlignment="Center" Grid.ColumnSpan="2" FontSize="16"/>
+            <Rectangle x:Name="tab_flight" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="1" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Rectangle x:Name="tab_map" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Rectangle x:Name="tab_stats" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
         </Grid>
         <Grid Margin="0,0,-1,0" Grid.Column="1" MouseLeftButtonDown="clickedWindow">
             <Grid.ColumnDefinitions>
@@ -86,43 +150,47 @@
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
             <Rectangle Fill="#FFF2F2F2" Margin="0,0,-0.333,20" Stroke="Black" StrokeThickness="0" Grid.ColumnSpan="2"/>
-            <Image x:Name="header" VerticalAlignment="Top" Source="Resources/Header.png" Margin="0,0,-0.333,0" Height="80" Grid.ColumnSpan="2"/>
+            <Image x:Name="header" VerticalAlignment="Top" Source="Resources/Header.png" Margin="0,0,-0.333,0" Height="80" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality"/>
             <Grid Height="54" Margin="0,7,0,0" VerticalAlignment="Top" Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="4*"/>
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="3*"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
-                <DockPanel LastChildFill="False" Margin="0" VerticalAlignment="Center" Height="30" HorizontalAlignment="Center" Width="112">
+                <DockPanel LastChildFill="False" Margin="5,0,0,0" VerticalAlignment="Center" Height="30" HorizontalAlignment="Center">
                     <Image x:Name="logo_efalcon_status" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/logo/efalcon.png" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="Commando" FontSize="18" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="5,0,0,0"/>
+                    <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/#Commando" FontSize="18" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="5,0,0,0" Padding="0"/>
                 </DockPanel>
                 <DockPanel Grid.Column="1" Margin="0,-5,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" Height="46">
                     <Grid Margin="12,0,14.667,0" DockPanel.Dock="Top">
                         <Image x:Name="icon_signal_0" HorizontalAlignment="Center" Height="30" Margin="0" VerticalAlignment="Center" Width="30" Source="Resources/icons/icons8-wi-fi-50.png" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Image x:Name="icon_signal_1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/icons8-wi-fi-filled-50.png" Height="30" Width="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
-                    <Label x:Name="lbl_signal" Content="Signal" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11"/>
-                    <Label x:Name="val_signal" Content="(dBm)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11"/>
+                    <Label x:Name="lbl_signal" Content="Sinyal" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11"/>
+                    <Label x:Name="val_signal" Content="(dBm)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11" FontFamily="Raleway SemiBold"/>
                 </DockPanel>
-                <DockPanel Grid.Column="2" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="40" Width="59">
-                    <Label x:Name="lbl_flightTime" Content="Flight Time" HorizontalAlignment="Center" Margin="0" Padding="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top"/>
+                <DockPanel Grid.Column="2" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="40">
+                    <Label x:Name="lbl_flightTime" Content="Waktu Terbang" HorizontalAlignment="Right" Margin="0" Padding="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top"/>
                     <Label x:Name="val_flightTime" Content="00:00" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0,3,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontFamily="UD Digi Kyokasho NP-B" DockPanel.Dock="Top"/>
                 </DockPanel>
-                <Button x:Name="btn_exit" Height="30" Margin="14.667,13,15.333,11" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="4" HorizontalAlignment="Center" Width="30" Click="closeApp">
-                    <Image x:Name="icon_exit" Source="Resources/icons/icons8-shutdown-50.png" RenderOptions.BitmapScalingMode="HighQuality" />
+                <Button x:Name="btn_exit" Height="30" Margin="0" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="4" Width="30" Click="closeApp" HorizontalAlignment="Left">
+                    <Image x:Name="icon_exit" Source="Resources/icons/icons8-shutdown-50.png" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Button>
-                <Grid Grid.Column="3" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Image x:Name="icon_bat_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/bat-empty.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality" Height="30"/>
-                    <Image x:Name="icon_bat_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Source="Resources/icons/bat-full.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality" Height="30"/>
-                </Grid>
+                <DockPanel Grid.Column="3" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid Margin="0,0,0,3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" DockPanel.Dock="Top">
+                        <Image x:Name="icon_bat_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/bat-empty.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image x:Name="icon_bat_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Source="Resources/icons/bat-full.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Grid>
+                    <Label x:Name="lbl_batt" Content="Batt" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" FontSize="11" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    <Label x:Name="val_batt" Content="(11.1 V)" HorizontalAlignment="Center" Margin="5,0,0,-1" VerticalAlignment="Center" FontSize="11" Padding="0" FontFamily="Raleway SemiBold" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                </DockPanel>
             </Grid>
 
 
         </Grid>
-        <TabControl x:Name="tabControl" Grid.Column="1" Margin="4.333,5,-1,5" Grid.RowSpan="2" Grid.Row="1">
+        <TabControl x:Name="tabControl" Grid.Column="1" Margin="20,5,5,5" Grid.Row="1">
             <TabItem Header="Flight">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
