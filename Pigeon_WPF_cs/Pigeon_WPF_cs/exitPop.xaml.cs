@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Pigeon_WPF_cs.Custom_UserControls;
 
 namespace Pigeon_WPF_cs
 {
@@ -34,6 +35,9 @@ namespace Pigeon_WPF_cs
 
         private void keluar(object sender, RoutedEventArgs e)
         {
+            MainWindow win = (MainWindow)Window.GetWindow(Owner);
+            win.stopTheCam();
+            
             Application.Current.Shutdown();
         }
     }

@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pigeon_WPF_cs"
+        xmlns:flight="clr-namespace:Pigeon_WPF_cs.Custom_UserControls"
         mc:Ignorable="d"
         
-        Title="PIGEON GCS" Height="540" Width="960" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="960" MinHeight="540" Icon="Resources/logo/pigeonlogo.png">
+        Title="PIGEON GCS" Height="720" Width="1280" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="leftPaneButtonStyle">
             <Setter Property="Template">
@@ -20,23 +21,45 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid>
+    <Grid Margin="0">
         <Grid.RowDefinitions>
-            <RowDefinition Height="80"/>
-            <RowDefinition Height="460"/>
+            <RowDefinition Height="50*"/>
+            <RowDefinition Height="480*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="19*"/>
-            <ColumnDefinition Width="173*"/>
+            <ColumnDefinition Width="117*"/>
+            <ColumnDefinition Width="1163*"/>
         </Grid.ColumnDefinitions>
-        <Grid Background="#FF1F1F1F" Grid.RowSpan="2" Margin="0" MouseLeftButtonDown="clickedWindow">
+        <Grid Margin="0,0,0.333,0.333">
+            <Grid.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF6A6A6A" Offset="0.316"/>
+                    <GradientStop Color="#FF1F1F1F" Offset="1"/>
+                    <GradientStop Color="#FF8F8F8F"/>
+                </LinearGradientBrush>
+            </Grid.Background>
+            <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Top" Margin="8,5,8,0" UseLayoutRounding="False">
+                <Image.Effect>
+                    <DropShadowEffect ShadowDepth="3" Direction="275" BlurRadius="0"/>
+                </Image.Effect>
+            </Image>
+            <DockPanel Margin="8,0,8,3" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <Label x:Name="logo_label_an" Content="an" VerticalAlignment="Top" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" HorizontalAlignment="Center" Foreground="#FFBBBBBB" FontWeight="Bold" FontFamily="Segoe UI Semibold" FontSize="11"/>
+                <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="5,0,0,0" DockPanel.Dock="Right" UseLayoutRounding="False">
+                    <Image.Effect>
+                        <DropShadowEffect ShadowDepth="1" Direction="208" BlurRadius="3" Color="White"/>
+                    </Image.Effect>
+                </Image>
+            </DockPanel>
+        </Grid>
+        <Grid Background="#FF1F1F1F" Margin="0" MouseLeftButtonDown="clickedWindow" Grid.Row="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="32*"/>
-                <RowDefinition Height="32*"/>
-                <RowDefinition Height="32*"/>
-                <RowDefinition Height="32*"/>
-                <RowDefinition Height="32*"/>
-                <RowDefinition Height="32*"/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="4*"/>
@@ -44,33 +67,12 @@
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
-            <Grid Grid.ColumnSpan="4" Margin="0" VerticalAlignment="Top" Height="59">
-                <Grid.Background>
-                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                        <GradientStop Color="#FF6A6A6A" Offset="0.316"/>
-                        <GradientStop Color="#FF1F1F1F" Offset="1"/>
-                        <GradientStop Color="#FF8F8F8F"/>
-                    </LinearGradientBrush>
-                </Grid.Background>
-                <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Top" Margin="8,8,8,0" Grid.ColumnSpan="4" UseLayoutRounding="False">
-                    <Image.Effect>
-                        <DropShadowEffect ShadowDepth="3" Direction="275" BlurRadius="0"/>
-                    </Image.Effect>
-                </Image>
-                <DockPanel Margin="3,0" Grid.ColumnSpan="4" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                    <Label x:Name="logo_label_an" Content="an" VerticalAlignment="Top" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" HorizontalAlignment="Center" Foreground="#FFBBBBBB" FontWeight="Bold" FontFamily="Segoe UI Semibold" FontSize="8"/>
-                    <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="3,0,0,0" DockPanel.Dock="Right" UseLayoutRounding="False">
-                        <Image.Effect>
-                            <DropShadowEffect ShadowDepth="1" Direction="208" BlurRadius="0" Color="White"/>
-                        </Image.Effect>
-                    </Image>
-                </DockPanel>
-            </Grid>
-            <Button x:Name="btn_flight" Style="{StaticResource leftPaneButtonStyle}"  Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" HorizontalAlignment="Center">
-                <Grid Margin="0" Height="60">
+
+            <Button x:Name="btn_flight" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab" Tag="">
+                <Grid Margin="0" MinWidth="117">
                     <Rectangle x:Name="rect_flight" Fill="#FF008C8C" Stroke="Black" Width="5" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <DockPanel Margin="0">
-                        <Label x:Name="lbl_flight" Content="Flight" HorizontalAlignment="Center" Margin="-2,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White">
+                    <DockPanel Margin="0,5">
+                        <Label x:Name="lbl_flight" Content="Flight" HorizontalAlignment="Center" Margin="-2,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14">
                             <Label.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -84,11 +86,11 @@
                     </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_map" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseLeave="dehoverButton" MouseEnter="hoverButton" HorizontalAlignment="Center" Click="selectTab" ToolTip="Waypoint Tab">
-                <Grid Margin="0" Height="60">
+            <Button x:Name="btn_map" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseLeave="dehoverButton" MouseEnter="hoverButton" Click="selectTab" ToolTip="Waypoint Tab">
+                <Grid Margin="0">
                     <Rectangle x:Name="rect_map" Fill="#FF008C8C" Stroke="Black" Width="5" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <DockPanel Margin="0">
-                        <Label x:Name="lbl_map" Content="Waypoint" HorizontalAlignment="Center" Margin="-10,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="11">
+                    <DockPanel Margin="0,5">
+                        <Label x:Name="lbl_map" Content="Waypoint" HorizontalAlignment="Center" Margin="-10,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14">
                             <Label.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -102,11 +104,11 @@
                     </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_stats" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" HorizontalAlignment="Center">
-                <Grid Margin="0" Height="60">
+            <Button x:Name="btn_stats" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab">
+                <Grid Margin="0" MinWidth="117">
                     <Rectangle x:Name="rect_stats" Fill="#FF008C8C" Stroke="Black" Width="5" StrokeThickness="0" HorizontalAlignment="Left"/>
-                    <DockPanel Margin="0">
-                        <Label x:Name="lbl_stats" Content="Stats" HorizontalAlignment="Center" Margin="1,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="11">
+                    <DockPanel Margin="0,5">
+                        <Label x:Name="lbl_stats" Content="Stats" HorizontalAlignment="Center" Margin="1,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14">
                             <Label.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -120,11 +122,11 @@
                     </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_track" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" BorderBrush="{x:Null}" MouseEnter="hoverButton" MouseLeave="dehoverButton" HorizontalAlignment="Center">
-                <Grid Margin="0" Height="60">
+            <Button x:Name="btn_track" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" BorderBrush="{x:Null}" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab">
+                <Grid Margin="0" MinWidth="117">
                     <Rectangle x:Name="rect_track" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" Margin="0" Width="5"/>
-                    <DockPanel Margin="0">
-                        <Label x:Name="lbl_track" Content="Tracker" HorizontalAlignment="Center" Margin="-5,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="11">
+                    <DockPanel Margin="0,5">
+                        <Label x:Name="lbl_track" Content="Tracker" HorizontalAlignment="Center" Margin="-5,0,0,0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14">
                             <Label.RenderTransform>
                                 <TransformGroup>
                                     <ScaleTransform/>
@@ -138,20 +140,20 @@
                     </DockPanel>
                 </Grid>
             </Button>
-            <Button x:Name="btn_help" Content="?" Style="{StaticResource leftPaneButtonStyle}" Margin="10,10,0,0" Grid.Row="5" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="White" FontFamily="Unispace" FontWeight="Bold" RenderTransformOrigin="0.067,1.037" HorizontalAlignment="Left" ToolTip="Help about Pigeon" MouseEnter="hoverButton" MouseLeave="dehoverButton" Padding="0" Width="20" Height="25" VerticalContentAlignment="Center" Grid.ColumnSpan="2" FontSize="16"/>
-            <Rectangle x:Name="tab_flight" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="1" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <Rectangle x:Name="tab_map" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <Rectangle x:Name="tab_stats" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFC8C8C8" Height="40" Margin="0,0,-42,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Button x:Name="btn_help" Content="?" Style="{StaticResource leftPaneButtonStyle}" Margin="10,9.667,0,0" Grid.Row="5" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="White" FontFamily="Unispace" FontWeight="Bold" RenderTransformOrigin="0.067,1.037" HorizontalAlignment="Left" ToolTip="Help about Pigeon" MouseEnter="hoverButton" MouseLeave="dehoverButton" Padding="0" Width="30" Height="30" VerticalContentAlignment="Center" Grid.ColumnSpan="2" FontSize="16"/>
+            <Rectangle x:Name="tab_flight" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-50,0" Grid.Row="1" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Rectangle x:Name="tab_map" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-50,0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Rectangle x:Name="tab_stats" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-50,0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-50,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
         </Grid>
-        <Grid Margin="0,0,-1,0" Grid.Column="1" MouseLeftButtonDown="clickedWindow">
+        <Grid Margin="0.667,0,-1,0.333" Grid.Column="1" MouseLeftButtonDown="clickedWindow">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="3*"/>
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
-            <Rectangle Fill="#FFF2F2F2" Margin="0,0,-0.333,20" Stroke="Black" StrokeThickness="0" Grid.ColumnSpan="2"/>
-            <Image x:Name="header" VerticalAlignment="Top" Source="Resources/Header.png" Margin="0,0,-0.333,0" Height="80" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality"/>
-            <Grid Height="54" Margin="0,7,0,0" VerticalAlignment="Top" Grid.Column="1">
+            <Rectangle Fill="WhiteSmoke" Margin="0" Stroke="Black" StrokeThickness="0" Grid.ColumnSpan="2"/>
+            <Image x:Name="header" Source="Resources/Header.png" Margin="-1,0,0,0" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality" Stretch="Fill"/>
+            <Grid Margin="0,10,0,0" Grid.Column="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="4*"/>
                     <ColumnDefinition Width="3*"/>
@@ -163,23 +165,23 @@
                     <Image x:Name="logo_efalcon_status" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/logo/efalcon.png" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/#Commando" FontSize="18" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="5,0,0,0" Padding="0"/>
                 </DockPanel>
-                <DockPanel Grid.Column="1" Margin="0,-5,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="70" Height="46">
+                <DockPanel Grid.Column="1" Margin="0,-5,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid Margin="12,0,14.667,0" DockPanel.Dock="Top">
                         <Image x:Name="icon_signal_0" HorizontalAlignment="Center" Height="30" Margin="0" VerticalAlignment="Center" Width="30" Source="Resources/icons/icons8-wi-fi-50.png" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Image x:Name="icon_signal_1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/icons8-wi-fi-filled-50.png" Height="30" Width="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
                     <Label x:Name="lbl_signal" Content="Sinyal" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11"/>
-                    <Label x:Name="val_signal" Content="(dBm)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11" FontFamily="Raleway SemiBold"/>
+                    <Label x:Name="val_signal" Content="(dBm)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="11" FontFamily="./#Raleway SemiBold" Margin="3,0,0,-3"/>
                 </DockPanel>
                 <DockPanel Grid.Column="2" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="40">
-                    <Label x:Name="lbl_flightTime" Content="Waktu Terbang" HorizontalAlignment="Right" Margin="0" Padding="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top"/>
+                    <Label x:Name="lbl_flightTime" Content="Waktu Terbang" HorizontalAlignment="Right" Margin="0" Padding="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" FontFamily="./#Raleway"/>
                     <Label x:Name="val_flightTime" Content="00:00" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0,3,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="18" FontFamily="UD Digi Kyokasho NP-B" DockPanel.Dock="Top"/>
                 </DockPanel>
-                <Button x:Name="btn_exit" Height="30" Margin="0" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="4" Width="30" Click="closeApp" HorizontalAlignment="Left">
+                <Button x:Name="btn_exit" Height="30" Margin="10,0,0,0" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="4" Width="30" Click="closeApp" HorizontalAlignment="Left">
                     <Image x:Name="icon_exit" Source="Resources/icons/icons8-shutdown-50.png" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Button>
                 <DockPanel Grid.Column="3" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Grid Margin="0,0,0,3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" DockPanel.Dock="Top">
+                    <Grid Margin="0,0,0,5" HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" DockPanel.Dock="Top">
                         <Image x:Name="icon_bat_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/bat-empty.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Image x:Name="icon_bat_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Source="Resources/icons/bat-full.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
@@ -190,17 +192,17 @@
 
 
         </Grid>
-        <TabControl x:Name="tabControl" Grid.Column="1" Margin="20,5,5,5" Grid.Row="1">
-            <TabItem Header="Flight">
+        <TabControl x:Name="tabControl" Grid.Column="1" Margin="20,15,10,5" BorderThickness="1" SelectedIndex="0" HorizontalContentAlignment="Center" Padding="2" FontSize="11" Grid.Row="1">
+            <TabItem Header="Flight" Visibility="Collapsed" Margin="0">
+                <flight:FlightControl x:Name="flight_Ctrl" x:FieldModifier="public"/>
+            </TabItem>
+            <TabItem Header="Map" Visibility="Collapsed">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
-            <TabItem Header="Map">
+            <TabItem Header="Stats" Visibility="Collapsed">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
-            <TabItem Header="Stats">
-                <Grid Background="#FFE5E5E5"/>
-            </TabItem>
-            <TabItem Header="Track">
+            <TabItem Header="Track" Visibility="Collapsed">
                 <Grid Background="#FFE5E5E5"/>
             </TabItem>
         </TabControl>

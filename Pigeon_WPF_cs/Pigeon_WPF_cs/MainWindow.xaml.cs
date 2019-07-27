@@ -25,41 +25,26 @@ namespace Pigeon_WPF_cs
         public MainWindow()
         {
             InitializeComponent();
-            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0,0,400,396));
+            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, 400, 396));
+            btn_flight.Background = Brushes.Teal;
+
+        }
+
+        public void stopTheCam()
+        {
+            flight_Ctrl.stopControl();
         }
 
         private void clickedWindow(object sender, MouseButtonEventArgs e)
         {
             DragMove();
-            Console.WriteLine("Window clicked");
+            //Console.WriteLine("Window clicked");
         }
-
-        //private void normal(object sender, MouseEventArgs e)
-        //{
-        //    Button the_btn = (Button)sender;
-        //    Thickness back = new Thickness(5, 0, 0, 0);
-        //    the_btn.Background = Brushes.Transparent;
-        //    switch (the_btn.Name)
-        //    {
-        //        case "btn_flight":
-        //            icon_flight.Margin = back;
-        //            break;
-        //        case "btn_map":
-        //            icon_map.Margin = back;
-        //            break;
-        //        case "btn_stats":
-        //            icon_stats.Margin = back;
-        //            break;
-        //        case "btn_track":
-        //            icon_track.Margin = back;
-        //            break;
-        //    }
-        //}
 
         private void closeApp(object sender, RoutedEventArgs e)
         {
             BlurEffect theblur= new BlurEffect();
-            theblur.Radius = 10;
+            theblur.Radius = 15;
             Effect = theblur;
             exitPop exitPop = new exitPop(appCheck());
             exitPop.Owner = this;
@@ -72,42 +57,74 @@ namespace Pigeon_WPF_cs
             return code;
         }
 
+        String selectedBtn="btn_flight";
+        Brush savedBG;
+        SolidColorBrush transparentBG;
         private void hoverButton(object sender, MouseEventArgs e)
         {
             Button it = (Button)sender;
-            it.Background = Brushes.DarkSlateGray;
+            if(it.Name == selectedBtn) savedBG = it.Background;
+            else it.Background = Brushes.DarkSlateGray;
         }
 
         private void dehoverButton(object sender, MouseEventArgs e)
         {
-            SolidColorBrush color = new SolidColorBrush();
+            transparentBG = new SolidColorBrush();
             Button it = (Button)sender;
-            it.Background = color;
+            if (it.Name == selectedBtn) it.Background = savedBG;
+            else it.Background = transparentBG;
         }
-
-        private void selectTab(object sender, MouseButtonEventArgs e)
+        
+        private void selectTab(object sender, RoutedEventArgs e)
         {
             Button the_btn = (Button)sender;
             switch (the_btn.Name)
             {
                 case "btn_flight":
                     tabControl.SelectedIndex = 0;
+                    setVisible(tab_flight);
+                    setSelected(btn_flight);
                     break;
                 case "btn_map":
                     tabControl.SelectedIndex = 1;
+                    setVisible(tab_map);
+                    setSelected(btn_map);
                     break;
                 case "btn_stats":
                     tabControl.SelectedIndex = 2;
+                    setVisible(tab_stats);
+                    setSelected(btn_stats);
                     break;
                 case "btn_track":
                     tabControl.SelectedIndex = 3;
+                    setVisible(tab_track);
+                    setSelected(btn_track);
                     break;
             }
         }
 
-        private void selectTab(object sender, RoutedEventArgs e)
+        private void setVisible(Rectangle theBox)
         {
+            //sembunyikan dahulu semua box
+            tab_flight.Visibility = Visibility.Hidden;
+            tab_map.Visibility = Visibility.Hidden;
+            tab_stats.Visibility = Visibility.Hidden;
+            tab_track.Visibility = Visibility.Hidden;
+            
+            //sekarang tampilkan box yang dipilih
+            theBox.Visibility = Visibility.Visible;
+        }
 
+        private void setSelected(Button theBtn)
+        {
+            transparentBG = new SolidColorBrush();
+            btn_flight.Background = transparentBG;
+            btn_map.Background = transparentBG;
+            btn_stats.Background = transparentBG;
+            btn_track.Background = transparentBG;
+
+            theBtn.Background = Brushes.Teal;
+            selectedBtn = theBtn.Name;
         }
     }
 }
