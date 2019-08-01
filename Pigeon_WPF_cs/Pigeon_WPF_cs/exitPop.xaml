@@ -5,12 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pigeon_WPF_cs"
         mc:Ignorable="d"
-        Title="Keluar dari Pigeon" Height="150" Width="200" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#7F828282" AllowsTransparency="True">
+        Title="Keluar dari Pigeon" Height="150" Width="200" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="#7F828282" AllowsTransparency="True" ShowInTaskbar="False">
     <Grid>
 
-        <Button x:Name="button" Content="Batal" HorizontalAlignment="Left" Margin="21,107,0,23" Width="75" Click="batal"/>
-        <Button x:Name="button_Copy" Content="Lanjut" Margin="0,107,19,23" HorizontalAlignment="Right" Width="75" Click="keluar"/>
-        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Height="69" Margin="48,33,0,0" TextWrapping="Wrap" Text="Anda yakin ingin keluar dari Pigeon?" VerticalAlignment="Top" Width="110" TextAlignment="Center"/>
+        <Button x:Name="btn_batal" Content="Batal" HorizontalAlignment="Left" Margin="21,107,0,23" Width="75" Click="batal"/>
+        <Button x:Name="btn_lanjut" Content="Lanjut" Margin="0,107,19,23" HorizontalAlignment="Right" Width="75" Click="keluar"/>
+        <TextBlock x:Name="tb_info" HorizontalAlignment="Left" Height="69" Margin="48,33,0,0" TextWrapping="Wrap" Text="Anda yakin ingin keluar dari Pigeon?" VerticalAlignment="Top" Width="110" TextAlignment="Center"/>
 
     </Grid>
 </Window>

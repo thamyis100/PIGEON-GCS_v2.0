@@ -22,12 +22,24 @@ using AForge.Video;
 using AForge.Video.DirectShow;
 using System.IO;
 using System.IO.Ports;
+using Pigeon_WPF_cs.JPGScreenshot;
+using System.Windows.Threading;
+using GMap.NET;
+using GMap.NET.WindowsPresentation;
+using GMap.NET.MapProviders;
+using System.Globalization;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
-    #region Custom ToBitmapImage()
+    #region Custom Bitmap to BitmapImage
+
     static class BitmapHelper
     {
+        /// <summary>
+        /// Convert Bitmap to BitmapImage
+        /// </summary>
+        /// <returns>BitmapImage</returns>
+        //Bitmap to BitmapImage
         public static BitmapImage ToBitmapImage(this Bitmap bitmap)
         {
             BitmapImage bi = new BitmapImage();
@@ -40,17 +52,33 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             return bi;
         }
     }
+
     #endregion
 
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
 
+        private float yaw_val, pitch_val, roll_val;
+        private short airspeed_val, alti_val;
+        private double lat = -7.275869, longt = 112.794307;
+
+        // The Data Goes :
+        // [0] = Yaw (-000.00)
+        // [1] = pitch (-00.00)
+        // [2] = roll (-00.00)
+        // [3] = airspeed (00)
+        // [4] = altitude (000)
+        // [5] = latitude (-00.000000)
+        // [6] = longtitude (-000.000000)
+
         public FlightControl()
         {
             InitializeComponent();
+
             DataContext = this;
-            GetVideoDevices(); //Cari webcam
-            GetConnectedSerial(); //Cari usb
+            PrepareWebcam(); //Cari webcam
+            PrepareUSBConn(); //Cari usb
+            //PrepareGMap(); //Siapkan GMAP.NET
         }
 
         #region USBSerial
@@ -59,13 +87,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public ComboBoxItem selectedPort { get; set; }
         public ComboBoxItem selectedBaud { get; set; }
         private SerialPort thePort;
-        private void GetConnectedSerial()
+        public bool connected = false;
+        private void PrepareUSBConn()
         {
             sPorts = new ObservableCollection<ComboBoxItem>();
             sPorts.Add(new ComboBoxItem { Content = "COM PORTS" });
             sPorts.Add(new ComboBoxItem { Content = "..REFRESH.." });
             getPortList();
-            selectedBaud = (ComboBoxItem)cb_bauds.Items[2];
+            selectedBaud = (ComboBoxItem)cb_bauds.Items[0];
         }
         private void getPortList()
         {
@@ -100,15 +129,167 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             sPorts[0].Content = "COM PORTS";
         }
 
-        private void img_conn_0(object sender, MouseEventArgs e) => img_conn.Source = new BitmapImage( new Uri("pack://application:,,,/Resources/icons/icons8-connected-80.png"));
-        private void img_conn_1(object sender, MouseEventArgs e) => img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
+        private void startSerial(ComboBoxItem comPort, ComboBoxItem baud)
+        {
+            //Console.WriteLine("Connecting to " + comPort.Content.ToString() + " on " + baud.Content.ToString());
+            if (comPort.Content.ToString().Length > 5 || comPort.Content.ToString() == "")
+            {
+                MessageBox.Show("Tidak ada COM PORT yang dipilih!");
+                return;
+            }
+            if (cb_bauds.SelectedIndex==0)
+            {
+                MessageBox.Show("Tidak ada Baudrate yang dipilih!");
+                return;
+            }
+            try
+            {
+                thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
+                thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
+                thePort.ReadTimeout = 5000;
+                thePort.WriteTimeout = 500;
+                if (!(thePort.IsOpen)) thePort.Open();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error opening serial port :: " + ex.Message, "Error!");
+                return;
+            }
+            connected = true;
+            toggleConn(true);
+        }
+
+        private void ToggleSerial(object sender, RoutedEventArgs e)
+        {
+            if (!connected) {
+                startSerial(selectedPort, selectedBaud);
+            } else if (thePort.IsOpen)
+            {
+                thePort.Close();
+                connected = false;
+                toggleConn(false);
+            }
+        }
+
+        private void toggleConn(bool s)
+        {
+            MainWindow mainWin = (MainWindow)Window.GetWindow(this);
+            if (s)
+            {
+                cb_ports.IsEnabled = false;
+                cb_bauds.IsEnabled = false;
+                stream_panel.IsEnabled = true;
+                mainWin.setConnStat(true);
+            } else
+            {
+                cb_ports.IsEnabled = true;
+                cb_bauds.IsEnabled = true;
+                stream_panel.IsEnabled = false;
+                mainWin.setConnStat(false);
+            }
+        }
+
+        private delegate void UpdateUiTextDelegate(string[] text);
+        private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            string dataIn ="";
+            string[] dataCount = null;
+            SerialPort receive = (SerialPort)sender;
+            try
+            {
+                while (receive.BytesToRead > 0)
+                {
+                    char chartoread = Convert.ToChar(receive.ReadChar());
+                    if (chartoread == '\n') break;
+                    dataIn += chartoread;
+                    dataCount = dataIn.Split(',');
+                }
+            
+                Console.WriteLine(string.Format("Extracted ({0}) data from dataIn ='{1}'", dataCount.Length, dataIn));
+                if (dataCount.Length == 7)
+                {
+                    if (!dataCount.Contains(""))
+                    {
+                        Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), dataCount);
+                        Console.WriteLine("valid");
+                    }
+                }
+                thePort.DiscardInBuffer();
+            } catch(Exception exc)
+            {
+                Console.WriteLine("invalid");
+            }
+        }
+
+        //Update Data on UI
+        private void dataMasukan(string[] theData)
+        {
+            yaw_val = float.Parse(theData[0], CultureInfo.InvariantCulture);
+            pitch_val= float.Parse(theData[1], CultureInfo.InvariantCulture);
+            roll_val = float.Parse(theData[2], CultureInfo.InvariantCulture);
+            airspeed_val = Convert.ToInt16(float.Parse(theData[3])); //short.Parse(theData[3]);
+            alti_val = short.Parse(theData[4]);
+            lat = double.Parse(theData[5], CultureInfo.InvariantCulture);
+            longt = double.Parse(theData[6], CultureInfo.InvariantCulture);
+
+            Console.WriteLine("Values : " + yaw_val + " " + pitch_val + " " + roll_val + " " + airspeed_val + " " + alti_val + " " + lat + " " + longt);
+
+            MainWindow win = (MainWindow)Window.GetWindow(this);
+            win.addStatistik(yaw_val, pitch_val, roll_val);
+
+            tb_yaw.Text = theData[0];
+            int heading = Convert.ToInt32(yaw_val) + 90;
+            if (heading > 360) heading = heading - 360;
+
+            ind_heading.SetHeadingIndicatorParameters(heading);
+            win.setCurrentPos(-7.275869, 112.794307, yaw_val);
+
+            tb_pitch.Text = theData[1];
+            tb_roll.Text = theData[2];
+            ind_attitude.SetAttitudeIndicatorParameters(Convert.ToDouble(pitch_val), -Convert.ToDouble(roll_val));
+
+            tb_airspeed.Text = theData[3];
+            ind_airspeed.SetAirSpeedIndicatorParameters(Convert.ToInt16(airspeed_val));
+
+            tb_alti.Text = theData[4];
+            tb_lat.Text = theData[5];
+            tb_longt.Text = theData[6];
+        }
+
+        #region Animating back n forth
+        private void img_conn_0(object sender, MouseEventArgs e)
+        {
+            if (connected)
+            {
+                img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
+                ind_conn_status.Content = "Disconnect";
+            }
+            else
+            {
+                img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-connected-80.png"));
+                ind_conn_status.Content = "Connect";
+            }
+        }
+        private void img_conn_1(object sender, MouseEventArgs e)
+        {
+            if (connected)
+            {
+                img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-connected-80.png"));
+                ind_conn_status.Content = "Connected";
+            }
+            else
+            {
+                img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
+                ind_conn_status.Content = "Disconnected";
+            }
+        }
+        #endregion
 
         #endregion
 
         #region LiveStreamCamera
 
         public ObservableCollection<FilterInfo> Cameras { get; set; }
-        public ObservableCollection<String> Cams { get; set; }
 
         public FilterInfo CurrentCamera
         {
@@ -117,37 +298,27 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
         private FilterInfo currCam;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string theProp)
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                var e = new PropertyChangedEventArgs(theProp);
-                handler(this, e);
-            }
-        }
-
-        private void GetVideoDevices()
+        private void PrepareWebcam()
         {
             Cameras = new ObservableCollection<FilterInfo>();
-            Cams = new ObservableCollection<String>();
             foreach (FilterInfo filterInfo in new FilterInfoCollection(FilterCategory.VideoInputDevice))
             {
                 Cameras.Add(filterInfo);
-                Cams.Add(filterInfo.Name.ToString());
             }
 
             if (Cameras.Any())
             {
+                Cameras.RemoveAt(0);
                 CurrentCamera = Cameras[0];
+                cb_cams.SelectedIndex = 0;
             }
             else
             {
-                MessageBox.Show("No video sources found", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Tidak ada kamera yang ditemukan", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                cb_cams.Items.Add("..REFRESH..");
             }
         }
-
+        
         public void stopControl() => StopCam(); //Exit Trigger
         private void StopCam()
         {
@@ -169,7 +340,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 liveStream.Start();
             }
         }
-        private void startWebcam(object sender, RoutedEventArgs e) => StartCam();//Button trigger
+
+        private void startOnboardCam(object sender, RoutedEventArgs e) => StartCam();
 
         private void cam_AvailFrame(object sender, NewFrameEventArgs eventArgs)
         {
@@ -190,21 +362,44 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
         }
 
-        #endregion
-
-        #region GMap Usage
-
-        private void theMapLoad(object sender, RoutedEventArgs e)
+        private void Cb_cams_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            GMap.NET.GMaps.Instance.Mode = GMap.NET.AccessMode.ServerAndCache;
-            theMap.DragButton = MouseButton.Left;
-            theMap.MapProvider = GMap.NET.MapProviders.GoogleMapProvider.Instance;
-            theMap.CenterPosition = new GMap.NET.PointLatLng(-7.275869, 112.794307);
-            theMap.ShowCenter = false;
-            theMap.Zoom = 18;
+            ComboBox cb = (ComboBox)sender;
+            string now = cb_cams.ToString();
+            if (now == "..REFRESH..") { refreshCamList(); cb_cams.SelectedIndex = 0; }
+        }
+
+        private void refreshCamList()
+        {
+            while (Cameras.Count > 1)
+            {
+                Cameras.RemoveAt(0);
+            }
+            PrepareWebcam();
         }
 
         #endregion
 
+        #region Avionics Instrument Controling
+
+        public void hideAvionics() => avInst.Visibility = Visibility.Hidden;
+        public void showAvionics() => avInst.Visibility = Visibility.Visible;
+
+        #endregion
+
+        #region Property Binding Handler
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged(string theProp)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                var e = new PropertyChangedEventArgs(theProp);
+                handler(this, e);
+            }
+        }
+
+        #endregion
     }
 }
