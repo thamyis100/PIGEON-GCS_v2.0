@@ -33,7 +33,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             double markerWidth = 40, markerHeight = 40;
             thePoints = new List<PointLatLng>();
-            currpos = new GMapMarker(new PointLatLng(0, 0))
+            currpos = new GMapMarker(new PointLatLng(-7.475869, 112.094307))
             {
                 Shape = new Image
                 {
@@ -42,7 +42,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/marker-waypoint.png"))
                 },
                 Offset = new Point(-markerWidth / 2, -markerHeight)
-            }; mapView.Markers.Add(currpos);
+            };
+            RenderOptions.SetBitmapScalingMode(currpos.Shape, BitmapScalingMode.HighQuality);
+            //mapView.Markers.Add(currpos);
             
         }
 
@@ -51,11 +53,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private void mapView_Loaded(object sender, RoutedEventArgs e)
         {
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
+            //mapView.CacheLocation = "@pack://application:,,,/Resources/MapCache/";
             mapView.MultiTouchEnabled = true;
-            mapView.MapProvider = ArcGIS_StreetMap_World_2D_MapProvider.Instance;
+            mapView.MapProvider = GoogleSatelliteMapProvider.Instance;
             mapView.MinZoom = 2;
             mapView.MaxZoom = 20;
-            mapView.Zoom = 5;
+            mapView.Zoom = 15;
             mapView.MouseWheelZoomType = MouseWheelZoomType.MousePositionWithoutCenter;
             mapView.CanDragMap = true;
             mapView.DragButton = MouseButton.Left;

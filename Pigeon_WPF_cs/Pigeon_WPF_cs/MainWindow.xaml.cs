@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Pigeon_WPF_cs
 {
@@ -25,11 +27,23 @@ namespace Pigeon_WPF_cs
         public MainWindow()
         {
             InitializeComponent();
+
+            //contoh kapasitas baterai
             icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, 400, 396));
+
             btn_flight.Background = Brushes.Teal;
-            MinimizeMap();
+            for(int x = 3; x >= 0; x--)
+            {
+                tabControl.SelectedIndex = x;
+            }
+
+            DispatcherTimer timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
+            {
+                digital_clock.Text = DateTime.Now.ToString("HH:mm:ss\ndddd, dd MMMM yyyy",new CultureInfo("id-ID"));
+            },Dispatcher);
         }
 
+        private void injectStats(object sender, RoutedEventArgs e) => stats_Ctrl.InjectStopOnClick(sender, e);
         public void setConnStat(bool status)
         {
             if (status)
@@ -65,18 +79,18 @@ namespace Pigeon_WPF_cs
 
         public void setCurrentPos(double lat, double longt, float yaw) => map_Ctrl.setCurrentPos(lat, longt, yaw);
 
-        public void MinimizeMap()
+        public void MinimizeMap(int width = 470, int height = 580)
         {
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
-            mapGrid.Width = 470;
-            mapGrid.Height = 580;
+            mapGrid.Width = width;
+            mapGrid.Height = height;
         }
 
         public void MaximizeMap()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Visible;
             mapGrid.Width = 1132;
-            mapGrid.Height = 626;
+            mapGrid.Height = 615;
         }
 
         #endregion
@@ -137,6 +151,7 @@ namespace Pigeon_WPF_cs
                     tabControl.SelectedIndex = 3;
                     setVisible(tab_track);
                     setSelected(btn_track);
+                    MinimizeMap(585, 615);
                     break;
             }
         }
@@ -165,5 +180,6 @@ namespace Pigeon_WPF_cs
             selectedBtn = theBtn.Name;
         }
         #endregion
+
     }
 }

@@ -97,6 +97,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         public bool IsReading { get; set; }
+        public void InjectStopOnClick(object sender, RoutedEventArgs e)
+        {
+            IsReading = !IsReading;
+            if (IsReading) Task.Factory.StartNew(Read);
+        }
 
         private void Read()
         {
@@ -114,18 +119,21 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     DateTime = now,
                     Value = ey
                 });
+                Console.Write("Added : {0} |", ey);
                 ey = r.Next(-21, 52);
                 PitchValues.Add(new MeasureModel
                 {
                     DateTime = now,
                     Value = ey
                 });
+                Console.Write(" {0} |", ey);
                 ey = r.Next(-61, 2);
                 RollValues.Add(new MeasureModel
                 {
                     DateTime = now,
                     Value = ey
                 });
+                Console.WriteLine(" {0}", ey);
 
                 SetAxisLimits(now);
 
@@ -165,15 +173,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             {
                 lastTick = now.Ticks;
                 AxisMax = now.Ticks + TimeSpan.FromSeconds(1).Ticks; // lets force the axis to be 1 second ahead
-                AxisMin = now.Ticks - TimeSpan.FromSeconds(30).Ticks; // and 8 seconds behind
+                AxisMin = now.Ticks - TimeSpan.FromSeconds(15).Ticks; // and 8 seconds behind
             }
 
-        }
-
-        private void InjectStopOnClick(object sender, RoutedEventArgs e)
-        {
-            IsReading = !IsReading;
-            if (IsReading) Task.Factory.StartNew(Read);
         }
 
         #region INotifyPropertyChanged implementation

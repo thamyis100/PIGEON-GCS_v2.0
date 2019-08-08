@@ -205,7 +205,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     dataCount = dataIn.Split(',');
                 }
             
-                Console.WriteLine(string.Format("Extracted ({0}) data from dataIn ='{1}'", dataCount.Length, dataIn));
+                Console.WriteLine(string.Format("[Flight] Extracted ({0}) data from dataIn ='{1}'", dataCount.Length, dataIn));
                 if (dataCount.Length == 7)
                 {
                     if (!dataCount.Contains(""))
@@ -214,7 +214,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                         Console.WriteLine("valid");
                     }
                 }
-                thePort.DiscardInBuffer();
+                //thePort.DiscardInBuffer();
             } catch(Exception exc)
             {
                 Console.WriteLine("invalid");
@@ -224,10 +224,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         //Update Data on UI
         private void dataMasukan(string[] theData)
         {
+            in_stream.Text = string.Join(" | ",theData);
+
             yaw_val = float.Parse(theData[0], CultureInfo.InvariantCulture);
             pitch_val= float.Parse(theData[1], CultureInfo.InvariantCulture);
             roll_val = float.Parse(theData[2], CultureInfo.InvariantCulture);
-            airspeed_val = Convert.ToInt16(float.Parse(theData[3])); //short.Parse(theData[3]);
+            airspeed_val = short.Parse(theData[3]); //Convert.ToInt16(float.Parse(theData[3])); 
             alti_val = short.Parse(theData[4]);
             lat = double.Parse(theData[5], CultureInfo.InvariantCulture);
             longt = double.Parse(theData[6], CultureInfo.InvariantCulture);
@@ -238,8 +240,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             win.addStatistik(yaw_val, pitch_val, roll_val);
 
             tb_yaw.Text = theData[0];
-            int heading = Convert.ToInt32(yaw_val) + 90;
-            if (heading > 360) heading = heading - 360;
+            int heading = Convert.ToInt32((yaw_val + 450) % 360);
 
             ind_heading.SetHeadingIndicatorParameters(heading);
             win.setCurrentPos(-7.275869, 112.794307, yaw_val);
