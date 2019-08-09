@@ -67,7 +67,7 @@
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
-            <Button Click="injectStats"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Click="injectStats"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden">
                 <Label Content="Testing Statistik IMU"/>
             </Button>
             <Button x:Name="btn_flight" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab" Tag="">
@@ -198,7 +198,7 @@
         <Grid x:Name="mapGrid" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Width="470" Margin="21.5,13.5,10,10" VerticalAlignment="Top" Height="580">
             <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch" Width="Auto"/>
         </Grid>
-        <controls:StatisticControl x:Name="stats_Ctrl" Grid.Row="1" Grid.Column="1" />
+        <controls:StatisticControl x:Name="stats_Ctrl" Grid.Row="1" Grid.Column="1" Visibility="Hidden" />
         <TabControl x:Name="tabControl" Grid.Column="1" Margin="20,10,10,10" BorderThickness="1" SelectedIndex="0" HorizontalContentAlignment="Center" Padding="2" FontSize="11" Grid.Row="1" Width="1133.33333333333" Background="{x:Null}">
             <TabItem Header="Flight" Visibility="Collapsed" Margin="0" Background="{x:Null}">
                 <controls:FlightControl x:Name="flight_Ctrl"/>
