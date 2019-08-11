@@ -58,8 +58,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
 
-        private float yaw_val, pitch_val, roll_val;
-        private short airspeed_val, alti_val;
+        private float yaw_val, pitch_val, roll_val, alti_val, bearing_val;
+        private short airspeed_val;
         private double lat = -7.275869, longt = 112.794307;
 
         // The Data Goes :
@@ -67,9 +67,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         // [1] = pitch (-00.00)
         // [2] = roll (-00.00)
         // [3] = airspeed (00)
-        // [4] = altitude (000)
+        // [4] = altitude (-000.00)
         // [5] = latitude (-00.000000)
         // [6] = longtitude (-000.000000)
+        // [7] = Bearing (000.00)
 
         public FlightControl()
         {
@@ -78,7 +79,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             DataContext = this;
             PrepareWebcam(); //Cari webcam
             PrepareUSBConn(); //Cari usb
-            //PrepareGMap(); //Siapkan GMAP.NET
         }
 
         #region USBSerial
@@ -206,7 +206,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 }
             
                 Console.WriteLine(string.Format("[Flight] Extracted ({0}) data from dataIn ='{1}'", dataCount.Length, dataIn));
-                if (dataCount.Length == 7)
+                if (dataCount.Length == 8)
                 {
                     if (!dataCount.Contains(""))
                     {
@@ -222,6 +222,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         //Update Data on UI
+        bool isFirstData = true;
         private void dataMasukan(string[] theData)
         {
             in_stream.Text = string.Join(" | ",theData);
@@ -230,31 +231,37 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             pitch_val= float.Parse(theData[1], CultureInfo.InvariantCulture);
             roll_val = float.Parse(theData[2], CultureInfo.InvariantCulture);
             airspeed_val = short.Parse(theData[3]); //Convert.ToInt16(float.Parse(theData[3])); 
-            alti_val = short.Parse(theData[4]);
+            alti_val = float.Parse(theData[4]);
             lat = double.Parse(theData[5], CultureInfo.InvariantCulture);
             longt = double.Parse(theData[6], CultureInfo.InvariantCulture);
+            bearing_val = float.Parse(theData[7], CultureInfo.InvariantCulture);
 
-            Console.WriteLine("Values : " + yaw_val + " " + pitch_val + " " + roll_val + " " + airspeed_val + " " + alti_val + " " + lat + " " + longt);
+            Console.WriteLine("Values : " + yaw_val + " " + pitch_val + " " + roll_val + " " + airspeed_val + " " + alti_val + " " + lat + " " + longt + " " + bearing_val);
 
+            
             MainWindow win = (MainWindow)Window.GetWindow(this);
             win.addStatistik(yaw_val, pitch_val, roll_val);
 
-            tb_yaw.Text = theData[0];
-            int heading = Convert.ToInt32((yaw_val + 450) % 360);
+            tb_yaw.Text = yaw_val.ToString();
 
-            ind_heading.SetHeadingIndicatorParameters(heading);
-            win.setCurrentPos(-7.275869, 112.794307, yaw_val);
+            ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(bearing_val));
+            if (isFirstData) {
+                isFirstData = false;
+                win.StartCurrentPos(lat, longt, yaw_val);
+            }
+            win.setCurrentPos(lat, longt, bearing_val);
+           
 
-            tb_pitch.Text = theData[1];
-            tb_roll.Text = theData[2];
+            tb_pitch.Text = pitch_val.ToString();
+            tb_roll.Text = roll_val.ToString();
             ind_attitude.SetAttitudeIndicatorParameters(Convert.ToDouble(pitch_val), -Convert.ToDouble(roll_val));
 
-            tb_airspeed.Text = theData[3];
-            ind_airspeed.SetAirSpeedIndicatorParameters(Convert.ToInt16(airspeed_val));
+            tb_airspeed.Text = airspeed_val.ToString();
+            ind_airspeed.SetAirSpeedIndicatorParameters(airspeed_val);
 
-            tb_alti.Text = theData[4];
-            tb_lat.Text = theData[5];
-            tb_longt.Text = theData[6];
+            tb_alti.Text = alti_val.ToString();
+            tb_lat.Text = lat.ToString();
+            tb_longt.Text = longt.ToString();
         }
 
         #region Animating back n forth

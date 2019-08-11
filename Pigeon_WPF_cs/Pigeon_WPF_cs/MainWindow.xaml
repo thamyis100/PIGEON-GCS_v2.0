@@ -67,9 +67,21 @@
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
-            <Button Click="injectStats"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Hidden">
-                <Label Content="Testing Statistik IMU"/>
+            <Button Click="injectStats"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                <Label Content="Testing Statistik IMU" FontSize="11"/>
             </Button>
+            <StackPanel Grid.ColumnSpan="4" VerticalAlignment="Top" Margin="0,15,0,0">
+                <Label x:Name="bhs_lbl" Content="Language :" Foreground="White" HorizontalContentAlignment="Center"/>
+                <WrapPanel HorizontalAlignment="Center">
+                    <Button x:Name="bhs_indo" Background="Lime" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{x:Null}" Padding="2" BorderThickness="0" Margin="0" Click="ubah_bahasa">
+                        <Image Source="Resources/icons/Flag_of_Indonesia.png" Height="12" Stretch="Fill" Width="22"/>
+                    </Button>
+                    <Button x:Name="bhs_inggris" VerticalAlignment="Center" Background="{x:Null}" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" BorderThickness="0" Padding="2" Margin="5,0,0,0" Click="ubah_bahasa">
+                        <Image Source="Resources/icons/Flag_of_the_United_Kingdom.png" Height="12" RenderTransformOrigin="0.5,0.5" Stretch="Fill" Width="22"/>
+                    </Button>
+                </WrapPanel>
+            </StackPanel>
+
             <Button x:Name="btn_flight" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab" Tag="">
                 <Grid Margin="0" MinWidth="117">
                     <Rectangle x:Name="rect_flight" Fill="#FF008C8C" Stroke="Black" Width="5" StrokeThickness="0" HorizontalAlignment="Left"/>
@@ -147,7 +159,7 @@
             <Rectangle x:Name="tab_map" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-50,0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
             <Rectangle x:Name="tab_stats" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-50,0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
             <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-50,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <TextBlock x:Name="digital_clock" HorizontalAlignment="Center" Margin="0,50,0,0" Grid.Row="5" TextWrapping="Wrap" Text="Waktu Sekarang" VerticalAlignment="Top" Grid.ColumnSpan="4" Width="97" Foreground="White"/>
+            <TextBlock x:Name="digital_clock" Margin="5,50,5,0" Grid.Row="5" TextWrapping="Wrap" Text="Waktu Sekarang" VerticalAlignment="Top" Grid.ColumnSpan="4" Foreground="White"/>
         </Grid>
         <Grid Margin="0.667,0,-1,0.333" Grid.Column="1" MouseLeftButtonDown="clickedWindow">
             <Grid.ColumnDefinitions>
@@ -165,7 +177,7 @@
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
                 <DockPanel LastChildFill="False" Margin="5,0,0,0" VerticalAlignment="Center" Height="40" HorizontalAlignment="Center">
-                    <Image x:Name="logo_efalcon_status" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/logo/efalcon.png" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image x:Name="logo_efalcon_status" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/logo/efalcon.png" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.5"/>
                     <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/#Commando" FontSize="24" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="5,0,0,0" Padding="0" Width="100" HorizontalContentAlignment="Center"/>
                 </DockPanel>
                 <DockPanel Grid.Column="1" Margin="0,-5,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -192,24 +204,20 @@
                     <Label x:Name="val_batt" Content="(11.1 V)" HorizontalAlignment="Center" Margin="5,0,0,-1" VerticalAlignment="Center" FontSize="14" Padding="0" FontFamily="Raleway SemiBold" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                 </DockPanel>
             </Grid>
-
-
         </Grid>
-        <Grid x:Name="mapGrid" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Width="470" Margin="21.5,13.5,10,10" VerticalAlignment="Top" Height="580">
-            <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch" Width="Auto"/>
-        </Grid>
-        <controls:StatisticControl x:Name="stats_Ctrl" Grid.Row="1" Grid.Column="1" Visibility="Hidden" />
-        <TabControl x:Name="tabControl" Grid.Column="1" Margin="20,10,10,10" BorderThickness="1" SelectedIndex="0" HorizontalContentAlignment="Center" Padding="2" FontSize="11" Grid.Row="1" Width="1133.33333333333" Background="{x:Null}">
-            <TabItem Header="Flight" Visibility="Collapsed" Margin="0" Background="{x:Null}">
+
+        <!-- imagine this is a tab control area-->
+        <Border Grid.Row="1" Grid.Column="1" Margin="20,10,10,10" BorderBrush="#FFA8A8A8" BorderThickness="2">
+            <Grid>
+                <Grid x:Name="mapGrid" HorizontalAlignment="Left" Width="470" VerticalAlignment="Top" Height="580">
+                    <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch" Width="Auto"/>
+                </Grid>
                 <controls:FlightControl x:Name="flight_Ctrl"/>
-            </TabItem>
-            <TabItem Header="Map" Visibility="Collapsed"/>
-            <TabItem Header="Stats" Visibility="Collapsed"/>
+                <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden"/>
+                <controls:TrackerControl x:Name="track_Ctrl" Visibility="Hidden"/>
+            </Grid>
+        </Border>
+        <!-- tab control area, up to this point-->
 
-            <TabItem Header="Track" Visibility="Collapsed">
-                <controls:TrackerControl x:Name="track_Ctrl"/>
-            </TabItem>
-
-        </TabControl>
     </Grid>
 </Window>

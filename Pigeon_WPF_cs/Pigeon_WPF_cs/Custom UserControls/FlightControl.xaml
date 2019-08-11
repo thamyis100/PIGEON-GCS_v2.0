@@ -55,10 +55,11 @@
                 <RowDefinition Height="300*"/>
                 <RowDefinition Height="157*"/>
             </Grid.RowDefinitions>
+            <Button FontSize="14" BorderBrush="Teal" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="0,5,0,0" Background="#FF9BECEC" Content="Ambil Gambar" HorizontalAlignment="Center" VerticalAlignment="Top" Padding="3,2"></Button>
             <Border Margin="0,0,-0.333,0" BorderBrush="#FF0A7C80" BorderThickness="1">
                 <Image x:Name="liveCam" Margin="0" MinHeight="220" Source="/Pigeon_WPF_cs;component/Resources/logo/dirgantara.png" StretchDirection="DownOnly"/>
             </Border>
-            <DockPanel Margin="0,0,0,5" VerticalAlignment="Bottom" Height="21">
+            <DockPanel Margin="0,5" VerticalAlignment="Top" Height="21" Grid.Row="1">
                 <Label Content="Camera :" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold" FontFamily="Consolas" Padding="5,0"/>
                 <ComboBox x:Name="cb_cams" DisplayMemberPath="Name" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" SelectedItem="{Binding CurrentCamera}" ItemsSource="{Binding Cameras}" SelectionChanged="Cb_cams_SelectionChanged"/>
                 <Button Content="Livestream" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Width="100" FontSize="14" BorderBrush="{x:Null}" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="0,0,5,0" Background="#FF9BECEC" Click="startOnboardCam"/>
@@ -81,7 +82,7 @@
                     <ComboBoxItem>115200</ComboBoxItem>
                     <ComboBoxItem>128000</ComboBoxItem>
                 </ComboBox>
-                <Button MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,0,0,0" Padding="0" Click="ToggleSerial" Height="35">
+                <Button MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,0,0,0" Padding="0" Click="ToggleSerial">
                     <DockPanel Width="145">
                         <Image x:Name="img_conn" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-disconnected-80.png"  Margin="2,0,0,0" HorizontalAlignment="Center"/>
                         <Label x:Name="ind_conn_status" Content="Disconnected" DockPanel.Dock="Right" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="16"/>

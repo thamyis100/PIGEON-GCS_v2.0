@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
+using System.Windows.Threading;
 using GMap;
 using GMap.NET;
 using GMap.NET.MapProviders;
@@ -26,26 +26,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
     public partial class Waypoint : UserControl
     {
         private double lat = -7.275869, longt = 112.794307;
+        double markerWidth = 50, markerHeight = 50;
         public Waypoint()
         {
             InitializeComponent();
             setHomePos(lat, longt);
-
-            double markerWidth = 40, markerHeight = 40;
             thePoints = new List<PointLatLng>();
-            currpos = new GMapMarker(new PointLatLng(-7.475869, 112.094307))
-            {
-                Shape = new Image
-                {
-                    Width = markerWidth,
-                    Height = markerHeight,
-                    Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/marker-waypoint.png"))
-                },
-                Offset = new Point(-markerWidth / 2, -markerHeight)
-            };
-            RenderOptions.SetBitmapScalingMode(currpos.Shape, BitmapScalingMode.HighQuality);
-            //mapView.Markers.Add(currpos);
-            
         }
 
         #region GMap.NET Implementation
@@ -55,9 +41,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
             //mapView.CacheLocation = "@pack://application:,,,/Resources/MapCache/";
             mapView.MultiTouchEnabled = true;
-            mapView.MapProvider = GoogleSatelliteMapProvider.Instance;
+            mapView.MapProvider = ArcGIS_World_Topo_MapProvider.Instance;
             mapView.MinZoom = 2;
-            mapView.MaxZoom = 20;
+            mapView.MaxZoom = 19;
             mapView.Zoom = 15;
             mapView.MouseWheelZoomType = MouseWheelZoomType.MousePositionWithoutCenter;
             mapView.CanDragMap = true;
@@ -69,21 +55,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
         #endregion
 
+        #region List of default Markers
+
+        private GMapMarker homeIco, poswahana;
+
+        #endregion
+
         #region Main Functions
 
         private void setHomePos(double homelat, double homelongt)
         {
             double markerWidth = 40, markerHeight = 40;
-            GMapMarker homeIco = new GMapMarker(new PointLatLng(homelat, homelongt))
+            homeIco = new GMapMarker(new PointLatLng(homelat, homelongt))
             {
+                Tag = "Home Pos",
                 Shape = new Image
                 {
                     Width = markerWidth,
                     Height = markerHeight,
-                    Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/marker-waypoint.png"))
+                    Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/home-ico.png")),
+                    ToolTip = "HOME"
                 },
-                Offset = new Point(-markerWidth / 2, -markerHeight)
+                Offset = new Point(-markerWidth / 2, -markerHeight / 2)
             };
+            mapView.Markers.Add(homeIco);
 
             GMapMarker homeLbl = new GMapMarker(new PointLatLng(homelat, homelongt))
             {
@@ -93,41 +88,56 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     Width = markerWidth,
                     Height = markerHeight,
                     Padding = new Thickness(0),
-                    FontSize = 16,
+                    FontSize = 12,
                     FontFamily = new FontFamily("Consolas"),
                     FontWeight = FontWeights.Bold,
                     HorizontalContentAlignment = HorizontalAlignment.Center,
-                    VerticalContentAlignment = VerticalAlignment.Top
+                    VerticalContentAlignment = VerticalAlignment.Top,
                 },
-                //Offset = new System.Windows.Point(-markerWidth / 2, 0)
+                Offset = new System.Windows.Point(-markerWidth / 2, (markerHeight / 2) - 5)
             };
-            mapView.Markers.Add(homeIco);
+
             mapView.Markers.Add(homeLbl);
         }
 
-        GMapMarker currpos;
-        public void setCurrentPos(double currlat, double currlongt, float heading)
+        public void StartCurrentPos(double currlat, double currlongt, float heading)
         {
-            currpos.Position = new PointLatLng(currlat, currlongt);
-            currpos.Shape.RenderTransform = new RotateTransform(heading);
+            poswahana = new GMapMarker(new PointLatLng(currlat, currlongt))
+            {
+                Tag = "Current Position",
+                Shape = new Image
+                {
+                    Width = markerWidth,
+                    Height = markerHeight,
+                    Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/ikon-wahana-pesawat-1.png"))
+                },
+                Offset = new Point(-markerWidth / 2, -markerHeight / 2)
+            };
+            RenderOptions.SetBitmapScalingMode(poswahana.Shape, BitmapScalingMode.HighQuality);
+
+            mapView.Markers.Add(poswahana);
+        }
+
+        public void setPosWahana(double currlat, double currlongt, float bearing)
+        {
+            poswahana.Position = new PointLatLng(currlat, currlongt);
+            poswahana.Shape.RenderTransformOrigin = new Point(0.5, 0.5);
+            poswahana.Shape.RenderTransform = new RotateTransform(bearing);
         }
 
         //place waypoint at mouse double click point
-        short routenum = 1;
-        short waynum = 1;
+        short routeIndex = 0;
+        short wayIndex = 0;
         private void MapView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            //waypointSelMenu.Items.Add("Testing");
-            //waypointSelMenu.Items.Add("Testing");
-            //waypointSelMenu.Items.Add("Testing");
             Point addMark = e.GetPosition(mapView);
             PointLatLng addMarkP = mapView.FromLocalToLatLng(Convert.ToInt32(addMark.X), Convert.ToInt32(addMark.Y));
-            AddMarkerAt(addMarkP,waynum++,routenum++);
-            Console.WriteLine(addMarkP.Lat + " " + addMarkP.Lng);
+            //AddMarkerAt(addMarkP,wayIndex++,routeIndex++);
+            Console.WriteLine("Double clicked at : " + addMarkP.Lat + " " + addMarkP.Lng);
         }
 
         //waypoint placing
-        List<PointLatLng> thePoints;
+        private List<PointLatLng> thePoints;
         private void AddMarkerAt(PointLatLng theLatLng, short waynum, short routenum)
         {
             short markerWidth = 40, markerHeight = 40;
@@ -164,7 +174,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             thePoints.Add(theLatLng);
             GMapRoute theRoute = new GMapRoute(thePoints);
-            //mapView.Markers.RemoveAt(theRoute);
+
             mapView.Markers.Remove(theRoute);
             mapView.Markers.Add(theRoute);
         }
@@ -199,5 +209,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         #endregion
+
+        
     }
 }

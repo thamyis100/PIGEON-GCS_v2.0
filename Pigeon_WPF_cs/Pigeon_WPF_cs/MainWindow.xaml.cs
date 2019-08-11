@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -30,18 +31,39 @@ namespace Pigeon_WPF_cs
 
             //contoh kapasitas baterai
             icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, 400, 396));
+            setCurrentlyActive(tab_track, btn_track, track_Ctrl);
+            setCurrentlyActive(tab_stats, btn_stats, stats_Ctrl);
+            setCurrentlyActive(tab_map, btn_map, map_Ctrl);
+            setCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
+            MinimizeMap();
 
-            btn_flight.Background = Brushes.Teal;
-            for(int x = 3; x >= 0; x--)
-            {
-                tabControl.SelectedIndex = x;
-            }
+            SetBahasa(new CultureInfo("id-ID"));
 
-            DispatcherTimer timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, delegate
+            DispatcherTimer timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.DataBind, delegate
             {
-                digital_clock.Text = DateTime.Now.ToString("HH:mm:ss\ndddd, dd MMMM yyyy",new CultureInfo("id-ID"));
+                digital_clock.Text = DateTime.Now.ToString("HH\\:mm\\:ss (G\\MTz) dddd,\ndd MMMM yyyy", CultureInfo.CurrentUICulture);
             },Dispatcher);
         }
+
+        private void ubah_bahasa(object sender, RoutedEventArgs e)
+        {
+            bhs_indo.Background = bhs_inggris.Background = null;
+            Button bahasa = (Button)sender;
+            switch (bahasa.Name)
+            {
+                case "bhs_indo":
+                    SetBahasa(new CultureInfo("id-ID"));
+                    bhs_lbl.Content = "Language :";
+                    bhs_indo.Background = Brushes.Lime;
+                    break;
+                case "bhs_inggris":
+                    SetBahasa(new CultureInfo("en-EN"));
+                    bhs_lbl.Content = "Bahasa :";
+                    bhs_inggris.Background = Brushes.Lime;
+                    break;
+            }
+        }
+        private void SetBahasa(CultureInfo theLanguage) => Thread.CurrentThread.CurrentUICulture = theLanguage;
 
         private void injectStats(object sender, RoutedEventArgs e) => stats_Ctrl.InjectStopOnClick(sender, e);
         public void setConnStat(bool status)
@@ -77,7 +99,9 @@ namespace Pigeon_WPF_cs
 
         #region Waypoint control
 
-        public void setCurrentPos(double lat, double longt, float yaw) => map_Ctrl.setCurrentPos(lat, longt, yaw);
+        public void setCurrentPos(double lat, double longt, float yaw) => map_Ctrl.setPosWahana(lat, longt, yaw);
+
+        public void StartCurrentPos(double currlat, double currlongt, float heading) => map_Ctrl.StartCurrentPos(currlat, currlongt, heading);
 
         public void MinimizeMap(int width = 470, int height = 580)
         {
@@ -110,8 +134,6 @@ namespace Pigeon_WPF_cs
 
         #region Tab Control choosing
         String selectedBtn ="btn_flight";
-        Brush savedBG = Brushes.Teal;
-        SolidColorBrush transparentBG;
         private void hoverButton(object sender, MouseEventArgs e)
         {
             Button it = (Button)sender;
@@ -120,9 +142,8 @@ namespace Pigeon_WPF_cs
 
         private void dehoverButton(object sender, MouseEventArgs e)
         {
-            transparentBG = new SolidColorBrush();
             Button it = (Button)sender;
-            if (it.Name != selectedBtn) it.Background = transparentBG;
+            if (it.Name != selectedBtn) it.Background = null;
         }
         
         private void selectTab(object sender, RoutedEventArgs e)
@@ -131,54 +152,45 @@ namespace Pigeon_WPF_cs
             switch (the_btn.Name)
             {
                 case "btn_flight":
-                    tabControl.SelectedIndex = 0;
-                    setVisible(tab_flight);
-                    setSelected(btn_flight);
+                    setCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
                     MinimizeMap();
                     break;
                 case "btn_map":
-                    tabControl.SelectedIndex = 1;
-                    setVisible(tab_map);
-                    setSelected(btn_map);
+                    setCurrentlyActive(tab_map, btn_map, map_Ctrl);
                     MaximizeMap();
                     break;
                 case "btn_stats":
-                    tabControl.SelectedIndex = 2;
-                    setVisible(tab_stats);
-                    setSelected(btn_stats);
+                    setCurrentlyActive(tab_stats, btn_stats, stats_Ctrl);
                     break;
                 case "btn_track":
-                    tabControl.SelectedIndex = 3;
-                    setVisible(tab_track);
-                    setSelected(btn_track);
+                    setCurrentlyActive(tab_track, btn_track, track_Ctrl);
                     MinimizeMap(585, 615);
                     break;
             }
         }
 
-        private void setVisible(Rectangle theBox)
+        private void setCurrentlyActive(Rectangle theBox, Button theBtn, UserControl theCtrl)
         {
-            //sembunyikan dahulu semua box
-            tab_flight.Visibility = Visibility.Hidden;
-            tab_map.Visibility = Visibility.Hidden;
-            tab_stats.Visibility = Visibility.Hidden;
-            tab_track.Visibility = Visibility.Hidden;
-            
-            //sekarang tampilkan box yang dipilih
+            //sembunyikan semua box
+            tab_flight.Visibility = tab_map.Visibility = tab_stats.Visibility = tab_track.Visibility = Visibility.Hidden;
+
+            //transparankan semua tombol pilihan
+            btn_flight.Background = btn_map.Background = btn_stats.Background = btn_track.Background = null;
+
+            //sembunyikan semua control kecuali waypoint
+            flight_Ctrl.Visibility = stats_Ctrl.Visibility = track_Ctrl.Visibility = Visibility.Hidden;
+
+            //tampilkan control yang dipilih
+            theCtrl.Visibility = Visibility.Visible;
+
+            //warnai tombol yang dipilih
+            theBtn.Background = Brushes.Teal;
+            selectedBtn = theBtn.Name;
+
+            //tampilkan box yang dipilih
             theBox.Visibility = Visibility.Visible;
         }
 
-        private void setSelected(Button theBtn)
-        {
-            transparentBG = new SolidColorBrush();
-            btn_flight.Background = transparentBG;
-            btn_map.Background = transparentBG;
-            btn_stats.Background = transparentBG;
-            btn_track.Background = transparentBG;
-
-            theBtn.Background = Brushes.Teal;
-            selectedBtn = theBtn.Name;
-        }
         #endregion
 
     }
