@@ -99,10 +99,6 @@ namespace Pigeon_WPF_cs
 
         #region Waypoint control
 
-        public void setCurrentPos(double lat, double longt, float yaw) => map_Ctrl.setPosWahana(lat, longt, yaw);
-
-        public void StartCurrentPos(double currlat, double currlongt, float heading) => map_Ctrl.StartCurrentPos(currlat, currlongt, heading);
-
         public void MinimizeMap(int width = 470, int height = 580)
         {
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
@@ -120,16 +116,11 @@ namespace Pigeon_WPF_cs
         #endregion
 
         #region statistik control
-        public void addStatistik(float yaw, float pitch, float roll)
-        {
-            stats_Ctrl.addToStatistik(yaw, pitch, roll);
-        }
+
         #endregion
 
         #region flight view control
-        public void showAvionics() => flight_Ctrl.showAvionics();
 
-        public void stopTheCam() => flight_Ctrl.stopControl();
         #endregion
 
         #region Tab Control choosing

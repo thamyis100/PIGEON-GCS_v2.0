@@ -58,7 +58,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
 
-        private float yaw_val, pitch_val, roll_val, alti_val, bearing_val;
+        private float heading_val, pitch_val, roll_val, alti_val;//, bearing_val;
         private short airspeed_val;
         private double lat = -7.275869, longt = 112.794307;
 
@@ -70,7 +70,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         // [4] = altitude (-000.00)
         // [5] = latitude (-00.000000)
         // [6] = longtitude (-000.000000)
-        // [7] = Bearing (000.00)
+        // [7] = Bearing (000.00) //not used
 
         public FlightControl()
         {
@@ -206,7 +206,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 }
             
                 Console.WriteLine(string.Format("[Flight] Extracted ({0}) data from dataIn ='{1}'", dataCount.Length, dataIn));
-                if (dataCount.Length == 8)
+                if (dataCount.Length == 7)
                 {
                     if (!dataCount.Contains(""))
                     {
@@ -227,30 +227,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             in_stream.Text = string.Join(" | ",theData);
 
-            yaw_val = float.Parse(theData[0], CultureInfo.InvariantCulture);
+            heading_val = float.Parse(theData[0], CultureInfo.InvariantCulture);
             pitch_val= float.Parse(theData[1], CultureInfo.InvariantCulture);
             roll_val = float.Parse(theData[2], CultureInfo.InvariantCulture);
             airspeed_val = short.Parse(theData[3]); //Convert.ToInt16(float.Parse(theData[3])); 
             alti_val = float.Parse(theData[4]);
             lat = double.Parse(theData[5], CultureInfo.InvariantCulture);
             longt = double.Parse(theData[6], CultureInfo.InvariantCulture);
-            bearing_val = float.Parse(theData[7], CultureInfo.InvariantCulture);
+            //bearing_val = float.Parse(theData[7], CultureInfo.InvariantCulture);
 
-            Console.WriteLine("Values : " + yaw_val + " " + pitch_val + " " + roll_val + " " + airspeed_val + " " + alti_val + " " + lat + " " + longt + " " + bearing_val);
+            Console.WriteLine("Values : " + heading_val + " " + pitch_val + " " + roll_val + " " + airspeed_val + " " + alti_val + " " + lat + " " + longt);
 
             
             MainWindow win = (MainWindow)Window.GetWindow(this);
-            win.addStatistik(yaw_val, pitch_val, roll_val);
-
-            tb_yaw.Text = yaw_val.ToString();
-
-            ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(bearing_val));
-            if (isFirstData) {
+            win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val);
+            if (isFirstData)
+            {
                 isFirstData = false;
-                win.StartCurrentPos(lat, longt, yaw_val);
+                win.map_Ctrl.StartPosWahana(lat, longt, heading_val);
             }
-            win.setCurrentPos(lat, longt, bearing_val);
-           
+            win.track_Ctrl.SetKoorWahana(lat, longt, alti_val);
+
+            tb_yaw.Text = heading_val.ToString();
+            ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
+            win.map_Ctrl.setPosWahana(lat, longt, heading_val);
 
             tb_pitch.Text = pitch_val.ToString();
             tb_roll.Text = roll_val.ToString();

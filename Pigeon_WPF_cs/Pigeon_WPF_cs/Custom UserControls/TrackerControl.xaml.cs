@@ -18,11 +18,18 @@ using System.Windows.Threading;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
+    
     /// <summary>
     /// Interaction logic for TrackerControl.xaml
     /// </summary>
     public partial class TrackerControl : UserControl
     {
+        private struct Posisi
+        {
+            public double Lat, Longt;
+            public float Alti;
+        }
+
         public TrackerControl()
         {
             InitializeComponent();
@@ -211,31 +218,78 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #endregion
 
-        public void SetKoorGCS(double lat, double longt)
+        private Posisi GCS, Wahana;
+        public void SetKoorGCS(double lat, double longt, float alti)
         {
-            gcslat = lat; gcslongt = longt;
+            GCS.Lat = lat; GCS.Longt = longt; GCS.Alti = alti;
+            MainWindow win = (MainWindow)Window.GetWindow(this);
+            win.map_Ctrl.StartPosGCS(GCS.Lat, GCS.Longt);
+            isTrackerReady = true;
+        }
+        public void SetKoorWahana(double lat, double longt, float alti)
+        {
+            Wahana.Lat = lat; Wahana.Longt = longt; Wahana.Alti = alti;
+            tb_lat_wahana.Text = lat.ToString();
+            tb_longt_wahana.Text = longt.ToString();
+            tb_alti_wahana.Text = alti.ToString();
         }
 
         #region Kalkulasi
-        
-        private double gcslat, gcslongt;
-        private void kalkulasiArah(double wahanalat, double wahanalongt, short tinggi)
+
+        private double JarakHorizon()
         {
-            //konversi selisih koordinat menjadi detik(derajat) menjadi meter
-            double jarakX = ((wahanalat - gcslat) * 3600) * 30.416;
-            double jarakY = ((wahanalongt - gcslongt) * 3600) * 30.416;
+            double R = 6371;
+            double deltaLat = (Wahana.Lat - GCS.Lat) * Math.PI / 180; //selisih Latitude dalam radian
+            double deltaLongt = (Wahana.Longt - GCS.Longt) * Math.PI / 180; //selisih Longitude dalam radian
 
-            //segitiga trigonometri
-            double jarakDarat = Math.Sqrt((jarakX * jarakX) + (jarakY * jarakY));
-            double jarakReal = Math.Sqrt((jarakDarat * jarakDarat) + (tinggi * tinggi));
-
-            float arahhorizontal, arahvertikal;
-            //ArahkanTracker(arahhorizontal, arahvertikal);
+            //trigonometric
+            double sisiA = Math.Pow(Math.Sin(deltaLat / 2), 2)
+                            + Math.Cos(GCS.Lat * Math.PI / 180) * Math.Cos(Wahana.Lat * Math.PI / 180)
+                            * Math.Pow(Math.Sin(deltaLongt / 2), 2);
+            double sisiB = 2 * Math.Asin(Math.Min(1, Math.Sqrt(sisiA)));
+            return R * sisiB;
         }
 
-        private void ArahkanTracker(float yaw, float pitch)
-        {
+        private bool isTrackerReady = false;
 
+        private void pasangTracker(object sender, RoutedEventArgs e)
+        {
+            if (tb_lat_tracker.Text != "" && tb_longt_tracker.Text != "" && tb_tinggi_tracker.Text != "")
+            {
+                SetKoorGCS(double.Parse(tb_lat_tracker.Text), double.Parse(tb_longt_tracker.Text), float.Parse(tb_tinggi_tracker.Text));
+            } else {
+                MessageBox.Show("Masukkan Latitude, Longitude, dan Tinggi Tracker!", "Posisi Invalid!", MessageBoxButton.OK, MessageBoxImage.Question);
+            }
+        }
+
+        public void ArahkanTracker(double wahanalat, double wahanalongt, float wahanaalti)
+        {
+            SetKoorWahana(wahanalat, wahanalat, wahanaalti);
+            if (!isTrackerReady) return;
+            float deltaTinggi = Wahana.Alti - GCS.Alti;
+
+            double jarakDarat = JarakHorizon();
+            double jarakLangsung = Math.Sqrt((jarakDarat * jarakDarat) + (deltaTinggi * deltaTinggi));
+
+            //double si_x = Math.Cos(GCS.Lat) * Math.Sin(Wahana.Lat)
+            //            - Math.Sin(GCS.Lat) * Math.Cos(Wahana.Lat)
+            //            * Math.Cos(Wahana.Longt - GCS.Longt);
+            //double si_y = Math.Sin(Wahana.Longt - GCS.Longt) * Math.Cos(Wahana.Lat);
+            //double ArahHorizon = Math.Atan2(si_y, si_x);
+
+            double ArahHorizon = Math.Atan2(Math.Sin(Wahana.Longt - GCS.Longt) * Math.Cos(Wahana.Lat),
+                                Math.Cos(GCS.Lat) * Math.Sin(Wahana.Lat)
+                                - Math.Sin(GCS.Lat) * Math.Cos(Wahana.Lat)
+                                * Math.Cos(Wahana.Longt - GCS.Longt)) * 180 / Math.PI;
+
+            double ArahVerti = Math.Acos(jarakDarat / jarakLangsung);
+
+            thePort.WriteLine(string.Format("{0},{1}",ArahHorizon,ArahVerti));
+
+            tb_jarak_horizon.Text = jarakDarat.ToString() + " m";
+            tb_jarak_lsg.Text = jarakLangsung.ToString() + " m";
+            tb_bearing.Text = ArahHorizon.ToString() + "°";
+            tb_pitch.Text = ArahVerti.ToString() + "°";
         }
 
         #endregion

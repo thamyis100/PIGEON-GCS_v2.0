@@ -21,7 +21,7 @@ namespace Pigeon_WPF_cs
     public partial class exitPop : Window
     {
         MainWindow win;
-        private byte exitCode;
+        //private byte exitCode;
         public exitPop(byte theCode = 0)
         {
             InitializeComponent();
@@ -46,16 +46,16 @@ namespace Pigeon_WPF_cs
 
         private void batal(object sender, RoutedEventArgs e)
         {
-            win = (MainWindow)Window.GetWindow(Owner);
+            win = (MainWindow)GetWindow(Owner);
             Owner.Effect = null;
-            win.showAvionics();
+            win.flight_Ctrl.showAvionics();
             Close();
         }
 
         private void keluar(object sender, RoutedEventArgs e)
         {
-            win = (MainWindow)Window.GetWindow(Owner);
-            win.stopTheCam();
+            win = (MainWindow)GetWindow(Owner);
+            win.flight_Ctrl.stopControl();
             Application.Current.Shutdown();
         }
     }

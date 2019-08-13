@@ -57,7 +57,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #region List of default Markers
 
-        private GMapMarker homeIco, poswahana;
+        private GMapMarker homeIco, poswahana, posgcs;
 
         #endregion
 
@@ -100,7 +100,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             mapView.Markers.Add(homeLbl);
         }
 
-        public void StartCurrentPos(double currlat, double currlongt, float heading)
+        public void StartPosGCS(double thelat, double thelongt)
+        {
+            posgcs = new GMapMarker(new PointLatLng(thelat, thelongt))
+            {
+                Tag = "GCS Position",
+                Shape = new Image
+                {
+                    Width = markerWidth,
+                    Height = markerHeight,
+                    Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/ikon-gcs-1.png"))
+                },
+                Offset = new Point(-markerWidth / 2, -markerHeight)
+            };
+            RenderOptions.SetBitmapScalingMode(poswahana.Shape, BitmapScalingMode.HighQuality);
+
+            mapView.Markers.Add(posgcs);
+        }
+        public void SetHeadingGCS(float bearing)
+        {
+            poswahana.Shape.RenderTransformOrigin = new Point(0.5, 1);
+            poswahana.Shape.RenderTransform = new RotateTransform(bearing);
+        }
+
+        public void StartPosWahana(double currlat, double currlongt, float heading)
         {
             poswahana = new GMapMarker(new PointLatLng(currlat, currlongt))
             {
