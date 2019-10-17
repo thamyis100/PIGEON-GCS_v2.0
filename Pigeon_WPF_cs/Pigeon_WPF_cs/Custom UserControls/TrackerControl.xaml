@@ -38,7 +38,7 @@
                         </Grid.ColumnDefinitions>
                         <DockPanel Margin="0">
                             <Label Content="LATITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                            <TextBox x:Name="tb_lat_tracker" Text="-7.27582978026774"  VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
+                            <TextBox x:Name="tb_lat_tracker" Text="-7.27664126611818"  VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
                         </DockPanel>
                         <DockPanel Grid.Column="2" Margin="0">
                             <Label Content="TINGGI" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
@@ -46,11 +46,11 @@
                         </DockPanel>
                         <DockPanel Grid.Column="1" Margin="0">
                             <Label Content="LONGTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                            <TextBox x:Name="tb_longt_tracker" Text="112.793835997581" VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
+                            <TextBox x:Name="tb_longt_tracker" Text="112.793774306774" VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
                         </DockPanel>
                     </Grid>
                 </DockPanel>
-                <Button Margin="0" Grid.Column="1" Height="40" VerticalAlignment="Center" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Center" Width="40" Click="pasangTracker">
+                <Button x:Name="btn_postracker" Margin="0" Grid.Column="1" Height="40" VerticalAlignment="Center" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Center" Width="40" Click="pasangTracker" IsEnabled="False">
                     <Image Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-email-send-80.png" Width="30" Height="30"/>
                 </Button>
             </Grid>
@@ -64,15 +64,18 @@
                     </Grid.ColumnDefinitions>
                     <DockPanel Margin="0">
                         <Label Content="LATITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_lat_wahana" Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="18" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsReadOnly="True" IsUndoEnabled="False" HorizontalContentAlignment="Center"/>
+                        <TextBox x:Name="tb_lat_wahana" Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
                     </DockPanel>
                     <DockPanel Grid.Column="1" Margin="0">
                         <Label Content="LONGTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_longt_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="18" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsReadOnly="True" IsUndoEnabled="False" HorizontalContentAlignment="Center"/>
+                        <TextBox x:Name="tb_longt_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
                     </DockPanel>
                     <DockPanel Grid.Column="2" Margin="0">
-                        <Label Content="ALTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_alti_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="18" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsReadOnly="True" IsUndoEnabled="False" HorizontalContentAlignment="Center"/>
+                        <StackPanel DockPanel.Dock="Top">
+                            <Label Content="ALTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold" Padding="0"/>
+                            <Label Content="(dari posisi start)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" FontSize="10"/>
+                        </StackPanel>
+                        <TextBox x:Name="tb_alti_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
                     </DockPanel>
                 </Grid>
             </DockPanel>
@@ -96,7 +99,7 @@
                     </DockPanel>
                     <TextBox x:Name="tb_received" Margin="0,0.333,0,-0.333" Grid.Row="1" IsReadOnly="True" IsUndoEnabled="False" HorizontalContentAlignment="Center" Height="24" VerticalAlignment="Top" VerticalContentAlignment="Center" IsEnabled="False"/>
                 </Grid>
-                <Button MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Padding="0" Click="ToggleSerial" DockPanel.Dock="Right" Height="70" Width="80">
+                <Button x:Name="track_conn_bt" MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Padding="0" Click="ToggleSerial" DockPanel.Dock="Right" Height="70" Width="80">
                     <DockPanel>
                         <Image x:Name="img_conn" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-disconnected-80.png"  Margin="0" HorizontalAlignment="Center" DockPanel.Dock="Top" Width="50" VerticalAlignment="Top"/>
                         <Label x:Name="ind_conn_status" Content="Disconnected" DockPanel.Dock="Top" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="11"/>
@@ -105,9 +108,9 @@
             </DockPanel>
             <Grid Margin="0,5" Background="Gainsboro" Grid.Row="3">
                 <Label Content="Status Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="28" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" Margin="15,5,0,0"/>
-                <Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,25,0" Background="#FF9BECEC" BorderBrush="{x:Null}">
+                <Button x:Name="btn_tracking" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,25,0" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="toggleTracking" IsEnabled="False">
                     <DockPanel>
-                        <Image x:Name="img_start_stop" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-play-50.png" Height="25"/>
+                        <Image x:Name="ico_start_stop" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-play-50.png" Height="25"/>
                         <Label x:Name="lbl_start_stop" Content="Start Tracking" FontSize="14" FontFamily="Century Gothic" FontWeight="Bold"/>
                     </DockPanel>
                 </Button>
@@ -116,18 +119,18 @@
                         <ColumnDefinition Width="13*"/>
                         <ColumnDefinition Width="13*"/>
                     </Grid.ColumnDefinitions>
-                    <DockPanel Margin="0">
+                    <DockPanel Margin="0" Height="163.2">
                         <Label Content="Pitch" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="18" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_pitch" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36"/>
+                        <TextBox x:Name="tb_pitch" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36" IsUndoEnabled="False" IsReadOnly="True"/>
                         <Label Content="Bearing" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="18" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_bearing" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36"/>
+                        <TextBox x:Name="tb_bearing" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36" IsUndoEnabled="False" IsReadOnly="True"/>
                     </DockPanel>
                     <Border Grid.Column="1" BorderBrush="#FF494949" BorderThickness="2,0,0,0">
                         <DockPanel Margin="0">
                             <Label Content="Jarak (Horizon)" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="18" FontWeight="Bold"/>
-                            <TextBox x:Name="tb_jarak_horizon" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36"/>
+                            <TextBox x:Name="tb_jarak_horizon" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36" IsUndoEnabled="False" IsReadOnly="True"/>
                             <Label Content="Jarak (Langsung)" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="18" FontWeight="Bold"/>
-                            <TextBox x:Name="tb_jarak_lsg" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36"/>
+                            <TextBox x:Name="tb_jarak_lsg" Text="N/A" Foreground="#FF15008B" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" Margin="0,0,0,5" BorderBrush="{x:Null}" Background="{x:Null}" FontFamily="Century Gothic" FontWeight="Bold" FontSize="36" IsUndoEnabled="False" IsReadOnly="True"/>
                         </DockPanel>
                     </Border>
                 </Grid>

@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="Pigeon_WPF_cs.Custom_UserControls.WaypointItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Pigeon_WPF_cs.Custom_UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="60" d:DesignWidth="300" Margin="5,1,3,1" MaxHeight="60">
+    <Border Background="#FFEBEBEB" CornerRadius="10">
+        <Grid x:Name="wp_grid" Margin="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="41*"/>
+                <ColumnDefinition Width="67*"/>
+                <ColumnDefinition Width="122*"/>
+            </Grid.ColumnDefinitions>
+            <Image x:Name="wp_ikon" Source="/Pigeon_WPF_cs;component/Resources/icons/marker-waypoint.png" Margin="10,5,5,5" Grid.RowSpan="2"/>
+            <StackPanel Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Grid.Column="1">
+                <TextBlock x:Name="wp_name" Text="#Home Pos" Margin="0" Padding="0" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway ExtraBold" TextAlignment="Center" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Label Content="Jarak: 999km" Padding="0" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="#FF15008B" FontStyle="Italic" FontSize="14"/>
+            </StackPanel>
+            <DockPanel Margin="5,0,10,2" Grid.Column="2" VerticalAlignment="Bottom">
+                <Label Content="LAT " Padding="0" FontSize="10" VerticalContentAlignment="Center" Width="25" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold"/>
+                <TextBox x:Name="wp_lat" Text="-7.2612623163" Padding="0" VerticalContentAlignment="Center" Foreground="#FF15008B" FontFamily="Trebuchet MS" FontStyle="Italic" HorizontalContentAlignment="Center" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+            </DockPanel>
+            <DockPanel Grid.Row="1" Margin="5,2,10,0" Grid.Column="2" VerticalAlignment="Top">
+                <Label Content="LON " Padding="0" FontSize="10" VerticalContentAlignment="Center" Width="25" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold"/>
+                <TextBox x:Name="wp_longt" Text="-112.173327327" Padding="0" Foreground="#FF15008B" FontFamily="Trebuchet MS" FontStyle="Italic" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontWeight="Bold" VerticalAlignment="Center" FontSize="14"/>
+            </DockPanel>
+        </Grid>
+    </Border>
+</UserControl>

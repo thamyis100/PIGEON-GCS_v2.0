@@ -1,0 +1,10 @@
+﻿<UserControl x:Class="Pigeon_WPF_cs.Custom_UserControls.CustomMarker"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Pigeon_WPF_cs.Custom_UserControls"
+             mc:Ignorable="d" 
+             Width="40" Height="40">
+    <Image x:Name="wp_img"/>
+</UserControl>

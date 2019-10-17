@@ -138,6 +138,9 @@
     <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="MavLink4Net.Messages, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MavLink4Net.Messages.0.4.0\lib\netstandard2.0\MavLink4Net.Messages.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -155,6 +158,7 @@
       <HintPath>..\packages\System.Data.SQLite.Linq.1.0.111.0\lib\net46\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Speech" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -175,6 +179,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Custom UserControls\CustomMarker.xaml.cs">
+      <DependentUpon>CustomMarker.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Custom UserControls\StatisticControl.xaml.cs">
       <DependentUpon>StatisticControl.xaml</DependentUpon>
     </Compile>
@@ -184,7 +191,18 @@
     <Compile Include="Custom UserControls\Waypoint.xaml.cs">
       <DependentUpon>Waypoint.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Custom UserControls\WaypointItem.xaml.cs">
+      <DependentUpon>WaypointItem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Custom UserControls\WPF Avionics Indicators\AttitudeIndicator.xaml.cs">
+      <DependentUpon>AttitudeIndicator.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Resources\ReadWriteCsv.cs" />
     <Compile Include="Resources\Screenshot.cs" />
+    <Page Include="Custom UserControls\CustomMarker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Custom UserControls\FlightControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -198,6 +216,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Custom UserControls\Waypoint.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Custom UserControls\WaypointItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Custom UserControls\WPF Avionics Indicators\AttitudeIndicator.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -391,6 +417,16 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\icons\ikon-gcs-1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons\icons8-stop-50.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Custom UserControls\WPF Avionics Indicators\Res\Horizon_Background.png" />
+    <Resource Include="Custom UserControls\WPF Avionics Indicators\Res\Maquette_Avion.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Custom UserControls\WPF Avionics Indicators\Res\Horizon_GroundSky.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.111.0\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.111.0\build\net46\System.Data.SQLite.Core.targets')" />

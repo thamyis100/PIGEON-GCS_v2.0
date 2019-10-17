@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Speech.AudioFormat;
+using System.Speech.Synthesis;
+using System.Speech.Recognition;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,10 +23,47 @@ using System.Windows.Threading;
 namespace Pigeon_WPF_cs
 {
     /// <summary>
+    /// Daftar perintah untuk dikirim ke wahana
+    /// </summary>
+    public enum command
+    {
+        /// <summary>
+        /// Perintah auto take off
+        /// </summary>
+        TAKE_OFF = 0xAA,
+        /// <summary>
+        /// Perintah auto landing
+        /// </summary>
+        LAND = 0xCC,
+        /// <summary>
+        /// Perintah membatalkan auto take-off
+        /// </summary>
+        BATALKAN = 0xBB
+    }
+
+    public enum FMode
+    {
+        MANUAL = 0x00,
+        STABILIZER = 0x01,
+        LOITER = 0x02,
+        TAKEOFF = 0x03
+    }
+
+    public enum Efalcon
+    {
+        TRACKER = 0x01,
+        WAHANA = 0x02
+    }
+
+    /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        float map(float x, float in_min, float in_max, float out_min, float out_max)
+        {
+            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+        }
 
         public MainWindow()
         {
@@ -31,19 +71,30 @@ namespace Pigeon_WPF_cs
 
             //contoh kapasitas baterai
             icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, 400, 396));
+
+            //inisialisasi semua tab
             setCurrentlyActive(tab_track, btn_track, track_Ctrl);
             setCurrentlyActive(tab_stats, btn_stats, stats_Ctrl);
             setCurrentlyActive(tab_map, btn_map, map_Ctrl);
             setCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
-            MinimizeMap();
 
+            setConnStat(false, false); //offline wahana
+            setConnStat(false, true); //offline tracker
+            MinimizeMap();
+            PrepareSpeechSynth();
+            PrepareRecog();
+
+            //set bahasa indonesia
             SetBahasa(new CultureInfo("id-ID"));
 
+            //set waktu sekarang
             DispatcherTimer timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.DataBind, delegate
             {
                 digital_clock.Text = DateTime.Now.ToString("HH\\:mm\\:ss (G\\MTz) dddd,\ndd MMMM yyyy", CultureInfo.CurrentUICulture);
             },Dispatcher);
         }
+
+        #region MainWindow functions
 
         private void ubah_bahasa(object sender, RoutedEventArgs e)
         {
@@ -64,22 +115,229 @@ namespace Pigeon_WPF_cs
             }
         }
         private void SetBahasa(CultureInfo theLanguage) => Thread.CurrentThread.CurrentUICulture = theLanguage;
+        private void injectStats(object sender, RoutedEventArgs e) => map_Ctrl.doRotateHomepos();
 
-        private void injectStats(object sender, RoutedEventArgs e) => stats_Ctrl.InjectStopOnClick(sender, e);
-        public void setConnStat(bool status)
+        internal void SetBaterai(float baterai)
         {
-            if (status)
+            //Console.WriteLine("Baterai Convert: " + Convert.ToInt32(map(baterai, 10.5f, 12.8f, 80.0f, 750.0f)).ToString());
+            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, 500, 396));
+            val_batt.Content = baterai.ToString("0.00") + " V";
+        }
+
+        #endregion
+
+        #region Speech Synth & Recog
+
+        #region synth
+
+        private SpeechSynthesizer synth;
+        private void PrepareSpeechSynth()
+        {
+            synth = new SpeechSynthesizer();
+            //synth.StateChanged += new EventHandler<StateChangedEventArgs>(synth_StateChanged);
+            //synth.SpeakStarted += new EventHandler<SpeakStartedEventArgs>(synth_SpeakStarted);
+            //synth.SpeakProgress += new EventHandler<SpeakProgressEventArgs>(synth_SpeakProgress);
+            //synth.SpeakCompleted += new EventHandler<SpeakCompletedEventArgs>(synth_SpeakCompleted);
+            synth.SelectVoice("Microsoft Andika");
+            synth.Volume = 100;
+            synth.Rate = 3;
+        }
+
+        bool MuteVoice = false;
+        public void SpeakOutloud(string ssmltxt)
+        {
+            if (MuteVoice) return;
+            if (ssmltxt == null || synth.State != SynthesizerState.Ready) return;
+            var prompt = new PromptBuilder();
+            prompt.AppendSsmlMarkup(ssmltxt);
+            synth.SpeakAsync(prompt);
+        }
+
+        private void injectSpeak(object sender, RoutedEventArgs e)
+        {
+            synth.SelectVoice("Microsoft Andika");
+            synth.Volume = 100;
+            synth.Rate = 3;
+            PromptBuilder prompt = new PromptBuilder();
+            //string ssmlText = "<emph>" +
+            //"Heading: 330,34." +
+            //"Pitch: -43,21." +
+            //"Roll: -92,34." +
+            //"Kecepatan: 99." +
+            //"Ketinggian: 20,52." +
+            //"Latitude: -7,125125." +
+            //"Longitude: 112,552125." +
+            //"</emph>";
+            string ssmltxt = "<s>Heading <emphasis><say-as interpret-as=\"number\">330</say-as></emphasis></s>";
+            ssmltxt += "<s>Ketinggian <emphasis><say-as interpret-as=\"number\">20</say-as></emphasis> meter</s>";
+            ssmltxt += "<s>Kecepatan <emphasis><say-as interpret-as=\"number\">90</say-as></emphasis> kilometer/jam</s>";
+            prompt.AppendSsmlMarkup(ssmltxt);
+
+            switch (synth.State)
+            {
+                case SynthesizerState.Ready:
+                    synth.SpeakAsync(prompt);
+                    break;
+                case SynthesizerState.Paused:
+                    synth.Resume();
+                    break;
+                case SynthesizerState.Speaking:
+                    synth.Pause();
+                    break;
+            }
+        }
+
+        #endregion
+
+        #region Recog
+
+        private SpeechRecognitionEngine recog = new SpeechRecognitionEngine();
+        private void PrepareRecog()
+        {
+            recog.SpeechRecognized += speechRecognized;
+            var command = new Choices("takeoff", "land","cancel");
+            var grambuild = new GrammarBuilder(command);
+
+            recog.LoadGrammar(new Grammar(grambuild));
+            recog.SetInputToDefaultAudioDevice();
+        }
+
+        bool isRecog = false;
+        private void toggleRecog(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.H)
+            {
+                if (!isRecog) { recog.RecognizeAsync(RecognizeMode.Single); isRecog = true; Console.WriteLine("Listening recognition"); }
+                else { recog.RecognizeAsyncStop(); Console.WriteLine("Cancelled recognition"); isRecog = false; }
+            }
+        }
+
+        private void speechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            Console.WriteLine("Received: " + e.Result.Text);
+            isRecog = false;
+            switch (e.Result.Text)
+            {
+                case "takeoff":
+                    Console.WriteLine("Sending TAKE_OFF command");
+                    flight_Ctrl.SendToConnection(command.TAKE_OFF, Efalcon.WAHANA);
+                    break;
+                case "land":
+                    flight_Ctrl.SendToConnection(command.LAND, Efalcon.WAHANA);
+                    Console.WriteLine("Sending LAND command");
+                    break;
+                case "cancel":
+                    flight_Ctrl.SendToConnection(command.BATALKAN, Efalcon.WAHANA);
+                    Console.WriteLine("Sending BATALKAN command");
+                    break;
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Connection n timer
+
+        public bool isWahanaConnected = false;
+        public bool isTrackerConnected = false;
+        public void setConnStat(bool status, bool tipe)
+        {
+            if (status && tipe) //tracker online
+            {
+                isTrackerConnected = true;
+                lbl_statusTracker.Visibility = Visibility.Visible;
+            }
+            else if (status && !tipe) //wahana online
+            {
+                isWahanaConnected = true;
+                lbl_statusWahana.Visibility = Visibility.Visible;
+            }
+            else if (!status && tipe) //tracker offline
+            {
+                isTrackerConnected = false;
+                lbl_statusTracker.Visibility = Visibility.Collapsed;
+            }
+            else if (!status && !tipe) //wahana offline
+            {
+                isWahanaConnected = false;
+                lbl_statusWahana.Visibility = Visibility.Collapsed;
+            }
+
+            if (isTrackerConnected || isWahanaConnected)
             {
                 lbl_statusLine.Content = "ONLINE";
                 lbl_statusLine.Foreground = Brushes.Green;
-            }
-            else
+            } else
             {
                 lbl_statusLine.Content = "OFFLINE";
                 lbl_statusLine.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF969696"));
             }
+            if (isTrackerConnected && isWahanaConnected) lbl_statusPlus.Visibility = Visibility.Visible;
+            else lbl_statusPlus.Visibility = Visibility.Collapsed;
+            MuteVoice = !MuteVoice;
         }
-        private void clickedWindow(object sender, MouseButtonEventArgs e) => DragMove();
+
+        public TimeSpan waktuTerbang = TimeSpan.Zero;
+        private DateTime waktuStart;
+        private DispatcherTimer detikan;
+        bool isTimerFirstTime = true;
+        public void ToggleWaktuTerbang()
+        {
+            if (isTimerFirstTime)
+            {
+                detikan = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(10) };
+                detikan.Tick += detikTerbang;
+                detikan.Start();
+                waktuStart = DateTime.Now;
+                isTimerFirstTime = false;
+                return;
+            }
+
+            if (detikan.IsEnabled)
+            {
+                detikan.Stop();
+                isTimerFirstTime = true;
+                waktuTerbang = TimeSpan.Zero;
+                val_flightTime.Content = waktuTerbang.ToString("mm\\:ss");
+            }
+            else detikan.Start();
+        }
+
+        private void detikTerbang(object sender, EventArgs e)
+        {
+            waktuTerbang = DateTime.Now - waktuStart;
+            val_flightTime.Content = waktuTerbang.ToString("hh\\:mm\\:ss");
+            //Console.WriteLine("added 1 second to waktu terbang");
+        }
+
+#endregion
+
+        #region window control
+
+        private void clickedWindow(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch { return; } }
+
+        public bool isWahanaLanded()
+        {
+            Effect = new BlurEffect() { Radius = 5 };
+            flight_Ctrl.hideAvionics();
+
+            var diskonekFirst = new exitPop(2);
+            diskonekFirst.Owner = this;
+            if (diskonekFirst.ShowDialog() == true)
+            {
+                Effect = null;
+                flight_Ctrl.showAvionics();
+                return true;
+            }
+            else
+            {
+                Effect = null;
+                flight_Ctrl.showAvionics();
+                return false;
+            }
+        }
+
         private byte appCheck()
         {
             byte code = 0;
@@ -88,18 +346,24 @@ namespace Pigeon_WPF_cs
         }
         private void closeApp(object sender, RoutedEventArgs e)
         {
-            BlurEffect theblur = new BlurEffect();
-            theblur.Radius = 15;
-            Effect = theblur;
+            Effect = new BlurEffect() { Radius = 15 };
             flight_Ctrl.hideAvionics();
-            exitPop exitPop = new exitPop(appCheck());
-            exitPop.Owner = this;
-            exitPop.ShowDialog();
+
+            var exitting = new exitPop(appCheck());
+            exitting.Owner = this;
+            if (exitting.ShowDialog() == true) { flight_Ctrl.stopControl(); Application.Current.Shutdown(); }
+            else
+            {
+                Effect = null;
+                flight_Ctrl.showAvionics();
+            }
         }
+
+        #endregion
 
         #region Waypoint control
 
-        public void MinimizeMap(int width = 470, int height = 580)
+        public void MinimizeMap(int width = 480, int height = 580)
         {
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
             mapGrid.Width = width;
@@ -184,5 +448,6 @@ namespace Pigeon_WPF_cs
 
         #endregion
 
+        private void muteVoice(object sender, RoutedEventArgs e) => MuteVoice = !MuteVoice;
     }
 }

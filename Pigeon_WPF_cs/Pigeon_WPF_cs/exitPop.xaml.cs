@@ -27,36 +27,48 @@ namespace Pigeon_WPF_cs
             InitializeComponent();
             if (theCode == 1)
             {
-                delayExit();
-                tb_info.Text = "EFALCON MASIH TERHUBUNG! Yakin ingin keluar?";
+                delayExit("Keluar", true);
+                tb_info.Text = "EFALCON MASIH TERHUBUNG!\nYakin ingin keluar?";
+            }
+            if (theCode == 2)
+            {
+                tb_info.Text = "PASTIKAN WAHANA MENDARAT DAN TELAH DIMATIKAN SEBELUM DISCONNECT!";
+                delayExit("Disconnect", false);
             }
         }
 
-        private async void delayExit()
+        private async void delayExit(string konten, bool isexit)
         {
             btn_lanjut.IsEnabled = false;
-            for (var i = 5; i > 0; i--)
+            tb_info.Foreground = Brushes.DarkRed;
+
+            byte i = 0;
+            if (isexit) i = 5;
+            else i = 3;
+            while(i > 0)
             {
-                btn_lanjut.Content = "Keluar(" + i + ")";
+                btn_lanjut.Content = konten + "(" + i + ")";
                 await Task.Delay(1000);
+                i--;
             }
-            btn_lanjut.Content = "Keluar";
+            btn_lanjut.Content = konten;
             btn_lanjut.IsEnabled = true;
         }
 
         private void batal(object sender, RoutedEventArgs e)
         {
-            win = (MainWindow)GetWindow(Owner);
-            Owner.Effect = null;
-            win.flight_Ctrl.showAvionics();
+            DialogResult = false;
             Close();
         }
 
         private void keluar(object sender, RoutedEventArgs e)
         {
-            win = (MainWindow)GetWindow(Owner);
-            win.flight_Ctrl.stopControl();
-            Application.Current.Shutdown();
+            DialogResult = true; Close();
         }
+        //{
+        //    win = (MainWindow)GetWindow(Owner);
+        //    win.flight_Ctrl.stopControl();
+        //    Application.Current.Shutdown();
+        //}
     }
 }

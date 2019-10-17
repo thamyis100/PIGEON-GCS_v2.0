@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Pigeon_WPF_cs"
         xmlns:controls="clr-namespace:Pigeon_WPF_cs.Custom_UserControls"
         mc:Ignorable="d"
+        KeyUp="toggleRecog"
         
         Title="PIGEON GCS" Height="720" Width="1280" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png">
     <Window.Resources>
@@ -21,7 +22,7 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid Margin="0">
+    <Grid Margin="0" IsEnabled="True">
         <Grid.RowDefinitions>
             <RowDefinition Height="55*"/>
             <RowDefinition Height="480*"/>
@@ -67,9 +68,10 @@
                 <ColumnDefinition Width="4*"/>
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
-            <Button Click="injectStats"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                <Label Content="Testing Statistik IMU" FontSize="11"/>
-            </Button>
+
+            <!--<Button Click="muteVoice"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
+                <Label Content="Mute" FontSize="11"/>
+            </Button>-->
             <StackPanel Grid.ColumnSpan="4" VerticalAlignment="Top" Margin="0,15,0,0">
                 <Label x:Name="bhs_lbl" Content="Language :" Foreground="White" HorizontalContentAlignment="Center"/>
                 <WrapPanel HorizontalAlignment="Center">
@@ -168,40 +170,50 @@
             </Grid.ColumnDefinitions>
             <Rectangle Fill="WhiteSmoke" Margin="0" Stroke="Black" StrokeThickness="0" Grid.ColumnSpan="2"/>
             <Image x:Name="header" Source="Resources/Header.png" Margin="-1,0,0,0" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality" Stretch="Fill"/>
+            
             <Grid Margin="0,10,0,0" Grid.Column="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="4*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="115*"/>
+                    <ColumnDefinition Width="62*"/>
+                    <ColumnDefinition Width="133*"/>
+                    <ColumnDefinition Width="133*"/>
+                    <ColumnDefinition Width="133*"/>
+                    <ColumnDefinition Width="89*"/>
                 </Grid.ColumnDefinitions>
-                <DockPanel LastChildFill="False" Margin="5,0,0,0" VerticalAlignment="Center" Height="40" HorizontalAlignment="Center">
+                
+                <DockPanel LastChildFill="True" Margin="0" VerticalAlignment="Center" Height="40" HorizontalAlignment="Center" Grid.ColumnSpan="2" Width="155">
                     <Image x:Name="logo_efalcon_status" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/logo/efalcon.png" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0.5"/>
-                    <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/#Commando" FontSize="24" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="5,0,0,0" Padding="0" Width="100" HorizontalContentAlignment="Center"/>
+                    <DockPanel Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/#Commando" FontSize="24" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="0" Padding="0" HorizontalContentAlignment="Center" DockPanel.Dock="Top"/>
+                        <WrapPanel DockPanel.Dock="Top" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,-4,0,0">
+                            <Label x:Name="lbl_statusWahana" Content="Wahana" HorizontalAlignment="Center" Padding="0" FontFamily="Century Gothic" FontWeight="Bold" Margin="0" VerticalAlignment="Center" FontSize="11"/>
+                            <Label x:Name="lbl_statusPlus"  Content=" + " Padding="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="11"/>
+                            <Label x:Name="lbl_statusTracker" Content="Tracker" HorizontalAlignment="Center" Padding="0" FontFamily="Century Gothic" FontWeight="Bold" Margin="0" VerticalAlignment="Center" FontSize="11"/>
+                        </WrapPanel>
+                    </DockPanel>
                 </DockPanel>
-                <DockPanel Grid.Column="1" Margin="0,-5,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <DockPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid Margin="12,0,14.667,0" DockPanel.Dock="Top">
                         <Image x:Name="icon_signal_0" HorizontalAlignment="Center" Height="30" Margin="0" VerticalAlignment="Center" Width="30" Source="Resources/icons/icons8-wi-fi-50.png" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Image x:Name="icon_signal_1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/icons8-wi-fi-filled-50.png" Height="30" Width="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
                     <Label x:Name="lbl_signal" Content="Sinyal" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="14"/>
-                    <Label x:Name="val_signal" Content="(99%)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="14" FontFamily="./#Raleway SemiBold" Margin="3,0,0,-3" FontWeight="Bold"/>
+                    <Label x:Name="val_signal" Content="(N/A)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="14" FontFamily="./#Raleway SemiBold" Margin="3,0,0,-3" FontWeight="Bold"/>
                 </DockPanel>
-                <DockPanel Grid.Column="2" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center" Height="40">
-                    <Label x:Name="lbl_flightTime" Content="Waktu Terbang" HorizontalAlignment="Right" Margin="0" Padding="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" FontFamily="./#Raleway" FontSize="14"/>
-                    <Label x:Name="val_flightTime" Content="00:00" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0,3,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontFamily="UD Digi Kyokasho NP-B" DockPanel.Dock="Top"/>
+                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="40">
+                    <Label x:Name="lbl_flightTime" Content="Waktu Terbang" HorizontalAlignment="Center" Margin="0" Padding="0" VerticalAlignment="Center" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" FontFamily="./#Raleway" FontSize="14"/>
+                    <Label x:Name="val_flightTime" Content="00:00:00" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0,3,0,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontFamily="UD Digi Kyokasho NP-B" DockPanel.Dock="Top"/>
                 </DockPanel>
-                <Button x:Name="btn_exit" Height="40" Margin="10,0,0,0" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="4" Width="40" Click="closeApp" HorizontalAlignment="Left">
+                <Button x:Name="btn_exit" Height="40" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="5" Width="40" Click="closeApp" HorizontalAlignment="Left" Margin="20,0,0,0">
                     <Image x:Name="icon_exit" Source="Resources/icons/icons8-shutdown-50.png" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Button>
-                <DockPanel Grid.Column="3" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <DockPanel Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid Margin="0,0,0,5" HorizontalAlignment="Center" VerticalAlignment="Center" Height="20" DockPanel.Dock="Top">
                         <Image x:Name="icon_bat_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/bat-empty.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Image x:Name="icon_bat_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Source="Resources/icons/bat-full.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Grid>
                     <Label x:Name="lbl_batt" Content="Batt" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" FontSize="14" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                    <Label x:Name="val_batt" Content="(11.1 V)" HorizontalAlignment="Center" Margin="5,0,0,-1" VerticalAlignment="Center" FontSize="14" Padding="0" FontFamily="Raleway SemiBold" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
+                    <Label x:Name="val_batt" Content="(N/A)" HorizontalAlignment="Center" Margin="5,0,0,-1" VerticalAlignment="Center" FontSize="14" Padding="0" FontFamily="Raleway SemiBold" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"/>
                 </DockPanel>
             </Grid>
         </Grid>
@@ -209,8 +221,8 @@
         <!-- imagine this is a tab control area-->
         <Border Grid.Row="1" Grid.Column="1" Margin="20,10,10,10" BorderBrush="#FFA8A8A8" BorderThickness="2">
             <Grid>
-                <Grid x:Name="mapGrid" HorizontalAlignment="Left" Width="470" VerticalAlignment="Top" Height="580">
-                    <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch" Width="Auto"/>
+                <Grid x:Name="mapGrid" HorizontalAlignment="Left" Width="480" VerticalAlignment="Top" Height="580">
+                    <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch"/>
                 </Grid>
                 <controls:FlightControl x:Name="flight_Ctrl"/>
                 <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden"/>
