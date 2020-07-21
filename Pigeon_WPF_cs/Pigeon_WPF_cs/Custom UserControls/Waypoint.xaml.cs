@@ -77,7 +77,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void mapView_Loaded(object sender, RoutedEventArgs e)
         {
-            GMaps.Instance.Mode = AccessMode.CacheOnly;
+            GMaps.Instance.Mode = AccessMode.ServerAndCache;
             mapView.MultiTouchEnabled = true;
             mapView.MapProvider = GoogleSatelliteMapProvider.Instance;
             //mapView.CacheLocation = System.IO.Path.GetDirectoryName(Application.ExecutablePath)

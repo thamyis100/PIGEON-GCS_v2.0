@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         KeyUp="toggleRecog"
         
-        Title="PIGEON GCS" Height="720" Width="1280" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png">
+        Title="PIGEON GCS" Height="720" Width="1280" WindowStyle="SingleBorderWindow" ResizeMode="CanResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png" WindowState="Maximized">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="leftPaneButtonStyle">
             <Setter Property="Template">
@@ -169,7 +169,7 @@
                 <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
             <Rectangle Fill="WhiteSmoke" Margin="0" Stroke="Black" StrokeThickness="0" Grid.ColumnSpan="2"/>
-            <Image x:Name="header" Source="Resources/Header.png" Margin="-1,0,0,0" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality" Stretch="Fill"/>
+            <Image x:Name="header" Source="Resources/Header.png" Margin="-1,0,0,0" Grid.ColumnSpan="2" RenderOptions.BitmapScalingMode="HighQuality" Stretch="Fill" VerticalAlignment="Top"/>
             
             <Grid Margin="0,10,0,0" Grid.Column="1">
                 <Grid.ColumnDefinitions>

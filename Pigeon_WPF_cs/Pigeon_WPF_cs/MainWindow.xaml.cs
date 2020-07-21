@@ -138,7 +138,7 @@ namespace Pigeon_WPF_cs
             //synth.SpeakStarted += new EventHandler<SpeakStartedEventArgs>(synth_SpeakStarted);
             //synth.SpeakProgress += new EventHandler<SpeakProgressEventArgs>(synth_SpeakProgress);
             //synth.SpeakCompleted += new EventHandler<SpeakCompletedEventArgs>(synth_SpeakCompleted);
-            synth.SelectVoice("Microsoft Andika");
+            //synth.SelectVoice("Microsoft Andika");
             synth.Volume = 100;
             synth.Rate = 3;
         }
