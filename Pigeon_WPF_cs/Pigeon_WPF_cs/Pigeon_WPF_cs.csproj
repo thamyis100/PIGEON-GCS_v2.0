@@ -334,9 +334,6 @@
     <Resource Include="Resources\logo\pigeonnew.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Header.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\icons\icons8-connected-80.png" />
     <Resource Include="Resources\icons\icons8-disconnected-80.png" />
     <Resource Include="Resources\icons\icons8-gps-antenna-100.png" />
@@ -399,7 +396,6 @@
     <Resource Include="Resources\icons\icons8-play-50.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Resources\images\" />
     <Folder Include="Resources\MapCache\" />
   </ItemGroup>
   <ItemGroup>
@@ -427,6 +423,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Custom UserControls\WPF Avionics Indicators\Res\Horizon_GroundSky.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\images\Header.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
