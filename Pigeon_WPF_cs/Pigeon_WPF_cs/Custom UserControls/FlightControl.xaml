@@ -7,21 +7,20 @@
              xmlns:indicator="clr-namespace:AviationInstruments"
              xmlns:indikator="clr-namespace:Pigeon_WPF_cs.Custom_UserControls.WPF_Avionics_Indicators"
              mc:Ignorable="d" 
-             d:DesignHeight="632" d:DesignWidth="1132" Height="626" Width="1132">
+             d:DesignHeight="632" d:DesignWidth="1132">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="27*"/>
             <RowDefinition Height="38*"/>
-            <RowDefinition Height="75*"/>
-            <RowDefinition Height="173*"/>
+            <RowDefinition Height="248*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150*"/>
             <ColumnDefinition Width="70*"/>
             <ColumnDefinition Width="130*"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="judul_flight" Content="Flight View" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="207" Grid.RowSpan="2"/>
-        <Grid Margin="5,4.4,4.8,4.6" Grid.Row="1" Grid.RowSpan="3">
+        <Label x:Name="judul_flight" Content="Flight View" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="207"/>
+        <Grid Margin="5,4,5,5" Grid.Row="1" Grid.RowSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="80*"/>
                 <ColumnDefinition Width="80*"/>
@@ -40,7 +39,7 @@
                 <TextBox x:Name="tb_longt" Text="N/A" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,5,0" FontSize="20" Width="180" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" Foreground="#FF15008B"/>
             </DockPanel>
         </Grid>
-        <DockPanel x:Name="stream_panel" Grid.Row="1" Grid.Column="2" Margin="4.8,4.4,5,3.6" Background="Gainsboro" IsEnabled="False">
+        <DockPanel x:Name="stream_panel" Grid.Row="1" Grid.Column="2" Margin="2.5" Background="Gainsboro" IsEnabled="False">
             <DockPanel DockPanel.Dock="Top" Margin="5,5,5,2">
                 <TextBox x:Name="out_stream" Margin="0,0,5,0" Width="280" BorderBrush="{x:Null}" FontSize="14" AllowDrop="False"/>
                 <Button BorderBrush="{x:Null}" Margin="-1" Width="20" Click="sendCommand">
@@ -50,7 +49,7 @@
             </DockPanel>
             <TextBox Text="" x:Name="in_stream" DockPanel.Dock="Top" BorderBrush="{x:Null}" Margin="5" FontSize="14" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False"/>
         </DockPanel>
-        <Grid Grid.Column="2" Margin="4.8,6.4,5,9.6" Grid.Row="2" Background="Gainsboro" Grid.RowSpan="2">
+        <Grid Grid.Column="2" Margin="2.5" Grid.Row="2" Background="Gainsboro" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="41*"/>
                 <RowDefinition Height="19*"/>
@@ -70,7 +69,7 @@
                 </WrapPanel>
             </ScrollViewer>
         </Grid>
-        <Border Grid.Column="1" VerticalAlignment="Center" Background="Gainsboro" Padding="0" CornerRadius="4" Grid.ColumnSpan="2" Margin="69.2,7,70,6.6" HorizontalAlignment="Center" Height="40" Width="508">
+        <Border Grid.Column="1" VerticalAlignment="Center" Background="Gainsboro" Padding="0" CornerRadius="4" Grid.ColumnSpan="2" Margin="69,7,70,7" HorizontalAlignment="Center" Height="40" Width="508">
             <DockPanel LastChildFill="False" Margin="10,3,5,3">
                 <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway"/>
                 <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedPort}" ItemsSource="{Binding sPorts}" Width="110" SelectionChanged="Cb_ports_SelectionChanged" FontSize="14"/>
@@ -90,8 +89,8 @@
                 </Button>
             </DockPanel>
         </Border>
-        <DockPanel  Grid.Column="1" Margin="0.2,0.4,0.2,1" Grid.Row="1" Grid.RowSpan="2" >
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
+        <DockPanel  Grid.Column="1" Margin="2.5" Grid.Row="1" Grid.RowSpan="2" >
+            <DockPanel Height="35" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
                 <Label Content="HEADING" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
                 <TextBox x:Name="tb_yaw" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
             </DockPanel>
@@ -117,28 +116,28 @@
                 </StackPanel>
                 <TextBox x:Name="tb_alti" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
             </DockPanel>
-        </DockPanel>
 
-        <DockPanel x:Name="avInst" Grid.Column="1" Margin="0.2,125.4,0.2,9.6" Grid.Row="2" Background="Gainsboro" Panel.ZIndex="-1" Grid.RowSpan="2">
-            <!--<WindowsFormsHost DockPanel.Dock="Top" Margin="0,5,0,0" VerticalAlignment="Top" Height="210" Width="210" HorizontalAlignment="Center">
-                <indicator:AttitudeIndicatorInstrumentControl x:Name="ind_attitude"/>
-            </WindowsFormsHost>-->
-            <indikator:AttitudeIndicator x:Name="ind_attitude" Margin="5,5,5,0" Grid.Row="3" Grid.Column="1" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top" HorizontalAlignment="Center" DockPanel.Dock="Top">
-                <indikator:AttitudeIndicator.LayoutTransform>
-                    <TransformGroup>
-                        <ScaleTransform ScaleX="0.54" ScaleY="0.54"/>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform/>
-                    </TransformGroup>
-                </indikator:AttitudeIndicator.LayoutTransform>
-            </indikator:AttitudeIndicator>
-            <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="105" Height="105" Margin="5,0,0,5">
-                <indicator:HeadingIndicatorInstrumentControl x:Name="ind_heading"/>
-            </WindowsFormsHost>
-            <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="105" Height="105" DockPanel.Dock="Right" Margin="0,0,5,5">
-                <indicator:AirSpeedIndicatorInstrumentControl x:Name="ind_airspeed"/>
-            </WindowsFormsHost>
+            <DockPanel x:Name="avInst" Grid.Column="1" Margin="0,5,0,0" Grid.Row="2" Background="Gainsboro">
+                <!--<WindowsFormsHost DockPanel.Dock="Top" Margin="0,5,0,0" VerticalAlignment="Top" Height="210" Width="210" HorizontalAlignment="Center">
+                    <indicator:AttitudeIndicatorInstrumentControl x:Name="ind_attitude"/>
+                </WindowsFormsHost>-->
+                <indikator:AttitudeIndicator x:Name="ind_attitude" Margin="5,5,5,0" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top" HorizontalAlignment="Center" DockPanel.Dock="Top">
+                    <indikator:AttitudeIndicator.LayoutTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="0.54" ScaleY="0.54"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </indikator:AttitudeIndicator.LayoutTransform>
+                </indikator:AttitudeIndicator>
+                <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="105" Height="105" Margin="5,0,0,5">
+                    <indicator:HeadingIndicatorInstrumentControl x:Name="ind_heading"/>
+                </WindowsFormsHost>
+                <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="105" Height="105" DockPanel.Dock="Right" Margin="0,0,5,5">
+                    <indicator:AirSpeedIndicatorInstrumentControl x:Name="ind_airspeed"/>
+                </WindowsFormsHost>
+            </DockPanel>
         </DockPanel>
 
     </Grid>

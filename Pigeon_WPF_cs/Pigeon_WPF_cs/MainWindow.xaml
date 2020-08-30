@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         KeyUp="toggleRecog"
         
-        Title="PIGEON GCS" WindowStyle="ToolWindow" ResizeMode="CanResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png" WindowState="Maximized" Width="1280" Height="720" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+        Title="PIGEON GCS" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png" Width="1360" Height="765" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SnapsToDevicePixels="True">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="leftPaneButtonStyle">
             <Setter Property="Template">
@@ -24,9 +24,8 @@
     </Window.Resources>
     <Grid IsEnabled="True">
         <Grid.RowDefinitions>
-            <RowDefinition Height="24*"/>
-            <RowDefinition Height="239*"/>
-            <RowDefinition Height="82*"/>
+            <RowDefinition Height="20*"/>
+            <RowDefinition Height="240*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="4*"/>
@@ -40,21 +39,16 @@
                     <GradientStop Color="#FF8F8F8F"/>
                 </LinearGradientBrush>
             </Grid.Background>
-            <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Top" Margin="8,5,8,0" UseLayoutRounding="False">
-                <Image.Effect>
-                    <DropShadowEffect ShadowDepth="2" Direction="275" BlurRadius="0"/>
-                </Image.Effect>
-            </Image>
-            <DockPanel Margin="8,0,8,3" HorizontalAlignment="Center" VerticalAlignment="Bottom">
-                <Label x:Name="logo_label_an" Content="an" VerticalAlignment="Top" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" HorizontalAlignment="Center" Foreground="#FFBBBBBB" FontFamily="Segoe UI Semibold" FontSize="7" Margin="0,0,0,1"/>
-                <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="0" DockPanel.Dock="Right" UseLayoutRounding="False">
+            <DockPanel>
+                <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" UseLayoutRounding="False" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="4,4,4,0">
                     <Image.Effect>
-                        <DropShadowEffect ShadowDepth="1" Direction="208" BlurRadius="2" Color="#FFB3B3B3" Opacity="0.75"/>
+                        <DropShadowEffect ShadowDepth="2" Direction="275" BlurRadius="0"/>
                     </Image.Effect>
                 </Image>
+                <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="4,0,4,4" DockPanel.Dock="Bottom" UseLayoutRounding="False"/>
             </DockPanel>
         </Grid>
-        <Grid Background="#FF1F1F1F" MouseLeftButtonDown="clickedWindow" Grid.Row="1" Margin="0,0,0.2,0.4" Grid.RowSpan="2">
+        <Grid MouseLeftButtonDown="clickedWindow" Grid.Row="1" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
@@ -64,19 +58,21 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="4*"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
+            <Rectangle Grid.RowSpan="6" Grid.ColumnSpan="4" Fill="#FF1F1F1F"/>
             <!--<Button Click="muteVoice"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
                 <Label Content="Mute" FontSize="11"/>
             </Button>-->
-            <StackPanel Grid.ColumnSpan="4" VerticalAlignment="Top" Margin="0,15,0,0">
-                <Label x:Name="bhs_lbl" Content="Lang :" Foreground="White" HorizontalContentAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway" FontSize="11"/>
-                <WrapPanel HorizontalAlignment="Center">
-                    <Button x:Name="bhs_indo" Background="Lime" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{x:Null}" Padding="2" BorderThickness="0" Margin="0" Click="ubah_bahasa">
+            <StackPanel Grid.ColumnSpan="4" Margin="0,15,0,0" VerticalAlignment="Top">
+                <Label x:Name="bhs_lbl" Content="Lang :" Foreground="White" HorizontalContentAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway"/>
+                <WrapPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button x:Name="bhs_indo" Background="Lime" HorizontalAlignment="Center" VerticalAlignment="Center" BorderBrush="{x:Null}" Padding="2" BorderThickness="0" Margin="0" Click="ubah_bahasa" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                         <Image Source="Resources/icons/Flag_of_Indonesia.png" Height="12" Stretch="Fill" Width="22"/>
                     </Button>
                     <Button x:Name="bhs_inggris" VerticalAlignment="Center" Background="{x:Null}" BorderBrush="{x:Null}" RenderTransformOrigin="0.5,0.5" BorderThickness="0" Padding="2" Margin="5,0,0,0" Click="ubah_bahasa">
@@ -156,7 +152,7 @@
             <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
             <TextBlock x:Name="digital_clock" Margin="5,50,5,0" Grid.Row="5" TextWrapping="Wrap" Text="Waktu Sekarang" VerticalAlignment="Top" Grid.ColumnSpan="4" Foreground="White"/>
         </Grid>
-        <Grid Background="#FF008C8C" MouseLeftButtonDown="clickedWindow" Grid.ColumnSpan="2" Margin="79,0,-0.4,0" >
+        <Grid Background="#FF008C8C" MouseLeftButtonDown="clickedWindow" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="9*"/>
@@ -222,14 +218,24 @@
         </Grid>
 
         <!-- imagine this is a tab control area-->
-        <Border Grid.Row="1" Grid.Column="1" Margin="19.8,10,9.6,10.4" BorderBrush="#FFA8A8A8" BorderThickness="2" Grid.RowSpan="2">
+        <Border Grid.Row="1" Grid.Column="1" Margin="10" BorderBrush="#FFA8A8A8" BorderThickness="2" Grid.RowSpan="2">
             <Grid>
-                <Grid x:Name="mapGrid" HorizontalAlignment="Left" Width="480" VerticalAlignment="Top" Height="580">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="314*"/>
+                    <RowDefinition Height="27*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150*"/>
+                    <ColumnDefinition Width="70*"/>
+                    <ColumnDefinition Width="130*"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid x:Name="mapGrid" Margin="2.5" >
                     <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch"/>
                 </Grid>
-                <controls:FlightControl x:Name="flight_Ctrl"/>
-                <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden"/>
-                <controls:TrackerControl x:Name="track_Ctrl" Visibility="Hidden"/>
+                <controls:FlightControl x:Name="flight_Ctrl" Grid.ColumnSpan="3" Grid.RowSpan="2"/>
+                <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
+                <controls:TrackerControl x:Name="track_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
             </Grid>
         </Border>
         <!-- tab control area, up to this point-->
