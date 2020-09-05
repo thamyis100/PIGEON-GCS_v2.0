@@ -605,9 +605,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             if (Cameras.Any())
             {
-                //Cameras.RemoveAt(0);
-                CurrentCamera = Cameras[1];
-                cb_cams.SelectedIndex = 1;
+                Cameras.RemoveAt(0);
+                CurrentCamera = Cameras[0];
+                cb_cams.SelectedIndex = 0;
             }
             else
             {
@@ -629,7 +629,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private delegate void UpdateScreenshotList(string path);
         private void GambarBaru(object sender, FileSystemEventArgs e)
         {
-            Console.WriteLine("New File at " + e.FullPath);
+            //Console.WriteLine("New File at " + e.FullPath);
             if (e.FullPath.Contains("Capture_"))
             {
                 Dispatcher.BeginInvoke(new UpdateScreenshotList(ShowSavedCaptures), e.FullPath);
@@ -642,9 +642,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             {
                 Source = new BitmapImage(new Uri(path)),
                 Margin = new Thickness(0, 0, 2, 0),
-
             });
             RenderOptions.SetBitmapScalingMode(screenshot_List.Children[0], BitmapScalingMode.HighQuality);
+            screenshot_List.Children[0].MouseLeftButtonDown += popupCapturedImage;
+        }
+
+        private void popupCapturedImage(object sender, MouseButtonEventArgs e)
+        {
+            //throw new NotImplementedException();
         }
 
         public void stopControl() => StopCam(); //Exit Trigger

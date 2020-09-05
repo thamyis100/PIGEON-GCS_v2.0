@@ -55,12 +55,15 @@
                 <RowDefinition Height="19*"/>
             </Grid.RowDefinitions>
             <Border Margin="2,2,2,1" BorderBrush="#FF0A7C80" BorderThickness="1">
-                <Image x:Name="liveCam" Margin="0" RenderOptions.BitmapScalingMode="HighQuality" Source="/Pigeon_WPF_cs;component/Resources/logo/dirgantara.png" StretchDirection="DownOnly"/>
+                <Border.Background>
+                    <ImageBrush RenderOptions.BitmapScalingMode="HighQuality" Stretch="Uniform" ImageSource="/Pigeon_WPF_cs;component/Resources/logo/dirgantara.png"/>
+                </Border.Background>
+                <Image x:Name="liveCam" Margin="0" RenderOptions.BitmapScalingMode="HighQuality" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <Button FontSize="14" BorderBrush="Teal" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="154,5,154,0" Background="#FF9BECEC" Content="Ambil Gambar" HorizontalAlignment="Center" VerticalAlignment="Top" Padding="3,2" Height="22" Width="103" Click="AmbilGambar"/>
             <DockPanel Margin="0,8,0,0" VerticalAlignment="Top" Height="21" Grid.Row="1">
                 <Label Content="Camera :" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold" FontFamily="Consolas" Padding="5,0"/>
-                <ComboBox x:Name="cb_cams" DisplayMemberPath="Name" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" SelectedItem="{Binding CurrentCamera}" ItemsSource="{Binding Cameras}" SelectionChanged="Cb_cams_SelectionChanged"/>
+                <ComboBox x:Name="cb_cams" DisplayMemberPath="Name" Margin="0" VerticalAlignment="Center" HorizontalAlignment="Left" Width="200" SelectedItem="{Binding CurrentCamera}" ItemsSource="{Binding Cameras}" SelectionChanged="Cb_cams_SelectionChanged" SelectedIndex="0"/>
                 <Button Content="LiveFeed" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Width="100" FontSize="14" BorderBrush="{x:Null}" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="0,0,5,0" Background="#FF9BECEC" Click="startOnboardCam"/>
             </DockPanel>
             <ScrollViewer Margin="5,38,5,5" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Background="White">
