@@ -437,6 +437,9 @@
   <ItemGroup>
     <Resource Include="Custom UserControls\test_webcam_fullhd.jpeg" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons\refresh.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

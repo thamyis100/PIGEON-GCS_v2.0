@@ -300,7 +300,8 @@ namespace Pigeon_WPF_cs
                 detikan.Stop();
                 isTimerFirstTime = true;
                 waktuTerbang = TimeSpan.Zero;
-                val_flightTime.Content = waktuTerbang.ToString("mm\\:ss");
+                val_flightTime.Content = waktuTerbang.ToString("HH\\:mm\\:ss");
+                Application.Current.MainWindow.Title = "PIGEON GCS";
             }
             else detikan.Start();
         }
@@ -308,8 +309,8 @@ namespace Pigeon_WPF_cs
         private void detikTerbang(object sender, EventArgs e)
         {
             waktuTerbang = DateTime.Now - waktuStart;
-            val_flightTime.Content = waktuTerbang.ToString("hh\\:mm\\:ss");
-            //Console.WriteLine("added 1 second to waktu terbang");
+            val_flightTime.Content = waktuTerbang.ToString("HH\\:mm\\:ss");
+            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString("HH\\:mm\\:ss") + " - PIGEON GCS";
         }
 
 #endregion
@@ -364,18 +365,18 @@ namespace Pigeon_WPF_cs
 
         #region Waypoint control
 
-        public void MinimizeMap(int width = 480, int height = 580)
+        public void MinimizeMap()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
-            mapGrid.Width = width;
-            mapGrid.Height = height;
+            Grid.SetRowSpan(mapGrid, 1);
+            Grid.SetColumnSpan(mapGrid, 1);
         }
 
         public void MaximizeMap()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Visible;
-            mapGrid.Width = 1132;
-            mapGrid.Height = 615;
+            Grid.SetRowSpan(mapGrid, 2);
+            Grid.SetColumnSpan(mapGrid, 3);
         }
 
         #endregion
@@ -420,7 +421,7 @@ namespace Pigeon_WPF_cs
                     break;
                 case "btn_track":
                     setCurrentlyActive(tab_track, btn_track, track_Ctrl);
-                    MinimizeMap(585, 615);
+                    MinimizeMap();
                     break;
             }
         }

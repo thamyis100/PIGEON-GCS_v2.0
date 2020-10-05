@@ -324,7 +324,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             mapView.Markers.Add(poswahana);
         }
 
+        //default durasi, TODO: ganti berdasarkan history waktu terbang
         TimeSpan durasiData = TimeSpan.FromMilliseconds(80);
+
         float lastbearing; Point lastpos;
         bool isIkutiWahana = false;
         public void setPosWahana(double currlat, double currlongt, float bearing)

@@ -444,6 +444,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             return R * sisiB;
         }
 
+        #endregion
+
+        #region Arahkan Tracker
         public void ArahkanTracker()//double wahanalat, double wahanalongt, float wahanaalti)
         {
             //SetKoorWahana(wahanalat, wahanalat, wahanaalti);
@@ -462,10 +465,21 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //double ArahVerti = Math.Acos(jarakDarat / jarakLangsung);
             double ArahVerti = Math.Atan(Math.Tan(deltaTinggi / jarakDarat)) * (180 / Math.PI);
 
-            try { /*thePort.WriteLine(string.Format("{0},{1}", Convert.ToInt16(ArahVerti), Convert.ToInt32(ArahHorizon)));*/
-                string data = "i," + ArahVerti.ToString("0.00") + ',' + ArahHorizon.ToString("0.00") + '\n';
-                byte[] datagram = Encoding.ASCII.GetBytes(data);
-                udpSocket.SendAsync(datagram, datagram.Length, new IPEndPoint(IPAddress.Parse("192.168.4.1"), 60111));
+            try {
+                // The Sent Data Goes :
+                // [0] = '#' command start identifier   (0)
+                // [1] = Pan (000.00) 4 byte            (1-4)
+                // [2] = Tilt (00.00) 4 byte            (5-8)
+                // \n endline
+                string data = "i," + ArahVerti.ToString("0.00") + ',' + ArahHorizon.ToString("0.00");
+
+                if (!isTrackerReady) return;
+                if (isUsingWifi)
+                {
+                    byte[] datagram = Encoding.ASCII.GetBytes(data + '\n');
+                    udpSocket.SendAsync(datagram, datagram.Length, new IPEndPoint(IPAddress.Parse("192.168.4.1"), 60111));
+                }
+                else thePort.WriteLine(string.Format("i,{0},{1}", Convert.ToInt16(ArahVerti), Convert.ToInt32(ArahHorizon)));
                 //Console.WriteLine("Sending: " + data);
             }
             catch(Exception e) { Console.WriteLine(e.StackTrace); }

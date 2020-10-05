@@ -75,7 +75,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         // [1] = Yaw/Bearing (000.00) 4 byte        (1-4)
         // [2] = pitch (-00.00) 4 byte              (5-8)
         // [3] = roll (-00.00) 4 byte               (9-12)
-        // [4] = airspeed (00) 2 byte               (13-14)
+        // [4] = airspeed (000) 2 byte              (13-14)
         // [5] = altitude (-000.00) 4 byte          (15-18)
         // [6] = latitude (-00.000000000) 8 byte    (19-26)
         // [7] = longtitude (-000.000000000) 8 byte (27-34)
@@ -83,8 +83,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         // Total 39 bytes
         //
         // if integrating tracker :
-        // [9] = track yaw (00.00) 4 byte           (39-42)
-        // [10]= track yaw (00.00) 4 byte           (43-46)
+        // [9] = track yaw (000.00) 4 byte          (39-42)
+        // [10]= track pitch (00.00) 4 byte         (43-46)
         // Total 47 bytes
 
         //speakoutloud timer
@@ -185,9 +185,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 mainWin.setConnStat(false, false);
                 img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
                 ind_conn_status.Content = "Disconnected";
+                
                 mainWin.map_Ctrl.FmodeEnable(false);
-                try { menulis.Close(); isCurrentlyRecv = false; udpSocket.Close(); }
-                catch { }
+                isCurrentlyRecv = false;
+
+                if (menulis != null) menulis.Close();
+                if (udpSocket != null) udpSocket.Close();
             }
         }
 
@@ -239,12 +242,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 sPorts.RemoveAt(3);
             }
             getPortList();
-            refreshed();
+            //refreshing();
         }
 
-        private async void refreshed()
+        private async void refreshing()
         {
-            sPorts[0].Content = "[refreshed]";
+            sPorts[0].Content = "[refreshing]";
             cb_ports.IsEnabled = false;
             await Task.Delay(1000);
             cb_ports.IsEnabled = true;
@@ -267,6 +270,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             {
                 thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
                 thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
+                thePort.NewLine = "\n";
                 thePort.ReadTimeout = 5000;
                 thePort.WriteTimeout = 500;
                 if (!(thePort.IsOpen)) thePort.Open();
@@ -335,7 +339,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 if (index == 39) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), dataIn);
                 //else if (index == 9) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataIntegrasi), dataIn);
 
-                thePort.DiscardInBuffer();
+                //thePort.DiscardInBuffer();
             }
             catch (Exception exc)
             {
@@ -597,24 +601,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         FileSystemWatcher watcher;
         private void PrepareWebcam()
         {
+            cb_cams.IsEnabled = false;
             Cameras = new ObservableCollection<FilterInfo>();
-            foreach (FilterInfo filterInfo in new FilterInfoCollection(FilterCategory.VideoInputDevice))
-            {
-                Cameras.Add(filterInfo);
-            }
-
-            if (Cameras.Any())
-            {
-                Cameras.RemoveAt(0);
-                CurrentCamera = Cameras[0];
-                cb_cams.SelectedIndex = 0;
-            }
-            else
-            {
-                //MessageBox.Show("Tidak ada kamera yang ditemukan", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                cb_cams.Items.Add("..REFRESH..");
-            }
-            
+            getCameras();
 
             watcher = new FileSystemWatcher()
             {
@@ -624,6 +613,42 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 EnableRaisingEvents = true
             };
             watcher.Created += GambarBaru;
+        }
+
+        private void getCameras()
+        {
+            foreach (FilterInfo filterInfo in new FilterInfoCollection(FilterCategory.VideoInputDevice)) Cameras.Add(filterInfo);
+            if (Cameras.Any())
+            {
+                cb_cams.SelectedIndex = 0;
+                CurrentCamera = Cameras[0];
+                cb_cams.IsEnabled = true;
+                cb_cams.IsEditable = false;
+                cb_cams.HorizontalContentAlignment = HorizontalAlignment.Left;
+            }
+            else
+            {
+                cb_cams.HorizontalContentAlignment = HorizontalAlignment.Right;
+                cb_cams.IsEnabled = false;
+                cb_cams.IsEditable = true;
+            }
+        }
+
+        private void refreshCameras(object sender, RoutedEventArgs e)
+        {
+            refreshcam();
+            while (Cameras.Any()) Cameras.RemoveAt(0);
+            getCameras();
+        }
+        private async void refreshcam()
+        {
+            btn_refreshcam.IsEnabled = false;
+            for (int i = 0; i <= 360; i+=90)
+            {
+                img_refreshcam.RenderTransform = new RotateTransform(i);
+                await Task.Delay(125);
+            }
+            btn_refreshcam.IsEnabled = true;
         }
 
         private delegate void UpdateScreenshotList(string path);
@@ -691,22 +716,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 MessageBox.Show("Error upon receiving new frame:\n" + exc.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 StopCam();
             }
-        }
-
-        private void Cb_cams_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox cb = (ComboBox)sender;
-            string now = cb_cams.ToString();
-            if (now == "..REFRESH..") { refreshCamList(); cb_cams.SelectedIndex = 0; }
-        }
-
-        private void refreshCamList()
-        {
-            while (Cameras.Count > 1)
-            {
-                Cameras.RemoveAt(0);
-            }
-            PrepareWebcam();
         }
 
         byte i = 0;
