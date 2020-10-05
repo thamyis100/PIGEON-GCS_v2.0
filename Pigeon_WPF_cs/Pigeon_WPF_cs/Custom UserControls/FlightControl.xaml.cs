@@ -33,6 +33,7 @@ using System.Windows.Media.Animation;
 using System.Net.Sockets;
 using System.Net;
 using System.Runtime.InteropServices;
+using MessagePack;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
@@ -59,6 +60,28 @@ namespace Pigeon_WPF_cs.Custom_UserControls
     }
 
     #endregion
+
+    [MessagePackObject]
+    public class FlightData
+    {
+        public byte FlightMode;
+        public float Bearing;
+        public float NosePitch;
+        public float Roll;
+        public short Airspeed;
+        public float Altitude;
+        public double Latitude;
+        public double Longitude;
+        public float BatteryVoltage;
+    }
+
+    [MessagePackObject]
+    public class TrackerData
+    {
+        public float Bearing;
+        public float Pitch;
+        public float BatteryVolt;
+    }
 
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {

@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         KeyUp="toggleRecog"
         
-        Title="PIGEON GCS" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png" Width="1360" Height="765" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SnapsToDevicePixels="True">
+        Title="PIGEON GCS" WindowStartupLocation="CenterScreen" MinWidth="1280" MinHeight="720" Icon="Resources/logo/pigeonlogo.png" Width="1280" Height="720" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SnapsToDevicePixels="True" WindowStyle="None">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="leftPaneButtonStyle">
             <Setter Property="Template">
@@ -82,7 +82,7 @@
             </StackPanel>
 
             <Button x:Name="btn_flight" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="1" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab" Tag="">
-                <DockPanel MinWidth="80">
+                <DockPanel>
                     <Rectangle x:Name="rect_flight" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" MinWidth="5" MinHeight="65"/>
                     <Label x:Name="lbl_flight" Content="Flight" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway" Margin="0">
                         <Label.LayoutTransform>
@@ -98,7 +98,7 @@
                 </DockPanel>
             </Button>
             <Button x:Name="btn_map" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="2" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseLeave="dehoverButton" MouseEnter="hoverButton" Click="selectTab" ToolTip="Waypoint Tab">
-                <DockPanel MinWidth="80">
+                <DockPanel>
                     <Rectangle x:Name="rect_map" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" Margin="0" HorizontalAlignment="Left" MinWidth="5" MinHeight="65"/>
                     <Label x:Name="lbl_map" Content="Waypoint" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway" HorizontalAlignment="Center" HorizontalContentAlignment="Center" Margin="0">
                         <Label.LayoutTransform>
@@ -114,7 +114,7 @@
                 </DockPanel>
             </Button>
             <Button x:Name="btn_stats" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="3" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab">
-                <DockPanel MinWidth="80">
+                <DockPanel>
                     <Rectangle x:Name="rect_stats" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" MinWidth="5" MinHeight="65"/>
                     <Label x:Name="lbl_stats" Content="Stats" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway">
                         <Label.LayoutTransform>
@@ -130,7 +130,7 @@
                 </DockPanel>
             </Button>
             <Button x:Name="btn_track" Style="{StaticResource leftPaneButtonStyle}" Grid.ColumnSpan="4" Margin="0,15" Grid.Row="4" Background="{x:Null}" HorizontalContentAlignment="Stretch" Padding="0" VerticalContentAlignment="Stretch" BorderThickness="0" BorderBrush="{x:Null}" MouseEnter="hoverButton" MouseLeave="dehoverButton" Click="selectTab">
-                <DockPanel MinWidth="80" Height="65">
+                <DockPanel>
                     <Rectangle x:Name="rect_track" Fill="#FF008C8C" Stroke="Black" StrokeThickness="0" HorizontalAlignment="Left" Margin="0" Width="5" Height="65"/>
                     <Label x:Name="lbl_track" Content="Tracker" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" RenderTransformOrigin="0.5,0.5" Foreground="White" FontSize="14" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway">
                         <Label.LayoutTransform>
@@ -150,7 +150,7 @@
             <Rectangle x:Name="tab_map" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
             <Rectangle x:Name="tab_stats" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
             <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <TextBlock x:Name="digital_clock" Margin="5,50,5,0" Grid.Row="5" TextWrapping="Wrap" Text="Waktu Sekarang" VerticalAlignment="Top" Grid.ColumnSpan="4" Foreground="White"/>
+            <TextBlock x:Name="digital_clock" Margin="5,50,5,0" Grid.Row="5" TextWrapping="Wrap" Text="Waktu Sekarang" VerticalAlignment="Top" Grid.ColumnSpan="4" Foreground="White" FontSize="9"/>
         </Grid>
         <Grid Background="#FF008C8C" MouseLeftButtonDown="clickedWindow" Grid.Column="1">
             <Grid.RowDefinitions>
