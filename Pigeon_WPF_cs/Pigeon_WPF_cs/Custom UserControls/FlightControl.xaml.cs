@@ -85,7 +85,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
-
+        FlightData Wahana;
         private float heading_val, pitch_val, roll_val, alti_val, baterai;
         private byte fmode;
         private ushort airspeed_val;
@@ -295,6 +295,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
                 thePort.NewLine = "\n";
                 thePort.ReadTimeout = 5000;
+                thePort.ReceivedBytesThreshold = 8;
                 thePort.WriteTimeout = 500;
                 if (!(thePort.IsOpen)) thePort.Open();
 
@@ -316,12 +317,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         TimeSpan lastRecv = TimeSpan.Zero;
-        private delegate void UpdateUiTextDelegate(byte[] text);
+        private delegate void UpdateUiTextDelegate(byte[] text);    
         private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             byte[] dataIn = new byte[255];
             //string dataIN = "";
             SerialPort receive = (SerialPort)sender;
+
             try
             {
                 byte index = 0;
