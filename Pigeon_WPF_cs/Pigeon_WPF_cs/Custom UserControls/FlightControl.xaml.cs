@@ -134,8 +134,23 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         
         private bool isCurrentlyRecv = false;
         public bool GetCurrentRecv { get => isCurrentlyRecv; }
-        private void StartListening(IAsyncResult result)
+        private async void StartListening(IAsyncResult result)
         {
+            //while (true)
+            //{
+            //    if (!isCurrentlyRecv) break;
+            //    isCurrentlyRecv = true;
+            //    UdpReceiveResult it = udpSocket.ReceiveAsync().Result;
+            //    byte[] received = it.Buffer;
+
+            //    if (received.Length == 39)
+            //    {
+            //        //Console.WriteLine("Received 34 bytes");
+            //        Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), received);
+            //    }
+            //    else if (received.Length == 47) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataIntegrasi), received);
+            //}
+
             if (!isCurrentlyRecv) return;
             isCurrentlyRecv = true;
             var theEndPoint = new IPEndPoint(IPAddress.Any, 60111);
@@ -167,6 +182,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     isCurrentlyRecv = true;
                     udpSocket = new UdpClient(9601);
                     udpSocket.BeginReceive(new AsyncCallback(StartListening), null);
+                    //StartListening(null);
                     connected = true;
                     toggleConn(true);
                     //win.track_Ctrl.track_conn_bt.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
