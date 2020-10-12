@@ -287,10 +287,10 @@ namespace Pigeon_WPF_cs
         {
             if (isTimerFirstTime)
             {
-                detikan = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(10) };
+                detikan = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(1) };
                 detikan.Tick += detikTerbang;
-                detikan.Start();
                 waktuStart = DateTime.Now;
+                detikan.Start();
                 isTimerFirstTime = false;
                 return;
             }
@@ -300,7 +300,7 @@ namespace Pigeon_WPF_cs
                 detikan.Stop();
                 isTimerFirstTime = true;
                 waktuTerbang = TimeSpan.Zero;
-                val_flightTime.Content = waktuTerbang.ToString("HH\\:mm\\:ss");
+                val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
                 Application.Current.MainWindow.Title = "PIGEON GCS";
             }
             else detikan.Start();
@@ -309,8 +309,8 @@ namespace Pigeon_WPF_cs
         private void detikTerbang(object sender, EventArgs e)
         {
             waktuTerbang = DateTime.Now - waktuStart;
-            val_flightTime.Content = waktuTerbang.ToString("HH\\:mm\\:ss");
-            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString("HH\\:mm\\:ss") + " - PIGEON GCS";
+            val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
+            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString(@"hh\:mm\:ss") + " - PIGEON GCS";
         }
 
 #endregion

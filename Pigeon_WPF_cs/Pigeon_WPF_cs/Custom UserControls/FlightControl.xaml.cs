@@ -93,21 +93,21 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         //global path for saving data
         string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
 
-        // The Data Goes :
-        // [0] = fmode (0x) 1 byte                  (0)
-        // [1] = Yaw/Bearing (000.00) 4 byte        (1-4)
-        // [2] = pitch (-00.00) 4 byte              (5-8)
-        // [3] = roll (-00.00) 4 byte               (9-12)
-        // [4] = airspeed (000) 2 byte              (13-14)
-        // [5] = altitude (-000.00) 4 byte          (15-18)
-        // [6] = latitude (-00.000000000) 8 byte    (19-26)
-        // [7] = longtitude (-000.000000000) 8 byte (27-34)
-        // [8] = baterai (00.00) 4 byte             (35-38)
+        //The Data Goes :
+        // [0] = fmode(0x) 1 byte (0)
+        // [1] = Yaw/Bearing(000.00) 4 byte (1-4)
+        // [2] = pitch(-00.00) 4 byte (5-8)
+        // [3] = roll(-00.00) 4 byte (9-12)
+        // [4] = airspeed(000) 2 byte (13-14)
+        // [5] = altitude(-000.00) 4 byte (15-18)
+        // [6] = latitude(-00.000000000) 8 byte (19-26)
+        // [7] = longtitude(-000.000000000) 8 byte (27-34)
+        // [8] = baterai(00.00) 4 byte (35-38)
         // Total 39 bytes
         //
         // if integrating tracker :
         // [9] = track yaw (000.00) 4 byte          (39-42)
-        // [10]= track pitch (00.00) 4 byte         (43-46)
+        // [10]= track pitch (00.00) 4 byte         (43-46)x
         // Total 47 bytes
 
         //speakoutloud timer
@@ -200,7 +200,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     toggleConn(false);
                     isFirstData = true;
                 }
-                win.ToggleWaktuTerbang();
             }
             catch(Exception none) { Console.WriteLine("ToggleSerial: "+none.StackTrace); }
         }
@@ -348,39 +347,25 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     byte chartoread = (byte)receive.ReadByte();
                     if (chartoread == 0x0A) break;
                     dataIn[index++] = chartoread;
-                    //char chartoread = Convert.ToChar(receive.ReadChar());
-                    //if (chartoread == '\n') break;
-                    //dataIN += chartoread;
                 }
                 //string[] dataCount = dataIN.Split(',');
 
-                //Console.WriteLine(dataIn);
-                //Console.WriteLine("got {0} bytes:", index);
-                //Console.WriteLine("Fmode: " + dataIn[0].ToString());
-                //Console.WriteLine("Heading: " + BitConverter.ToSingle(SplitBytes(dataIn, 1, 4), 0).ToString());
-                //Console.WriteLine("Pitch: " + BitConverter.ToSingle(SplitBytes(dataIn, 5, 4), 0).ToString());
-                //Console.WriteLine("Roll: " + BitConverter.ToSingle(SplitBytes(dataIn, 9, 4), 0).ToString());
-                //Console.WriteLine("Speed: " + BitConverter.ToInt16(SplitBytes(dataIn, 13, 2, true), 0).ToString());
-                //Console.WriteLine("Alti: " + BitConverter.ToSingle(SplitBytes(dataIn, 15, 4), 0).ToString());
-                //Console.WriteLine("Lat: " + BitConverter.ToDouble(SplitBytes(dataIn, 19, 8), 0).ToString());
-                //Console.WriteLine("Longt: " + BitConverter.ToDouble(SplitBytes(dataIn, 27, 8), 0).ToString());
-                //Console.WriteLine("Batt: " + BitConverter.ToSingle(SplitBytes(dataIn, 35, 4), 0).ToString());
+                Console.WriteLine(dataIn);
+                Console.WriteLine("got {0} bytes:", index);
+                Console.WriteLine("Fmode: " + dataIn[0].ToString());
+                Console.WriteLine("Heading: " + BitConverter.ToSingle(SplitBytes(dataIn, 1, 4), 0).ToString());
+                Console.WriteLine("Pitch: " + BitConverter.ToSingle(SplitBytes(dataIn, 5, 4), 0).ToString());
+                Console.WriteLine("Roll: " + BitConverter.ToSingle(SplitBytes(dataIn, 9, 4), 0).ToString());
+                Console.WriteLine("Speed: " + BitConverter.ToInt16(SplitBytes(dataIn, 13, 2), 0).ToString());
+                Console.WriteLine("Alti: " + BitConverter.ToSingle(SplitBytes(dataIn, 15, 4), 0).ToString());
+                Console.WriteLine("Lat: " + BitConverter.ToDouble(SplitBytes(dataIn, 19, 8), 0).ToString());
+                Console.WriteLine("Longt: " + BitConverter.ToDouble(SplitBytes(dataIn, 27, 8), 0).ToString());
+                Console.WriteLine("Batt: " + BitConverter.ToSingle(SplitBytes(dataIn, 35, 4), 0).ToString());
                 //Console.WriteLine(String.Format("Batt: {0:x2} {1:x2} {2:x2} {3:x2}", dataIn[35], dataIn[36], dataIn[37], dataIn[38]));
 
-                //Console.WriteLine("Fmode: " + dataIn[0].ToString());
-                //Console.WriteLine("Heading: " + BitConverter.ToSingle(dataIn, 1).ToString());
-                //Console.WriteLine("Pitch: " + BitConverter.ToSingle(dataIn, 5).ToString());
-                //Console.WriteLine("Roll: " + BitConverter.ToSingle(dataIn, 9).ToString());
-                //Console.WriteLine("Speed: " + BitConverter.ToInt16(dataIn, 13).ToString());
-                //Console.WriteLine("Alti: " + BitConverter.ToSingle(dataIn, 15).ToString());
-                //Console.WriteLine("Lat: " + BitConverter.ToDouble(dataIn, 19).ToString());
-                //Console.WriteLine("Longt: " + BitConverter.ToDouble(dataIn, 27).ToString());
-                //Console.WriteLine("Batt: " + BitConverter.ToSingle(dataIn, 35).ToString());
-                
                 if (index == 39) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), dataIn);
                 //else if (index == 9) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataIntegrasi), dataIn);
 
-                //thePort.DiscardInBuffer();
             }
             catch (Exception exc)
             {
@@ -393,6 +378,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #region Update Data
 
+        //pemisah bytes
         private byte[] SplitBytes(byte[] theBytes, byte startindex, byte length, bool reverse = false)
         {
             byte[] returned = new byte[length];
@@ -436,12 +422,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 heading_val = (BitConverter.ToSingle(SplitBytes(theData, 1, 4), 0) + 360) % 360;
                 pitch_val = BitConverter.ToSingle(SplitBytes(theData, 5, 4), 0);
                 roll_val = BitConverter.ToSingle(SplitBytes(theData, 9, 4), 0);
-                airspeed_val = BitConverter.ToUInt16(SplitBytes(theData, 13, 2,true), 0); 
+                airspeed_val = BitConverter.ToUInt16(SplitBytes(theData, 13, 2), 0); 
                 alti_val = BitConverter.ToSingle(SplitBytes(theData, 15, 4), 0);
                 lat = BitConverter.ToDouble(SplitBytes(theData, 19, 8), 0);
                 longt = BitConverter.ToDouble(SplitBytes(theData, 27, 8), 0);
                 baterai = BitConverter.ToSingle(SplitBytes(theData, 35, 4), 0);
-
 
                 //float.TryParse(theData[0], NumberStyles.Float, CultureInfo.InvariantCulture, out heading_val);
                 //pitch_val = float.Parse(theData[1], CultureInfo.InvariantCulture);
@@ -472,6 +457,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 menulis = new CsvFileWriter(new FileStream(path + "BlackBox_" + DateTime.Now.ToString("(HH-mm-ss)_[dd-MM-yy]") + ".csv",
                           FileMode.Create, FileAccess.Write));
                 dataTimer.Start();
+                win.ToggleWaktuTerbang();
             }
 
             //if (!win.track_Ctrl.isTrackerReady) win.track_Ctrl.SetKoorTrack(lat, longt);
