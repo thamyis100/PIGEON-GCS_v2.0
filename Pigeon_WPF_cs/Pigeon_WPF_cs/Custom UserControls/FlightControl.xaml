@@ -10,9 +10,9 @@
              d:DesignHeight="632" d:DesignWidth="1132">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="27*"/>
-            <RowDefinition Height="38*"/>
-            <RowDefinition Height="248*"/>
+            <RowDefinition Height="54.4"/>
+            <RowDefinition Height="77*"/>
+            <RowDefinition Height="501*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="150*"/>

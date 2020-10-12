@@ -22,9 +22,9 @@
     </UserControl.Resources>
     <Grid HorizontalAlignment="Stretch" Margin="0" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
-            <RowDefinition Height="25*"/>
-            <RowDefinition Height="436"/>
-            <RowDefinition Height="47*"/>
+            <RowDefinition Height="62.4"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
             <RowDefinition Height="0*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>

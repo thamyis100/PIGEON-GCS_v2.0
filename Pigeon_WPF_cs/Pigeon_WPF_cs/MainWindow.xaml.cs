@@ -451,5 +451,10 @@ namespace Pigeon_WPF_cs
         #endregion
 
         private void muteVoice(object sender, RoutedEventArgs e) => MuteVoice = !MuteVoice;
+
+        private void flight_Ctrl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

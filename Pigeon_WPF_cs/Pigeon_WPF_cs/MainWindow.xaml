@@ -28,10 +28,11 @@
             <RowDefinition Height="240*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="4*"/>
-            <ColumnDefinition Width="60*"/>
+            <ColumnDefinition Width="79*"/>
+            <ColumnDefinition Width="797*"/>
+            <ColumnDefinition Width="397*"/>
         </Grid.ColumnDefinitions>
-        <Grid>
+        <Grid Margin="0,0,0.2,0.2">
             <Grid.Background>
                 <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
                     <GradientStop Color="#FF6A6A6A" Offset="0.316"/>
@@ -48,7 +49,7 @@
                 <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="4,0,4,4" DockPanel.Dock="Bottom" UseLayoutRounding="False"/>
             </DockPanel>
         </Grid>
-        <Grid MouseLeftButtonDown="clickedWindow" Grid.Row="1" Grid.RowSpan="2">
+        <Grid MouseLeftButtonDown="clickedWindow" Grid.RowSpan="2" Margin="0,55,0.2,-0.4">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition/>
@@ -152,14 +153,14 @@
             <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
             <TextBlock x:Name="digital_clock" Margin="5,50,5,0" Grid.Row="5" TextWrapping="Wrap" Text="Waktu Sekarang" VerticalAlignment="Top" Grid.ColumnSpan="4" Foreground="White" FontSize="9"/>
         </Grid>
-        <Grid Background="#FF008C8C" MouseLeftButtonDown="clickedWindow" Grid.Column="1">
+        <Grid Background="#FF008C8C" MouseLeftButtonDown="clickedWindow" Grid.ColumnSpan="3" Margin="79,0,-0.4,0.2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="9*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="7*"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="9*"/>
             </Grid.ColumnDefinitions>
 
             <Rectangle Fill="WhiteSmoke" Margin="0" StrokeThickness="0" Grid.Row="1" Grid.Column="1"/>
@@ -175,7 +176,7 @@
                     <ColumnDefinition Width="134*"/>
                 </Grid.ColumnDefinitions>
 
-                <DockPanel LastChildFill="False" HorizontalAlignment="Center" VerticalAlignment="Center" Height="34" Margin="31,0,32,-0.8" Width="145">
+                <DockPanel LastChildFill="False" HorizontalAlignment="Center" VerticalAlignment="Center" >
                     <Image x:Name="logo_efalcon_status" Margin="0" Source="Resources/logo/efalcon.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality" />
                     <DockPanel Margin="5,0,-1,0" VerticalAlignment="Center" HorizontalAlignment="Center">
                         <Label x:Name="lbl_statusLine" Content="OFFLINE" VerticalAlignment="Center" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/#Commando" FontSize="26" Background="{x:Null}" Foreground="#FF969696" HorizontalAlignment="Center" Margin="0" Padding="0" HorizontalContentAlignment="Center" DockPanel.Dock="Top" VerticalContentAlignment="Center"/>
@@ -186,7 +187,7 @@
                         </WrapPanel>
                     </DockPanel>
                 </DockPanel>
-                <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center" Height="34" Margin="30,0,39.2,-0.8" Width="110" Grid.Column="1">
+                <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
                     <Grid DockPanel.Dock="Left">
                         <Image x:Name="icon_signal_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/icons8-wi-fi-50.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Image x:Name="icon_signal_1" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/icons8-wi-fi-filled-50.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -196,12 +197,12 @@
                         <Label x:Name="val_signal" Content="(N/A dBm)" Padding="0" VerticalContentAlignment="Center" FontFamily="./#Raleway SemiBold" Margin="0" FontWeight="Bold" DockPanel.Dock="Bottom" HorizontalContentAlignment="Center" FontSize="14"/>
                     </DockPanel>
                 </DockPanel>
-                <DockPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Height="34" Margin="39.8,0,40.2,-0.8" Width="100">
+                <DockPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" >
                     <Label x:Name="lbl_flightTime" Content="Waktu Terbang" HorizontalAlignment="Center" Margin="0" Padding="0" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" FontFamily="./#Raleway"/>
                     <Label x:Name="val_flightTime" Content="00:00:00" Margin="0" VerticalAlignment="Bottom" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontFamily="UD Digi Kyokasho NP-B" DockPanel.Dock="Bottom"/>
                 </DockPanel>
 
-                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Height="34" Margin="42.8,0,41.6,-0.8" Width="98">
+                <DockPanel Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Grid Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image x:Name="icon_bat_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/bat-empty.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
                         <Image x:Name="icon_bat_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Top" Source="Resources/icons/bat-full.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -218,7 +219,7 @@
         </Grid>
 
         <!-- imagine this is a tab control area-->
-        <Border Grid.Row="1" Grid.Column="1" Margin="10" BorderBrush="#FFA8A8A8" BorderThickness="2" Grid.RowSpan="2">
+        <Border Grid.Row="1" Grid.Column="1" Margin="9.8,9.8,9.6,9.6" BorderBrush="#FFA8A8A8" BorderThickness="2" Grid.ColumnSpan="2">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="314*"/>
@@ -233,7 +234,7 @@
                 <Grid x:Name="mapGrid" Margin="2.5" >
                     <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch"/>
                 </Grid>
-                <controls:FlightControl x:Name="flight_Ctrl" Grid.ColumnSpan="3" Grid.RowSpan="2"/>
+                <controls:FlightControl x:Name="flight_Ctrl" Grid.ColumnSpan="3" Grid.RowSpan="2" Loaded="flight_Ctrl_Loaded"/>
                 <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
                 <controls:TrackerControl x:Name="track_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
             </Grid>
