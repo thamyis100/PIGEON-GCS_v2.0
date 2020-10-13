@@ -5,8 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ESC_Tuning"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="218" Width="453">
     <Grid>
-
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock HorizontalAlignment="Center" Text="ADC Offset :" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <TextBox HorizontalAlignment="Center" Text="{Binding Path=currADCOffset}" TextWrapping="Wrap" VerticalAlignment="Top" Width="40" />
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" Text="Min" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                        <TextBox x:Name="tb_minADCOffset" Text="0.001" TextWrapping="Wrap" Width="40" TextChanged="changed" />
+                    </StackPanel>
+                    <Slider HorizontalAlignment="Center" Width="350" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" Text="Max" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                        <TextBox Text="10" TextWrapping="Wrap" MinWidth="40" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock HorizontalAlignment="Center" Text="OC5 Value :" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <TextBox HorizontalAlignment="Center" Text="{Binding Path=currOC5Value}" TextWrapping="Wrap" VerticalAlignment="Top" Width="40" />
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" Text="Min" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                        <TextBox Text="0.001" TextWrapping="Wrap" Width="40" />
+                    </StackPanel>
+                    <Slider HorizontalAlignment="Center" Width="350" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                    <StackPanel>
+                        <TextBlock HorizontalAlignment="Center" Text="Max" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                        <TextBox Text="10" TextWrapping="Wrap" MinWidth="40" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </Window>
