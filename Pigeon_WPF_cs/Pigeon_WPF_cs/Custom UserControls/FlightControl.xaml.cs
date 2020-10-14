@@ -34,6 +34,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Runtime.InteropServices;
 using MessagePack;
+using System.Diagnostics;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
@@ -86,15 +87,15 @@ namespace Pigeon_WPF_cs.Custom_UserControls
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
         FlightData Wahana;
-        private float heading_val, pitch_val, roll_val, alti_val, baterai;
+        private float heading_val, pitch_val, roll_val, alti_val, batt_volt, batt_cur;
         private byte fmode;
-        private ushort airspeed_val;
+        private ushort airspeed_val = 0;
         private double lat = -7.275869000, longt = 112.794307000;
         //global path for saving data
         string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
 
         //The Data Goes :
-        // [0] = fmode(0x) 1 byte (0)
+        /*// [0] = fmode(0x) 1 byte (0)
         // [1] = Yaw/Bearing(000.00) 4 byte (1-4)
         // [2] = pitch(-00.00) 4 byte (5-8)
         // [3] = roll(-00.00) 4 byte (9-12)
@@ -108,7 +109,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         // if integrating tracker :
         // [9] = track yaw (000.00) 4 byte          (39-42)
         // [10]= track pitch (00.00) 4 byte         (43-46)x
-        // Total 47 bytes
+        // Total 47 bytes*/
+
+        //I:Yaw,pitch,roll#
+        //G:lat,lon#
+        //A:altiude#
+        //B:batt_volt,batt_cur#
+        //T:pitch,yaw,latitude,long#
+        //cth : I<yaw><pitch><roll>#
 
         //speakoutloud timer
         DispatcherTimer dataTimer;
@@ -134,7 +142,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         
         private bool isCurrentlyRecv = false;
         public bool GetCurrentRecv { get => isCurrentlyRecv; }
-        private async void StartListening(IAsyncResult result)
+        private async void StartListening()
         {
             //while (true)
             //{
@@ -150,20 +158,21 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //    }
             //    else if (received.Length == 47) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataIntegrasi), received);
             //}
-
-            if (!isCurrentlyRecv) return;
-            isCurrentlyRecv = true;
-            var theEndPoint = new IPEndPoint(IPAddress.Any, 60111);
-            byte[] received = udpSocket.EndReceive(result, ref theEndPoint);
-
-            if (received.Length == 39)
+            while (isCurrentlyRecv)
             {
-                //Console.WriteLine("Received 34 bytes");
-                Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), received);
+                /*var theEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                byte[] received = udpSocket.EndReceive(result, ref theEndPoint);
+                udpSocket.BeginReceive(new AsyncCallback(StartListening), null);*/
+                UdpReceiveResult it = await udpSocket.ReceiveAsync();
+                Debug.WriteLine("Received [");
+                foreach (byte bite in it.Buffer)
+                {
+                    Debug.Write(bite.ToString("X2"));
+                }
+                Debug.WriteLine($"] from : {it.RemoteEndPoint.ToString()}");
+                //ParseDataAsync();
             }
-            else if (received.Length == 47) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataIntegrasi), received);
-
-            udpSocket.BeginReceive(new AsyncCallback(StartListening), null);
+            udpSocket.Close();
             return;
         }
 
@@ -174,34 +183,29 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private void ToggleSerial(object sender, RoutedEventArgs e)
         {
             var win = (MainWindow)Window.GetWindow(this);
-            try
+            
+            if (isUsingWifi)
             {
-                if (isUsingWifi)
-                {
-                    isUsingWifi = !isUsingWifi;
-                    isCurrentlyRecv = true;
-                    udpSocket = new UdpClient(9601);
-                    udpSocket.BeginReceive(new AsyncCallback(StartListening), null);
-                    //StartListening(null);
-                    connected = true;
-                    toggleConn(true);
-                    //win.track_Ctrl.track_conn_bt.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                }
-                else if (!connected) {
-                    if (startSerial(selectedPort, selectedBaud) == 1) Console.WriteLine("Serial is fine");
-                    else return;
-                }
-                else
-                {
-                    if (thePort != null) thePort.Close();
-                    isCurrentlyRecv = false;
-                    if (udpSocket != null) udpSocket.Close();
-                    connected = false;
-                    toggleConn(false);
-                    isFirstData = true;
-                }
+                isUsingWifi = !isUsingWifi;
+                isCurrentlyRecv = true;
+                udpSocket = new UdpClient(0);
+                Debug.WriteLine("ToggleConn: UDP PORT is " + ((IPEndPoint)udpSocket.Client.LocalEndPoint).Port.ToString());
+                StartListening();
+                connected = true;
+                toggleConn(true);
             }
-            catch(Exception none) { Console.WriteLine("ToggleSerial: "+none.StackTrace); }
+            else if (!connected) {
+                if (startSerial(selectedPort, selectedBaud) == 1) Console.WriteLine("Serial is fine");
+                else return;
+            }
+            else
+            {
+                if (thePort != null) thePort.Close();
+                isCurrentlyRecv = false;
+                connected = false;
+                toggleConn(false);
+                isFirstData = true;
+            }
         }
 
         private void toggleConn(bool s)
@@ -332,40 +336,15 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         TimeSpan lastRecv = TimeSpan.Zero;
-        private delegate void UpdateUiTextDelegate(byte[] text);    
+        private delegate void UpdateUiTextDelegate(char dataType);    
         private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            byte[] dataIn = new byte[255];
-            //string dataIN = "";
             SerialPort receive = (SerialPort)sender;
 
             try
             {
-                byte index = 0;
-                while (receive.BytesToRead > 0)
-                {
-                    byte chartoread = (byte)receive.ReadByte();
-                    if (chartoread == 0x0A) break;
-                    dataIn[index++] = chartoread;
-                }
-                //string[] dataCount = dataIN.Split(',');
-
-                Console.WriteLine(dataIn);
-                Console.WriteLine("got {0} bytes:", index);
-                Console.WriteLine("Fmode: " + dataIn[0].ToString());
-                Console.WriteLine("Heading: " + BitConverter.ToSingle(SplitBytes(dataIn, 1, 4), 0).ToString());
-                Console.WriteLine("Pitch: " + BitConverter.ToSingle(SplitBytes(dataIn, 5, 4), 0).ToString());
-                Console.WriteLine("Roll: " + BitConverter.ToSingle(SplitBytes(dataIn, 9, 4), 0).ToString());
-                Console.WriteLine("Speed: " + BitConverter.ToInt16(SplitBytes(dataIn, 13, 2), 0).ToString());
-                Console.WriteLine("Alti: " + BitConverter.ToSingle(SplitBytes(dataIn, 15, 4), 0).ToString());
-                Console.WriteLine("Lat: " + BitConverter.ToDouble(SplitBytes(dataIn, 19, 8), 0).ToString());
-                Console.WriteLine("Longt: " + BitConverter.ToDouble(SplitBytes(dataIn, 27, 8), 0).ToString());
-                Console.WriteLine("Batt: " + BitConverter.ToSingle(SplitBytes(dataIn, 35, 4), 0).ToString());
-                //Console.WriteLine(String.Format("Batt: {0:x2} {1:x2} {2:x2} {3:x2}", dataIn[35], dataIn[36], dataIn[37], dataIn[38]));
-
-                if (index == 39) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), dataIn);
-                //else if (index == 9) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataIntegrasi), dataIn);
-
+                string dataIn = receive.ReadTo("#");
+                ParseDataAsync(dataIn);
             }
             catch (Exception exc)
             {
@@ -378,75 +357,59 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #region Update Data
 
-        //pemisah bytes
-        private byte[] SplitBytes(byte[] theBytes, byte startindex, byte length, bool reverse = false)
+        //parse data
+        private async void ParseDataAsync(string dataIn)
         {
-            byte[] returned = new byte[length];
-            switch (reverse)
+            byte[] bytes = Encoding.ASCII.GetBytes(dataIn);
+            try
             {
-                case false:
-                    for (byte x = 0; x < length; x++)
-                    {
-                        returned[x] = theBytes[x + startindex];
-                    }
-                    break;
-                case true:
-                    for (byte x = 0; x < length; x++)
-                    {
-                        returned[x] = theBytes[(startindex + length - 1) - x];
-                    }
-                    break;
+                switch (dataIn[0])
+                {
+                    case 'I':
+                        heading_val = (BitConverter.ToSingle(bytes, 1) + 360) % 360;
+                        pitch_val = BitConverter.ToSingle(bytes, 5);
+                        roll_val = BitConverter.ToSingle(bytes, 9);
+                        break;
+                    case 'G':
+                        lat = BitConverter.ToDouble(bytes, 1);
+                        longt = BitConverter.ToDouble(bytes, 9);
+                        break;
+                    case 'A':
+                        alti_val = BitConverter.ToSingle(bytes, 1);
+                        break;
+                    case 'B':
+                        batt_volt = BitConverter.ToSingle(bytes, 1);
+                        batt_cur = BitConverter.ToSingle(bytes, 5);
+                        break;
+                }
+            } catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
             }
-            return returned;
+
+            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), dataIn[0]);
         }
 
         //Update Data on UI
         bool isFirstData = true, isBlackBoxRecord = true;
-        private void dataIntegrasi(byte[] dataIntg)
+        double lastlat = 0, lastlng = 0;
+        private void dataMasukan(char dataType)
         {
-            MainWindow win = (MainWindow)Window.GetWindow(this);
-            if (isFirstData)
-            {
-                win.track_Ctrl.StartTracking();
-            }
-            win.track_Ctrl.dataMasukan(SplitBytes(dataIntg, 40, 8));
-            dataMasukan(SplitBytes(dataIntg, 0, 39));
-        }
-
-        double lastlat = 0; double lastlng = 0;
-        private void dataMasukan(byte[] theData)
-        {
-            try
-            {
-                fmode = theData[0];
-                heading_val = (BitConverter.ToSingle(SplitBytes(theData, 1, 4), 0) + 360) % 360;
-                pitch_val = BitConverter.ToSingle(SplitBytes(theData, 5, 4), 0);
-                roll_val = BitConverter.ToSingle(SplitBytes(theData, 9, 4), 0);
-                airspeed_val = BitConverter.ToUInt16(SplitBytes(theData, 13, 2), 0); 
-                alti_val = BitConverter.ToSingle(SplitBytes(theData, 15, 4), 0);
-                lat = BitConverter.ToDouble(SplitBytes(theData, 19, 8), 0);
-                longt = BitConverter.ToDouble(SplitBytes(theData, 27, 8), 0);
-                baterai = BitConverter.ToSingle(SplitBytes(theData, 35, 4), 0);
-
-                //float.TryParse(theData[0], NumberStyles.Float, CultureInfo.InvariantCulture, out heading_val);
-                //pitch_val = float.Parse(theData[1], CultureInfo.InvariantCulture);
-                //roll_val = float.Parse(theData[2], CultureInfo.InvariantCulture);
-                //airspeed_val = short.Parse(theData[3], CultureInfo.InvariantCulture); //Convert.ToInt16(float.Parse(theData[3])); 
-                //alti_val = float.Parse(theData[4], CultureInfo.InvariantCulture);
-                //lat = double.Parse(theData[5], CultureInfo.InvariantCulture);
-                //longt = double.Parse(theData[6], CultureInfo.InvariantCulture);
-                if (!isCurrentlyRecv)
-                {
-                    if (udpSocket == null) udpSocket = new UdpClient(9601);
-                    udpSocket.SendAsync(theData, 39, "192.168.4.5", 9601);
-                    //Console.WriteLine("Sent to Android");
-                }
-
-                in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + lat + " | " + longt + " | " + baterai;
-            }
-            catch (Exception exc) { Console.WriteLine("updatedata: "+exc.StackTrace); return; }
+            //try
+            //{
+            //    if (!isCurrentlyRecv)
+            //    {
+            //        if (udpSocket == null) udpSocket = new UdpClient(9601);
+            //        udpSocket.SendAsync(theData, 39, "192.168.4.5", 9601);
+            //        //Console.WriteLine("Sent to Android");
+            //    }
+            //}
+            //catch (Exception exc) { Console.WriteLine("updatedata: "+exc.StackTrace); return; }
 
             MainWindow win = (MainWindow)Window.GetWindow(this);
+
+            in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + lat + " | " + longt + " | " + batt_volt;
+            
             win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val, win.waktuTerbang);
 
             if (isFirstData)
@@ -463,7 +426,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //if (!win.track_Ctrl.isTrackerReady) win.track_Ctrl.SetKoorTrack(lat, longt);
 
             win.map_Ctrl.SetMode(fmode);
-            win.SetBaterai(baterai);
+            win.SetBaterai(batt_volt);
 
             if (isBlackBoxRecord) WriteBlackBox();
 
@@ -525,7 +488,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             baris.Add(alti_val.ToString());
             baris.Add(lat.ToString());
             baris.Add(longt.ToString());
-            baris.Add(baterai.ToString());
+            baris.Add(batt_volt.ToString());
 
             menulis.WriteRow(baris);
         }

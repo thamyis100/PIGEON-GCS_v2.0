@@ -127,35 +127,6 @@ namespace ESC_Tuning
             }
         }
 
-        /*private double _ticksADCOffset = 10.0d;
-        public double ticksADCOffset
-        {
-            get { return _currADCOffset; }
-            set
-            {
-                if (value != _currADCOffset)
-                {
-                    _currADCOffset = value;
-                    OnPropertyChanged("currADCOffset");
-                }
-            }
-        }
-
-        private double _currOC5Value = 0.0d;
-        public double currOC5Value
-        {
-            get { return _currOC5Value; }
-            set
-            {
-                if (value != _currOC5Value)
-                {
-                    _currOC5Value = value;
-                    OnPropertyChanged("currOC5Value");
-                }
-            }
-        }*/
-
-
         public MainWindow()
         {
             InitializeComponent();
@@ -164,27 +135,6 @@ namespace ESC_Tuning
             PrepareUSBConn();
             ADCOffsetStack.IsEnabled = false;
             OC5ValueStack.IsEnabled = false;
-        }
-
-        private async void SendToSerial(double value, string val)
-        {
-            try
-            {
-                switch (val)
-                {
-                    case "ADC":
-                        Debug.WriteLine("#ADO=" + value.ToString("0.000"));
-                        thePort.Write("#ADO=" + value.ToString("0.000"));
-                        break;
-                    case "OC5":
-                        Debug.WriteLine("#OC5=" + value.ToString());
-                        thePort.Write("#OC5=" + value.ToString());
-                        break;
-                }
-            } catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
         }
 
         #region USBSerial
@@ -263,11 +213,10 @@ namespace ESC_Tuning
                 MessageBox.Show("Tidak ada Baudrate yang dipilih!");
                 return 0;
             }
-            //MessageBox.Show(baud);
-            //return 0;
+            
             try
             {
-                thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud/*.Content.ToString()*/), Parity.None, 8, StopBits.One);
+                thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud), Parity.None, 8, StopBits.One);
                 thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
                 thePort.NewLine = "\n";
                 thePort.ReadTimeout = 5000;
@@ -328,6 +277,28 @@ namespace ESC_Tuning
             {
                 Debug.WriteLine("invalid");
                 Debug.WriteLine(exc.StackTrace);
+            }
+        }
+
+        private async void SendToSerial(double value, string val)
+        {
+            try
+            {
+                switch (val)
+                {
+                    case "ADC":
+                        Debug.WriteLine("#ADO=" + value.ToString("0.000"));
+                        thePort.Write("#ADO=" + value.ToString("0.000"));
+                        break;
+                    case "OC5":
+                        Debug.WriteLine("#OC5=" + value.ToString());
+                        thePort.Write("#OC5=" + value.ToString());
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
             }
         }
 
