@@ -11,7 +11,7 @@
             <DockPanel Margin="10,3,5,3" HorizontalAlignment="Center">
                 <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontWeight="Bold" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway" FontSize="11"/>
                 <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedPort}" ItemsSource="{Binding sPorts}" Width="110" SelectionChanged="Cb_ports_SelectionChanged" FontSize="11"/>
-                <ComboBox x:Name="cb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedBaud}" Width="110" VerticalContentAlignment="Center" FontSize="11">
+                <ComboBox x:Name="cb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedBaud}" Width="110" VerticalContentAlignment="Center" FontSize="11" IsEditable="True">
                     <ComboBoxItem>BAUDRATE</ComboBoxItem>
                     <ComboBoxItem>9600</ComboBoxItem>
                     <ComboBoxItem>19200</ComboBoxItem>

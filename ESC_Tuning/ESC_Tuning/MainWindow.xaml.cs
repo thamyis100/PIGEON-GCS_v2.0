@@ -233,7 +233,7 @@ namespace ESC_Tuning
             {
                 if (!connected)
                 {
-                    if (startSerial(selectedPort, selectedBaud) == 1) Debug.WriteLine("Serial is fine");
+                    if (startSerial(selectedPort, cb_bauds.Text) == 1) Debug.WriteLine("Serial is fine");
                     else return;
                     ADCOffsetStack.IsEnabled = true;
                     OC5ValueStack.IsEnabled = true;
@@ -251,7 +251,7 @@ namespace ESC_Tuning
             catch (Exception none) { Debug.WriteLine("ToggleSerial: " + none.StackTrace); }
         }
 
-        private int startSerial(ComboBoxItem comPort, ComboBoxItem baud)
+        private int startSerial(ComboBoxItem comPort, string baud)
         {
             if (comPort.Content.ToString().Length > 5 || comPort.Content.ToString() == "")
             {
@@ -263,10 +263,11 @@ namespace ESC_Tuning
                 MessageBox.Show("Tidak ada Baudrate yang dipilih!");
                 return 0;
             }
-
+            //MessageBox.Show(baud);
+            //return 0;
             try
             {
-                thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
+                thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud/*.Content.ToString()*/), Parity.None, 8, StopBits.One);
                 thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
                 thePort.NewLine = "\n";
                 thePort.ReadTimeout = 5000;
