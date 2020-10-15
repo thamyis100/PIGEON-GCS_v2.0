@@ -90,26 +90,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private float heading_val, pitch_val, roll_val, alti_val, batt_volt, batt_cur;
         private byte fmode;
         private ushort airspeed_val = 0;
-        private double lat = -7.275869000, longt = 112.794307000;
+        private double lat = -7.275869000d, longt = 112.794307000d;
         //global path for saving data
         string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
 
         //The Data Goes :
-        /*// [0] = fmode(0x) 1 byte (0)
-        // [1] = Yaw/Bearing(000.00) 4 byte (1-4)
-        // [2] = pitch(-00.00) 4 byte (5-8)
-        // [3] = roll(-00.00) 4 byte (9-12)
-        // [4] = airspeed(000) 2 byte (13-14)
-        // [5] = altitude(-000.00) 4 byte (15-18)
-        // [6] = latitude(-00.000000000) 8 byte (19-26)
-        // [7] = longtitude(-000.000000000) 8 byte (27-34)
-        // [8] = baterai(00.00) 4 byte (35-38)
-        // Total 39 bytes
-        //
-        // if integrating tracker :
-        // [9] = track yaw (000.00) 4 byte          (39-42)
-        // [10]= track pitch (00.00) 4 byte         (43-46)x
-        // Total 47 bytes*/
 
         //I:Yaw,pitch,roll#
         //G:lat,lon#
@@ -128,7 +113,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
             PrepareWebcam(); //Cari webcam
             PrepareUSBConn(); //Cari usb
-            //WriteBlackBox();
 
             dataTimer = new DispatcherTimer();
             dataTimer.Interval = TimeSpan.FromSeconds(8);
@@ -144,33 +128,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public bool GetCurrentRecv { get => isCurrentlyRecv; }
         private async void StartListening()
         {
-            //while (true)
-            //{
-            //    if (!isCurrentlyRecv) break;
-            //    isCurrentlyRecv = true;
-            //    UdpReceiveResult it = udpSocket.ReceiveAsync().Result;
-            //    byte[] received = it.Buffer;
-
-            //    if (received.Length == 39)
-            //    {
-            //        //Console.WriteLine("Received 34 bytes");
-            //        Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), received);
-            //    }
-            //    else if (received.Length == 47) Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataIntegrasi), received);
-            //}
             while (isCurrentlyRecv)
             {
-                /*var theEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                byte[] received = udpSocket.EndReceive(result, ref theEndPoint);
-                udpSocket.BeginReceive(new AsyncCallback(StartListening), null);*/
                 UdpReceiveResult it = await udpSocket.ReceiveAsync();
-                Debug.WriteLine("Received [");
-                foreach (byte bite in it.Buffer)
-                {
-                    Debug.Write(bite.ToString("X2"));
-                }
-                Debug.WriteLine($"] from : {it.RemoteEndPoint.ToString()}");
-                //ParseDataAsync();
+                ParseDataAsync(it.Buffer);
             }
             udpSocket.Close();
             return;
@@ -195,7 +156,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 toggleConn(true);
             }
             else if (!connected) {
-                if (startSerial(selectedPort, selectedBaud) == 1) Console.WriteLine("Serial is fine");
+                if (startSerial(selectedPort, selectedBaud) == 1) Debug.WriteLine("Serial is fine");
                 else return;
             }
             else
@@ -251,7 +212,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public ComboBoxItem selectedBaud { get; set; }
         private SerialPort thePort;
         public bool connected = false;
-        private void PrepareUSBConn()
+        private async void PrepareUSBConn()
         {
             sPorts = new ObservableCollection<ComboBoxItem>();
             sPorts.Add(new ComboBoxItem { Content = "COM PORTS" });
@@ -313,9 +274,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
                 thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
                 thePort.NewLine = "\n";
-                thePort.ReadTimeout = 5000;
                 thePort.ReceivedBytesThreshold = 8;
-                thePort.WriteTimeout = 500;
                 if (!(thePort.IsOpen)) thePort.Open();
 
                 connected = true;
@@ -329,7 +288,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             catch (Exception ex)
             {
                 MessageBox.Show("Error opening serial port :: " + ex.Message, "Error!");
-                Console.WriteLine(ex.StackTrace);
+                Debug.WriteLine(ex.StackTrace);
                 return 0;
             }
             return 1;
@@ -341,15 +300,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             SerialPort receive = (SerialPort)sender;
 
-            try
-            {
-                string dataIn = receive.ReadTo("#");
-                ParseDataAsync(dataIn);
-            }
+            try { ParseDataAsync(Encoding.ASCII.GetBytes(receive.ReadTo("#"))); }
             catch (Exception exc)
             {
-                Console.WriteLine("invalid");
-                Console.WriteLine(exc.StackTrace);
+                Debug.WriteLine("invalid");
+                Debug.WriteLine(exc.StackTrace);
             }
         }
 
@@ -358,54 +313,56 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         #region Update Data
 
         //parse data
-        private async void ParseDataAsync(string dataIn)
+        private async void ParseDataAsync(byte[] dataIn)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(dataIn);
+            Debug.Write($"\ndataIn = [");
+            foreach (byte bite in dataIn)
+            {
+                Debug.Write(bite.ToString("X2"));
+            }
+            Debug.WriteLine("]\n");
+
             try
             {
                 switch (dataIn[0])
                 {
-                    case 'I':
-                        heading_val = (BitConverter.ToSingle(bytes, 1) + 360) % 360;
-                        pitch_val = BitConverter.ToSingle(bytes, 5);
-                        roll_val = BitConverter.ToSingle(bytes, 9);
+                    case (byte)'I':
+                        heading_val = (BitConverter.ToSingle(dataIn, 1) + 360) % 360;
+                        pitch_val = BitConverter.ToSingle(dataIn, 5);
+                        roll_val = BitConverter.ToSingle(dataIn, 9);
+                        Debug.WriteLine("IMU updated");
                         break;
-                    case 'G':
-                        lat = BitConverter.ToDouble(bytes, 1);
-                        longt = BitConverter.ToDouble(bytes, 9);
+                    case (byte)'G':
+                        lat = BitConverter.ToDouble(dataIn, 1);
+                        longt = BitConverter.ToDouble(dataIn, 9);
+                        Debug.WriteLine("GPS updated");
                         break;
-                    case 'A':
-                        alti_val = BitConverter.ToSingle(bytes, 1);
+                    case (byte)'A':
+                        alti_val = BitConverter.ToSingle(dataIn, 1);
+                        Debug.WriteLine("Alti updated");
                         break;
-                    case 'B':
-                        batt_volt = BitConverter.ToSingle(bytes, 1);
-                        batt_cur = BitConverter.ToSingle(bytes, 5);
+                    case (byte)'B':
+                        batt_volt = BitConverter.ToSingle(dataIn, 1);
+                        batt_cur = BitConverter.ToSingle(dataIn, 5);
+                        Debug.WriteLine("Batt updated");
                         break;
+                    default:
+                        Debug.WriteLine("Nothing updated");
+                        return;
                 }
             } catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
             }
 
-            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(dataMasukan), dataIn[0]);
+            //Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(UpdateFlightData), dataIn[0]);
         }
 
         //Update Data on UI
         bool isFirstData = true, isBlackBoxRecord = true;
         double lastlat = 0, lastlng = 0;
-        private void dataMasukan(char dataType)
+        private void UpdateFlightData(char dataType)
         {
-            //try
-            //{
-            //    if (!isCurrentlyRecv)
-            //    {
-            //        if (udpSocket == null) udpSocket = new UdpClient(9601);
-            //        udpSocket.SendAsync(theData, 39, "192.168.4.5", 9601);
-            //        //Console.WriteLine("Sent to Android");
-            //    }
-            //}
-            //catch (Exception exc) { Console.WriteLine("updatedata: "+exc.StackTrace); return; }
-
             MainWindow win = (MainWindow)Window.GetWindow(this);
 
             in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + lat + " | " + longt + " | " + batt_volt;
@@ -516,7 +473,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         public void SendToConnection(command cmd, Efalcon tujuan, string track = "")
         {
-            Console.WriteLine(cmd.ToString("X"));
+            Debug.WriteLine(cmd.ToString("X"));
             if (thePort != null || isCurrentlyRecv == true)
             { 
                 switch (tujuan) {
@@ -589,7 +546,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private FilterInfo currCam;
         FileSystemWatcher watcher;
-        private void PrepareWebcam()
+        private async void PrepareWebcam()
         {
             cb_cams.IsEnabled = false;
             Cameras = new ObservableCollection<FilterInfo>();
