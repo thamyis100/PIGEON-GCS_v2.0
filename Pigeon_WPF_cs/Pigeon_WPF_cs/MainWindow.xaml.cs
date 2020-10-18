@@ -42,7 +42,10 @@ namespace Pigeon_WPF_cs
         BATALKAN = 0xBB
     }
 
-    public enum FMode
+    /// <summary>
+    /// Daftar mode penerbangan
+    /// </summary>
+    public enum FlightMode
     {
         MANUAL = 0x00,
         STABILIZER = 0x01,
@@ -50,6 +53,9 @@ namespace Pigeon_WPF_cs
         TAKEOFF = 0x03
     }
 
+    /// <summary>
+    /// Identifier penggunaan efalcon
+    /// </summary>
     public enum Efalcon
     {
         TRACKER = 0x01,
@@ -61,6 +67,9 @@ namespace Pigeon_WPF_cs
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// Fungsi memetakan satu rentang nilai ke rentang nilai yang lain
+        /// </summary>
         float map(float x, float in_min, float in_max, float out_min, float out_max)
         {
             return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -97,6 +106,9 @@ namespace Pigeon_WPF_cs
 
         #region MainWindow functions
 
+        /// <summary>
+        /// Event tombol ubah bahasa
+        /// </summary>
         private void ubah_bahasa(object sender, RoutedEventArgs e)
         {
             bhs_indo.Background = bhs_inggris.Background = null;
@@ -115,9 +127,12 @@ namespace Pigeon_WPF_cs
                     break;
             }
         }
-        private void SetBahasa(CultureInfo theLanguage) => Thread.CurrentThread.CurrentUICulture = theLanguage;
-        private void injectStats(object sender, RoutedEventArgs e) => map_Ctrl.doRotateHomepos();
 
+        /// <summary>
+        /// Mengubah bahasa tampilan
+        /// </summary>
+        private void SetBahasa(CultureInfo theLanguage) => Thread.CurrentThread.CurrentUICulture = theLanguage;
+        
         internal void SetBaterai(float baterai)
         {
             //Console.WriteLine("Baterai Convert: " + Convert.ToInt32(map(baterai, 10.5f, 12.8f, 80.0f, 750.0f)).ToString());

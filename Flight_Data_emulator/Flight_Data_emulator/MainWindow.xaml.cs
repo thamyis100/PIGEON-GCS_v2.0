@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MavLinkNet;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -27,21 +28,20 @@ namespace Flight_Data_emulator
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            tb_yaw.Text += "°";
-            Debug.WriteLine(propertyName + " has CHANGED : " + tb_yaw.Text);
+            Debug.WriteLine(propertyName + " has CHANGED");
         }
 
         #region Flight Data
 
-        private float _heading_val = 92.2f;
-        public float heading_val
+        private float heading_val = 0.0f;
+        public float Heading
         {
-            get { return _heading_val; }
+            get { return heading_val; }
             set
             {
-                if (value != _heading_val)
+                if (value != heading_val)
                 {
-                    _heading_val = value;
+                    heading_val = value;
                     //OnPropertyChanged("Heading");
                 }
             }
@@ -49,13 +49,48 @@ namespace Flight_Data_emulator
 
         #endregion
 
+        MavLinkSerialPortTransport it = new MavLinkSerialPortTransport()
+        {
+            SerialPortName = "COM3",
+            BaudRate = 115200,
+            HeartBeatUpdateRateMs = 1500
+        };
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
 
-            heading_val = 120.120f;
+            it.OnPacketReceived += NewMavlinkPacket;
+            it.Initialize();
+            it.BeginHeartBeatLoop();
+
+            //HeadingAsync();
         }
 
+        private void NewMavlinkPacket(object sender, MavLinkPacket packet)
+        {
+            Debug.WriteLine("\nReceived :");
+            //Debug.WriteLine(packet.)
+        }
+
+        private async void HeadingAsync()
+        {
+            while (true)
+            {
+                for (; ; )
+                {
+                    Heading += 5.0f;
+                    await Task.Delay(100);
+                    if (Heading > 180.0f) break;
+                }
+                for (; ; )
+                {
+                    Heading -= 5.0f;
+                    await Task.Delay(100);
+                    if (Heading < -180.0f) break;
+                }
+            }
+        }
     }
 }

@@ -34,7 +34,7 @@
         <DockPanel  Grid.Column="1" Margin="2.5" Grid.Row="1" Grid.RowSpan="2" >
             <DockPanel Height="35" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
                 <Label Content="HEADING" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
-                <TextBox x:Name="tb_yaw" Text="{Binding heading_val}" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
+                <TextBox x:Name="tb_yaw" Text="{Binding Heading}" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
             </DockPanel>
             <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
                 <Label Content="PITCH" Padding="0" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
