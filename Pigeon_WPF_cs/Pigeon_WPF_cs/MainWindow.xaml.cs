@@ -132,7 +132,10 @@ namespace Pigeon_WPF_cs
         /// Mengubah bahasa tampilan
         /// </summary>
         private void SetBahasa(CultureInfo theLanguage) => Thread.CurrentThread.CurrentUICulture = theLanguage;
-        
+
+        /// <summary>
+        /// Set properti baterai
+        /// </summary>
         internal void SetBaterai(float baterai)
         {
             //Console.WriteLine("Baterai Convert: " + Convert.ToInt32(map(baterai, 10.5f, 12.8f, 80.0f, 750.0f)).ToString());
@@ -147,6 +150,10 @@ namespace Pigeon_WPF_cs
         #region synth
 
         private SpeechSynthesizer synth;
+        /// <summary>
+        /// Siapkan resources untuk synthesize suara<br/>
+        /// DO NOT USE, CURRENTLY NOT AVAILABLE
+        /// </summary>
         private void PrepareSpeechSynth()
         {
             synth = new SpeechSynthesizer();
@@ -160,6 +167,9 @@ namespace Pigeon_WPF_cs
         }
 
         bool MuteVoice = false;
+        /// <summary>
+        /// Suarakan <paramref name="ssmltxt"/> dengan synthesizer
+        /// </summary>
         public void SpeakOutloud(string ssmltxt)
         {
             if (MuteVoice) return;
@@ -208,6 +218,9 @@ namespace Pigeon_WPF_cs
         #region Recog
 
         private SpeechRecognitionEngine recog = new SpeechRecognitionEngine();
+        /// <summary>
+        /// Siapkan pengenalan suara dengan mikrofon
+        /// </summary>
         private void PrepareRecog()
         {
             recog.SpeechRecognized += speechRecognized;
@@ -219,6 +232,9 @@ namespace Pigeon_WPF_cs
         }
 
         bool isRecog = false;
+        /// <summary>
+        /// Toggle mengenali suara
+        /// </summary>
         private void toggleRecog(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.H)
@@ -228,6 +244,9 @@ namespace Pigeon_WPF_cs
             }
         }
 
+        /// <summary>
+        /// Suara berhasil dikenali
+        /// </summary>
         private void speechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
             Console.WriteLine("Received: " + e.Result.Text);
@@ -255,8 +274,18 @@ namespace Pigeon_WPF_cs
 
         #region Connection n timer
 
+        /// <summary>
+        /// Apakah terkoneksi dengan wahana?
+        /// </summary>
         public bool isWahanaConnected = false;
+        /// <summary>
+        /// Apakah terkoneksi dengan tracker?
+        /// </summary>
         public bool isTrackerConnected = false;
+        /// <summary>
+        /// Set status koneksi<br/>
+        /// <paramref name="tipe"/> : wahana = false, tracker = true
+        /// </summary>
         public void setConnStat(bool status, bool tipe)
         {
             if (status && tipe) //tracker online
@@ -298,6 +327,9 @@ namespace Pigeon_WPF_cs
         private DateTime waktuStart;
         private DispatcherTimer detikan;
         bool isTimerFirstTime = true;
+        /// <summary>
+        /// Toggle stopwatch lama waktu penerbangan tiap satu detik
+        /// </summary>
         public void ToggleWaktuTerbang()
         {
             if (isTimerFirstTime)
@@ -328,12 +360,15 @@ namespace Pigeon_WPF_cs
             Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString(@"hh\:mm\:ss") + " - PIGEON GCS";
         }
 
-#endregion
+        #endregion
 
         #region window control
 
         private void clickedWindow(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch { return; } }
 
+        /// <summary>
+        /// Cek apakah wahana aman (eg. sudah mendarat)
+        /// </summary>
         public bool isWahanaLanded()
         {
             Effect = new BlurEffect() { Radius = 5 };
@@ -355,12 +390,19 @@ namespace Pigeon_WPF_cs
             }
         }
 
+        /// <summary>
+        /// Cek apakah sedang terkoneksi
+        /// </summary>
         private byte appCheck()
         {
             byte code = 0;
             if (flight_Ctrl.connected) code = 1;
             return code;
         }
+
+        /// <summary>
+        /// Tutup aplikasi
+        /// </summary>
         private void closeApp(object sender, RoutedEventArgs e)
         {
             Effect = new BlurEffect() { Radius = 15 };
@@ -380,13 +422,18 @@ namespace Pigeon_WPF_cs
 
         #region Waypoint control
 
+        /// <summary>
+        /// Kecilkan ukuran map view
+        /// </summary>
         public void MinimizeMap()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
             Grid.SetRowSpan(mapGrid, 1);
             Grid.SetColumnSpan(mapGrid, 1);
         }
-
+        /// <summary>
+        /// Besarkan ukuran map view
+        /// </summary>
         public void MaximizeMap()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Visible;
@@ -405,7 +452,8 @@ namespace Pigeon_WPF_cs
         #endregion
 
         #region Tab Control choosing
-        String selectedBtn ="btn_flight";
+
+        string selectedBtn ="btn_flight";
         private void hoverButton(object sender, MouseEventArgs e)
         {
             Button it = (Button)sender;
@@ -417,7 +465,10 @@ namespace Pigeon_WPF_cs
             Button it = (Button)sender;
             if (it.Name != selectedBtn) it.Background = null;
         }
-        
+
+        /// <summary>
+        /// Pilihan tab dengan button
+        /// </summary>
         private void selectTab(object sender, RoutedEventArgs e)
         {
             Button the_btn = (Button)sender;
@@ -441,6 +492,9 @@ namespace Pigeon_WPF_cs
             }
         }
 
+        /// <summary>
+        /// Aktifkan view pada tab
+        /// </summary>
         private void setCurrentlyActive(Rectangle theBox, Button theBtn, UserControl theCtrl)
         {
             //sembunyikan semua box
@@ -466,10 +520,5 @@ namespace Pigeon_WPF_cs
         #endregion
 
         private void muteVoice(object sender, RoutedEventArgs e) => MuteVoice = !MuteVoice;
-
-        private void flight_Ctrl_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }
