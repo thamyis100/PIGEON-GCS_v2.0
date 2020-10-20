@@ -84,24 +84,54 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public float BatteryVolt;
     }
 
+    public class GPSData
+    {
+        public sbyte lat_int8;
+        public float lat_float;
+        public short lon_int16;
+        public float lon_float;
+
+        public bool SetLatitude(byte[] thebytes)
+        {
+            try
+            {
+                lat_int8 = (sbyte)thebytes[0];
+                lat_float = BitConverter.ToSingle(thebytes, 1);
+                return true;
+            }
+            catch { return false; }
+        }
+        public bool SetLongitude(byte[] thebytes)
+        {
+            try
+            {
+                lon_int16 = BitConverter.ToInt16(thebytes, 0);
+                lon_float = BitConverter.ToSingle(thebytes, 2);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public string LatDDMString => string.Format("{0} {1}", lat_int8, lat_float);
+        public string LonDDMString => string.Format("{0} {1}", lon_int16, lon_float);
+        public double LatDecimal => lat_int8 + (lat_float / 60.0f);
+        public double LonDecimal => lon_int16 + (lon_float / 60.0f);
+    }
+
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
         FlightData Wahana;
-        private float heading_val, pitch_val, roll_val, alti_val, batt_volt, batt_cur;
+        private float heading_val, pitch_val, roll_val, alti_val, batt_volt, batt_cur, tracker_yaw, tracker_pitch;
         private byte fmode;
         private ushort airspeed_val = 0;
         private double lat = -7.275869000d, longt = 112.794307000d;
+        GPSData efalcongps = new GPSData(), trackergps = new GPSData();
         //global path for saving data
         string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
 
         //The Data Goes :
 
-        //I:Yaw,pitch,roll#
-        //G:lat,lon#
-        //A:altiude#
-        //B:batt_volt,batt_cur#
-        //T:pitch,yaw,latitude,long#
-        //cth : I<yaw><pitch><roll>#
+
 
         //speakoutloud timer
         DispatcherTimer dataTimer;
@@ -114,9 +144,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             PrepareWebcam(); //Cari webcam
             PrepareUSBConn(); //Cari usb
 
-            dataTimer = new DispatcherTimer();
-            dataTimer.Interval = TimeSpan.FromSeconds(8);
-            dataTimer.Tick += SpeakOutLoud;
+            //dataTimer = new DispatcherTimer();
+            //dataTimer.Interval = TimeSpan.FromSeconds(8);
+            //dataTimer.Tick += SpeakOutLoud;
         }
 
         #region WIFI Connect
@@ -300,7 +330,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             SerialPort receive = (SerialPort)sender;
 
-            try { ParseDataAsync(Encoding.ASCII.GetBytes(receive.ReadTo("#"))); }
+            try { ParseDataAsync(Encoding.ASCII.GetBytes(receive.ReadTo("#"))); Debug.WriteLine("Done reading to #"); }
             catch (Exception exc)
             {
                 Debug.WriteLine("invalid");
@@ -315,39 +345,81 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         //parse data
         private async void ParseDataAsync(byte[] dataIn)
         {
-            Debug.Write($"\ndataIn = [");
-            foreach (byte bite in dataIn)
-            {
-                Debug.Write(bite.ToString("X2"));
-            }
-            Debug.WriteLine("]\n");
+            //Debug.Write($"\ndataIn = [");
+            //foreach (byte bite in dataIn)
+            //{
+            //    Debug.Write(bite.ToString("X2") + ' ');
+            //}
+            //Debug.Write("]\n");
 
             try
             {
                 switch (dataIn[0])
                 {
-                    case (byte)'I':
-                        heading_val = (BitConverter.ToSingle(dataIn, 1) + 360) % 360;
+                    case (byte)'N': //should be 29 bytes data
+                        heading_val = BitConverter.ToSingle(dataIn, 1); //use (heading_val + 360) % 360; to get positive degrees
                         pitch_val = BitConverter.ToSingle(dataIn, 5);
                         roll_val = BitConverter.ToSingle(dataIn, 9);
-                        Debug.WriteLine("IMU updated");
+                        alti_val = BitConverter.ToSingle(dataIn, 13);
+                        byte[] thebytes = new byte[5];
+                        Array.Copy(dataIn, 17, thebytes, 0, 5);
+                        Debug.Write("Lat : [");
+                        foreach (byte item in thebytes)
+                        {
+                            Debug.Write(item.ToString("X2") + ' ');
+                        }
+                        Debug.WriteLine(']');
+                        Debug.WriteLine(efalcongps.lat_int8.ToString() + ((sbyte)thebytes[0]).ToString());
+                        Debug.WriteLine(efalcongps.lat_float.ToString() + BitConverter.ToSingle(thebytes, 1).ToString());
+
+                        efalcongps.SetLatitude(thebytes);
+                        byte[] thobytes = new byte[6];
+                        Array.Copy(dataIn, 22, thebytes, 0, 6);
+                        efalcongps.SetLatitude(thebytes);
+
+                        //efalcongps.lat_int8 = (sbyte)dataIn[17];
+                        //efalcongps.lat_float = BitConverter.ToSingle(dataIn, 18);
+                        //efalcongps.lon_int16 = BitConverter.ToInt16(dataIn, 22);
+                        //efalcongps.lon_float = BitConverter.ToSingle(dataIn, 24);
+
+                        Debug.WriteLine("\nNavigation data updated :\n"
+                            + "Yaw : " + heading_val.ToString() + '\n'
+                            + "Pitch : " + pitch_val.ToString() + '\n'
+                            + "Roll : " + roll_val.ToString() + '\n'
+                            + "Altitude : " + alti_val.ToString() + '\n'
+                            + "Lat DDM (DD) : " + efalcongps.LatDDMString + " (" + efalcongps.LatDecimal.ToString() + ")\n"
+                            + "Lon DDM (DD) : " + efalcongps.LonDDMString + " (" + efalcongps.LonDecimal.ToString() + ")\n"
+                            );
                         break;
-                    case (byte)'G':
-                        lat = BitConverter.ToDouble(dataIn, 1);
-                        longt = BitConverter.ToDouble(dataIn, 9);
-                        Debug.WriteLine("GPS updated");
-                        break;
-                    case (byte)'A':
-                        alti_val = BitConverter.ToSingle(dataIn, 1);
-                        Debug.WriteLine("Alti updated");
+                    case (byte)'M':
+                        fmode = dataIn[1];
+                        Debug.WriteLine("Flight Mode updated : " + fmode.ToString("X2"));
                         break;
                     case (byte)'B':
                         batt_volt = BitConverter.ToSingle(dataIn, 1);
                         batt_cur = BitConverter.ToSingle(dataIn, 5);
-                        Debug.WriteLine("Batt updated");
+                        Debug.WriteLine("Battery updated :\n"
+                            + "Volt : " + batt_volt.ToString() + '\n'
+                            + "Arus : " + batt_cur.ToString() + '\n'
+                            );
+                        break;
+                    case (byte)'T':
+                        tracker_yaw = BitConverter.ToSingle(dataIn, 1);
+                        tracker_pitch = BitConverter.ToSingle(dataIn, 5);
+                        byte[] bytes = new byte[6];
+                        Array.Copy(dataIn, 17, bytes, 0, 6);
+                        efalcongps.SetLatitude(bytes);
+                        Array.Copy(dataIn, 22, bytes, 0, 6);
+                        efalcongps.SetLatitude(bytes);
+                        Debug.WriteLine("Tracker data updated :\n"
+                            + "Yaw : "+tracker_yaw.ToString()+'\n'
+                            + "Pitch : " + tracker_pitch.ToString() + '\n'
+                            + "Lat int float : " + trackergps.lat_int8.ToString() + ' ' + trackergps.lat_float.ToString()//" (" + trackergps.LatDecimal.ToString() + ")\n"
+                            + "Lon int float : " + trackergps.lon_int16.ToString() + ' ' + trackergps.lon_float.ToString()//" (" + trackergps.LonDecimal.ToString() + ")\n"
+                            );
                         break;
                     default:
-                        Debug.WriteLine("Nothing updated");
+                        Debug.WriteLine("There was data, but no identifier recognized, nothing updated");
                         return;
                 }
             } catch (Exception e)

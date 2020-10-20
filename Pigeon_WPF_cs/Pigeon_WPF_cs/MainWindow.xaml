@@ -234,7 +234,7 @@
                 <Grid x:Name="mapGrid" Margin="2.5" >
                     <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch"/>
                 </Grid>
-                <controls:FlightControl x:Name="flight_Ctrl" Grid.ColumnSpan="3" Grid.RowSpan="2" Loaded="flight_Ctrl_Loaded"/>
+                <controls:FlightControl x:Name="flight_Ctrl" Grid.ColumnSpan="3" Grid.RowSpan="2" />
                 <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
                 <controls:TrackerControl x:Name="track_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
             </Grid>
