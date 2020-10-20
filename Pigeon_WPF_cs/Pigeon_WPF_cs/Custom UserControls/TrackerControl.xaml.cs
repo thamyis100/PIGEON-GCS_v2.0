@@ -45,15 +45,23 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //}
         }
 
-        //our connection is integrated in efalcon tracker
-        public void IntegrateTrackerConn(bool isWifi)
+        public void Integration(bool it)
         {
-            if (isWifi)
+            if (it)
             {
-                isUsingWifi = isWifi;
-                track_conn_bt.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                conn_panel.IsEnabled = false;
+                conn_panel_label.Visibility = Visibility.Visible;
             }
-            else toggleConn(true);
+            else
+            {
+                conn_panel.IsEnabled = true;
+                conn_panel_label.Visibility = Visibility.Collapsed;
+            }
+        }
+        //our connection is integrated in efalcon tracker
+        public void DataFromFlightView(byte[] thedata)
+        {
+            
         }
 
         #region WIFI UDP
@@ -179,7 +187,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             {
                 isUsingWifi = !isUsingWifi;
                 isCurrentlyRecv = true;
-                udpSocket = new UdpClient(9600);
+                udpSocket = new UdpClient(0);
                 udpSocket.BeginReceive(new AsyncCallback(StartListening), null);
                 toggleConn(true);
             }
@@ -324,7 +332,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //float.TryParse(theData[1], out heading);
         }
 
-        #region Animating back n forth
+        #region Animating connect button
         private void img_conn_0(object sender, MouseEventArgs e)
         {
             if (connected)
@@ -358,15 +366,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private Posisi GCS, Wahana;
         public void SetKoorGCS(double lat, double longt, float alti)
         {
-            //GCS.Lat = lat; GCS.Longt = longt; GCS.Alti = alti;
-            MainWindow win = (MainWindow)Window.GetWindow(this);
-            win.map_Ctrl.StartPosGCS(GCS.Lat, GCS.Longt);
+            GCS.Lat = lat; GCS.Longt = longt; GCS.Alti = alti;
+            tb_lat_tracker.Text = lat.ToString("#.########");
+            tb_longt_tracker.Text = longt.ToString("#.########");
+            tb_tinggi_tracker.Text = alti.ToString("#.########");
         }
-        public void SetKoorWahana(double lat, double longt, float alti)
+        public async void SetKoorWahana(double lat, double longt, float alti)
         {
             Wahana.Lat = lat; Wahana.Longt = longt; Wahana.Alti = alti;
-            tb_lat_wahana.Text = lat.ToString();
-            tb_longt_wahana.Text = longt.ToString();
+            tb_lat_wahana.Text = lat.ToString("#.########");
+            tb_longt_wahana.Text = longt.ToString("#.########");
             tb_alti_wahana.Text = alti.ToString() + " m";
         }
 
@@ -389,8 +398,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
         }
 
-        bool isTracking = false;
-        public bool GetTrackStatus() { return isTracking; }
+        private bool isTracking = false;
+        public bool IsTracking => isTracking;
         private void toggleTracking(object sender, RoutedEventArgs e)
         {
             if (!isTracking)
@@ -398,10 +407,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 isTracking = true;
                 lbl_start_stop.Content = "Stop Tracking";
                 ico_start_stop.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-stop-50.png"));
-
-                //DispatcherTimer rotateTracker = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(200) };
-                //rotateTracker.Tick += cmd_rotateTracker;
-                //rotateTracker.Start();
             }
             else
             {
@@ -419,7 +424,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 var it = (DispatcherTimer)sender;
                 it.Stop();
             }
-            ArahkanTracker();
+            
             //if (rotasi > 359) rotasi = 0;
             //if (pitch > 90) pitch = 0;
             //rotasi += 2;
@@ -430,18 +435,17 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #region Kalkulasi
 
-        private double JarakHorizon()
+        private float JarakHorizon()
         {
-            double R = 6371000;
-            double deltaLat = (Wahana.Lat - GCS.Lat) * Math.PI / 180; //selisih Latitude dalam radian
-            double deltaLongt = (Wahana.Longt - GCS.Longt) * Math.PI / 180; //selisih Longitude dalam radian
+            float deltaLat = (float)((Wahana.Lat - GCS.Lat) * Math.PI / 180); //selisih Latitude dalam radian
+            float deltaLongt = (float)((Wahana.Longt - GCS.Longt) * Math.PI / 180); //selisih Longitude dalam radian
 
             //trigonometric
-            double sisiA = Math.Pow(Math.Sin(deltaLat / 2), 2)
+            float sisiA = (float)(Math.Pow(Math.Sin(deltaLat / 2), 2)
                             + Math.Cos(GCS.Lat * Math.PI / 180) * Math.Cos(Wahana.Lat * Math.PI / 180)
-                            * Math.Pow(Math.Sin(deltaLongt / 2), 2);
-            double sisiB = 2 * Math.Asin(Math.Min(1, Math.Sqrt(sisiA)));
-            return R * sisiB;
+                            * Math.Pow(Math.Sin(deltaLongt / 2), 2));
+            float sisiB = (float)(2 * Math.Asin(Math.Min(1, Math.Sqrt(sisiA))));
+            return 6371000.0f * sisiB;
         }
 
         #endregion

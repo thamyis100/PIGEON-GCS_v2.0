@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DEBUGDATA
+
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -35,6 +37,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using MessagePack;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
@@ -71,9 +74,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public float Roll;
         public short Airspeed;
         public float Altitude;
-        public double Latitude;
-        public double Longitude;
-        public float BatteryVoltage;
+        GPSData GPSLocation;
+        public float BatteryVolt;
+        public float BatteryCur;
     }
 
     [MessagePackObject]
@@ -86,48 +89,79 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
     public class GPSData
     {
-        public sbyte lat_int8;
-        public float lat_float;
-        public short lon_int16;
-        public float lon_float;
+        private sbyte lat_int8; //dd
+        private short lon_int16; //ddd
+        private float lat_float, lon_float; //mm.mmmm
+        private double lat_dd, lon_dd; //decimals
 
+        /// <summary>
+        /// Masukkan nilai latitude dalam format
+        /// <br/><paramref name="thebytes"/> = 1 bytes (signed int8 [dd]), 4 bytes (signed float32 [mm.mmmmm])
+        /// </summary>
+        /// <returns>true if conversion works, else false</returns>
         public bool SetLatitude(byte[] thebytes)
         {
             try
             {
                 lat_int8 = (sbyte)thebytes[0];
                 lat_float = BitConverter.ToSingle(thebytes, 1);
+                lat_dd = lat_int8 + (lat_float / 60.0f);
                 return true;
             }
             catch { return false; }
         }
+        /// <summary>
+        /// Masukkan nilai longitude dalam format
+        /// <br/><paramref name="thebytes"/> = 2 bytes (signed int16 [ddd])<br/>, 4 bytes (signed float32 [mm.mmmmm])
+        /// </summary>
+        /// <returns>true if conversion works, else false</returns>
         public bool SetLongitude(byte[] thebytes)
         {
             try
             {
                 lon_int16 = BitConverter.ToInt16(thebytes, 0);
                 lon_float = BitConverter.ToSingle(thebytes, 2);
+                lon_dd = lon_int16 + (lon_float / 60.0f);
                 return true;
             }
             catch { return false; }
         }
 
-        public string LatDDMString => string.Format("{0} {1}", lat_int8, lat_float);
-        public string LonDDMString => string.Format("{0} {1}", lon_int16, lon_float);
-        public double LatDecimal => lat_int8 + (lat_float / 60.0f);
-        public double LonDecimal => lon_int16 + (lon_float / 60.0f);
+        /// <summary>
+        /// Decimal, Minutes, fraction of Minutes
+        /// </summary>
+        /// <returns>signed string : "ddmm.mmmmmm"</returns>
+        public string GetLatDDMString() => $"{lat_int8}{lat_float}";
+        /// <summary>
+        /// Decimal, Minutes, fraction of Minutes
+        /// </summary>
+        /// <returns>signed string : "ddmm.mmmmmm"</returns>
+        public string GetLonDDMString() => $"{lon_int16}{lon_float}";
+        /// <summary>
+        /// Ambil nilai Latitude GPS
+        /// </summary>
+        /// <returns>nilai decimal dalam tipe double(float64)</returns>
+        public double GetLatDecimal() => lat_dd;
+        public double GetLonDecimal() => lon_dd;
     }
 
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
         FlightData Wahana;
         private float heading_val, pitch_val, roll_val, alti_val, batt_volt, batt_cur, tracker_yaw, tracker_pitch;
+        
         private byte fmode;
+        // 0b00000000 = 0x00 = MATI
+        // 0b00001000 = 0x08 = 
+        // 0b10000000 = 0x80 = 
+        
         private ushort airspeed_val = 0;
-        private double lat = -7.275869000d, longt = 112.794307000d;
+        //private double lat = -7.275869000d, longt = 112.794307000d;
         GPSData efalcongps = new GPSData(), trackergps = new GPSData();
+
         //global path for saving data
-        string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
+        private string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
+        public string Path => path;
 
         //The Data Goes :
 
@@ -160,10 +194,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             while (isCurrentlyRecv)
             {
-                UdpReceiveResult it = await udpSocket.ReceiveAsync();
+                UdpReceiveResult it;
+                try { 
+                    it = await udpSocket.ReceiveAsync();
+                }
+                catch { break; }
+
                 ParseDataAsync(it.Buffer);
             }
-            udpSocket.Close();
             return;
         }
 
@@ -179,7 +217,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             {
                 isUsingWifi = !isUsingWifi;
                 isCurrentlyRecv = true;
-                udpSocket = new UdpClient(0);
+                udpSocket = new UdpClient(60111);
                 Debug.WriteLine("ToggleConn: UDP PORT is " + ((IPEndPoint)udpSocket.Client.LocalEndPoint).Port.ToString());
                 StartListening();
                 connected = true;
@@ -191,11 +229,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
             else
             {
-                if (thePort != null) thePort.Close();
+                if (thePort != null) thePort.Dispose();
                 isCurrentlyRecv = false;
                 connected = false;
                 toggleConn(false);
-                isFirstData = true;
+                isFirstNav = isFirstMode = isFirstBatt = isFirstTracker = true;
             }
         }
 
@@ -207,7 +245,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 cb_ports.IsEnabled = false;
                 cb_bauds.IsEnabled = false;
                 stream_panel.IsEnabled = true;
-                mainWin.setConnStat(true, false);
                 img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-connected-80.png"));
                 ind_conn_status.Content = "Connected";
             } else
@@ -215,15 +252,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 cb_ports.IsEnabled = true;
                 cb_bauds.IsEnabled = true;
                 stream_panel.IsEnabled = false;
-                mainWin.setConnStat(false, false);
                 img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
                 ind_conn_status.Content = "Disconnected";
                 
                 mainWin.map_Ctrl.FmodeEnable(false);
                 isCurrentlyRecv = false;
 
-                if (menulis != null) menulis.Close();
-                if (udpSocket != null) udpSocket.Close();
+                if (menulis != null) menulis.Dispose();
+                if (udpSocket != null) udpSocket.Dispose();
             }
         }
 
@@ -345,79 +381,86 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         //parse data
         private async void ParseDataAsync(byte[] dataIn)
         {
-            //Debug.Write($"\ndataIn = [");
-            //foreach (byte bite in dataIn)
-            //{
-            //    Debug.Write(bite.ToString("X2") + ' ');
-            //}
-            //Debug.Write("]\n");
-
             try
             {
                 switch (dataIn[0])
                 {
-                    case (byte)'N': //should be 29 bytes data
+                    case (byte)'N':
                         heading_val = BitConverter.ToSingle(dataIn, 1); //use (heading_val + 360) % 360; to get positive degrees
                         pitch_val = BitConverter.ToSingle(dataIn, 5);
                         roll_val = BitConverter.ToSingle(dataIn, 9);
                         alti_val = BitConverter.ToSingle(dataIn, 13);
+                        
                         byte[] thebytes = new byte[5];
                         Array.Copy(dataIn, 17, thebytes, 0, 5);
-                        Debug.Write("Lat : [");
-                        foreach (byte item in thebytes)
-                        {
-                            Debug.Write(item.ToString("X2") + ' ');
-                        }
-                        Debug.WriteLine(']');
-                        Debug.WriteLine(efalcongps.lat_int8.ToString() + ((sbyte)thebytes[0]).ToString());
-                        Debug.WriteLine(efalcongps.lat_float.ToString() + BitConverter.ToSingle(thebytes, 1).ToString());
-
                         efalcongps.SetLatitude(thebytes);
-                        byte[] thobytes = new byte[6];
+                        thebytes = new byte[6];
                         Array.Copy(dataIn, 22, thebytes, 0, 6);
-                        efalcongps.SetLatitude(thebytes);
+                        efalcongps.SetLongitude(thebytes);
 
-                        //efalcongps.lat_int8 = (sbyte)dataIn[17];
-                        //efalcongps.lat_float = BitConverter.ToSingle(dataIn, 18);
-                        //efalcongps.lon_int16 = BitConverter.ToInt16(dataIn, 22);
-                        //efalcongps.lon_float = BitConverter.ToSingle(dataIn, 24);
-
+                        #region Navigation data debugging
+                        #if DEBUGDATA
                         Debug.WriteLine("\nNavigation data updated :\n"
                             + "Yaw : " + heading_val.ToString() + '\n'
                             + "Pitch : " + pitch_val.ToString() + '\n'
                             + "Roll : " + roll_val.ToString() + '\n'
                             + "Altitude : " + alti_val.ToString() + '\n'
-                            + "Lat DDM (DD) : " + efalcongps.LatDDMString + " (" + efalcongps.LatDecimal.ToString() + ")\n"
-                            + "Lon DDM (DD) : " + efalcongps.LonDDMString + " (" + efalcongps.LonDecimal.ToString() + ")\n"
-                            );
+                            + "Lat DDM (DD) : " + efalcongps.GetLatDDMString() + " (" + efalcongps.GetLatDecimal().ToString("#.########") + ")\n"
+                            + "Lon DDM (DD) : " + efalcongps.GetLonDDMString() + " (" + efalcongps.GetLonDecimal().ToString("#.########") + ")\n"
+                        );
+                        #endif
+                        #endregion
                         break;
+
                     case (byte)'M':
                         fmode = dataIn[1];
+
+                        #region Flight mode debugging
+                        #if DEBUGDATA
                         Debug.WriteLine("Flight Mode updated : " + fmode.ToString("X2"));
+                        #endif
+                        #endregion
                         break;
+
                     case (byte)'B':
                         batt_volt = BitConverter.ToSingle(dataIn, 1);
                         batt_cur = BitConverter.ToSingle(dataIn, 5);
+
+                        #region Battery data debugging
+                        #if DEBUGDATA
                         Debug.WriteLine("Battery updated :\n"
                             + "Volt : " + batt_volt.ToString() + '\n'
                             + "Arus : " + batt_cur.ToString() + '\n'
-                            );
+                        );
+                        #endif
+                        #endregion
                         break;
+
                     case (byte)'T':
                         tracker_yaw = BitConverter.ToSingle(dataIn, 1);
                         tracker_pitch = BitConverter.ToSingle(dataIn, 5);
-                        byte[] bytes = new byte[6];
-                        Array.Copy(dataIn, 17, bytes, 0, 6);
-                        efalcongps.SetLatitude(bytes);
-                        Array.Copy(dataIn, 22, bytes, 0, 6);
-                        efalcongps.SetLatitude(bytes);
+
+                        byte[] thobytes = new byte[5];
+                        Array.Copy(dataIn, 6, thobytes, 0, 5);
+                        trackergps.SetLatitude(thobytes);
+                        thebytes = new byte[6];
+                        Array.Copy(dataIn, 11, thobytes, 0, 6);
+                        trackergps.SetLongitude(thobytes);
+
+
+
+                        #region Tracker data debugging
+                        #if DEBUGDATA
                         Debug.WriteLine("Tracker data updated :\n"
-                            + "Yaw : "+tracker_yaw.ToString()+'\n'
+                            + "Yaw : " + tracker_yaw.ToString() + '\n'
                             + "Pitch : " + tracker_pitch.ToString() + '\n'
-                            + "Lat int float : " + trackergps.lat_int8.ToString() + ' ' + trackergps.lat_float.ToString()//" (" + trackergps.LatDecimal.ToString() + ")\n"
-                            + "Lon int float : " + trackergps.lon_int16.ToString() + ' ' + trackergps.lon_float.ToString()//" (" + trackergps.LonDecimal.ToString() + ")\n"
-                            );
+                            + "Lat DDM (DD) : " + trackergps.GetLatDDMString() + " (" + trackergps.GetLatDecimal().ToString("#.########") + ")\n"
+                            + "Lon DDM (DD) : " + trackergps.GetLonDDMString() + " (" + trackergps.GetLonDecimal().ToString("#.########") + ")\n"
+                        );
+                        #endif
+                        #endregion
                         break;
+
                     default:
                         Debug.WriteLine("There was data, but no identifier recognized, nothing updated");
                         return;
@@ -427,57 +470,74 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 Debug.WriteLine(e.Message);
             }
 
-            //Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(UpdateFlightData), dataIn[0]);
+            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(UpdateFlightData), dataIn[0]);
         }
 
         //Update Data on UI
-        bool isFirstData = true, isBlackBoxRecord = true;
-        double lastlat = 0, lastlng = 0;
+        bool isFirstNav = true, isFirstMode = true, isFirstBatt = true, isFirstTracker = true;
+        bool isBlackBoxRecord = true;
+        //double lastlat = 0, lastlng = 0;
         private void UpdateFlightData(char dataType)
         {
             MainWindow win = (MainWindow)Window.GetWindow(this);
 
-            in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + lat + " | " + longt + " | " + batt_volt;
-            
-            win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val, win.waktuTerbang);
+            in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + efalcongps.GetLatDecimal() + " | " + efalcongps.GetLonDecimal() + " | " + batt_volt;
 
-            if (isFirstData)
+            switch (dataType)
             {
-                isFirstData = false;
-                win.map_Ctrl.StartPosWahana(lat, longt, heading_val);
-                win.map_Ctrl.FmodeEnable(true);
-                menulis = new CsvFileWriter(new FileStream(path + "BlackBox_" + DateTime.Now.ToString("(HH-mm-ss)_[dd-MM-yy]") + ".csv",
-                          FileMode.Create, FileAccess.Write));
-                dataTimer.Start();
-                win.ToggleWaktuTerbang();
+                case 'N':
+                    if(isFirstNav)
+                    {
+                        isFirstNav = false;
+                        win.ToggleWaktuTerbang();
+                        win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
+                        win.setConnStat(true, false);
+                        menulis = new CsvFileWriter(new FileStream(path + "BlackBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
+                    }
+                    win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
+                    win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
+
+                    tb_yaw.Text = heading_val.ToString("0.##", CultureInfo.InvariantCulture) + "°";
+                    ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
+
+                    tb_pitch.Text = pitch_val.ToString("0.##", CultureInfo.InvariantCulture) + "°";
+                    tb_roll.Text = roll_val.ToString("0.##", CultureInfo.InvariantCulture) + "°";
+                    ind_attitude.SetAttitudeIndicatorParameters(pitch_val, -roll_val);
+
+                    //tb_airspeed.Text = airspeed_val.ToString(CultureInfo.CurrentUICulture) + " km/j";
+                    //ind_airspeed.SetAirSpeedIndicatorParameters(airspeed_val);
+
+                    tb_alti.Text = alti_val.ToString("0.##", CultureInfo.InvariantCulture) + " m";
+
+                    tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.########", CultureInfo.InvariantCulture);
+                    tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.########", CultureInfo.InvariantCulture);
+
+                    win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val, win.waktuTerbang);
+                    break;
+
+                case 'M':
+                    if (isFirstMode)
+                    {
+                        isFirstMode = false;
+                        win.map_Ctrl.FmodeEnable(true);
+                    }
+                    win.map_Ctrl.SetMode(fmode);
+                    break;
+
+                case 'B':
+                    if (isFirstBatt) isFirstBatt = false;
+                    win.SetBaterai(batt_volt, batt_cur);
+                    break;
+
+                case 'T':
+                    win.track_Ctrl.SetKoorGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal(), 1.5f);
+                    break;
             }
+            if (isFirstNav == isFirstMode == isFirstBatt == false) WriteBlackBox();
 
             //if (!win.track_Ctrl.isTrackerReady) win.track_Ctrl.SetKoorTrack(lat, longt);
 
-            win.map_Ctrl.SetMode(fmode);
-            win.SetBaterai(batt_volt);
-
-            if (isBlackBoxRecord) WriteBlackBox();
-
-            tb_yaw.Text = heading_val.ToString("0.00", CultureInfo.CurrentUICulture) + "°";
-            ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
-
-            tb_pitch.Text = pitch_val.ToString("0.00", CultureInfo.CurrentUICulture) + "°";
-            tb_roll.Text = roll_val.ToString("0.00", CultureInfo.CurrentUICulture) + "°";
-            ind_attitude.SetAttitudeIndicatorParameters(pitch_val, -roll_val);
-
-            tb_airspeed.Text = airspeed_val.ToString(CultureInfo.CurrentUICulture) + " km/j";
-            ind_airspeed.SetAirSpeedIndicatorParameters(airspeed_val);
-
-            tb_alti.Text = alti_val.ToString("0.00", CultureInfo.CurrentUICulture) + " m";
-
-            if (lastlat == 0 || lastlng == 0) lastlat = lat; lastlng = longt;
-            //if (lat - lastlat > 1.0f || lat - lastlat < -1.0f || longt - lastlng > 1.0f || longt - lastlng < -1.0f) return;
-            win.track_Ctrl.SetKoorWahana(lat, longt, alti_val);
-            win.map_Ctrl.setPosWahana(lat, longt, heading_val);
-            if (win.track_Ctrl.GetTrackStatus()) win.track_Ctrl.ArahkanTracker();
-            tb_lat.Text = lat.ToString("0.#########", CultureInfo.InvariantCulture);
-            tb_longt.Text = longt.ToString("0.#########", CultureInfo.InvariantCulture);
+            //if (win.track_Ctrl.GetTrackStatus()) win.track_Ctrl.ArahkanTracker();
         }
         
         //speak out our current heading, speed, altitude
@@ -496,28 +556,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             CsvRow baris = new CsvRow();
             /*  Urutan blackbox
-             *  0. TimeSpan (ticks)
+             *  0. TimeSpan WaktuTerbang (ticks)
                 1. Fmode
                 2. Heading
                 3. Pitch
                 4. Roll
-                5. Speed
-                6. altitude
-                7. latitude
-                8. longitude
-                9. Batt
+                5. Airspeed
+                6. Altitude
+                7. Latitude
+                8. Longitude
+                9. Batt Tegangan
+                10. Batt Arus
             */
             MainWindow win = (MainWindow)Window.GetWindow(this);
             baris.Add(win.waktuTerbang.Ticks.ToString());
-            baris.Add(fmode.ToString("X"));
+            baris.Add(fmode.ToString("D"));
             baris.Add(heading_val.ToString());
             baris.Add(pitch_val.ToString());
             baris.Add(roll_val.ToString());
             baris.Add(airspeed_val.ToString());
             baris.Add(alti_val.ToString());
-            baris.Add(lat.ToString());
-            baris.Add(longt.ToString());
+            baris.Add(efalcongps.GetLatDecimal().ToString("0.########", CultureInfo.CurrentUICulture));
+            baris.Add(efalcongps.GetLonDecimal().ToString("0.########", CultureInfo.CurrentUICulture));
             baris.Add(batt_volt.ToString());
+            baris.Add(batt_cur.ToString());
 
             menulis.WriteRow(baris);
         }
@@ -709,7 +771,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private IVideoSource liveStream;
         private void startOnboardCam(object sender, RoutedEventArgs e)
         {
-            if (liveStream != null) StopCam();
+            if (liveStream != null || liveStream.IsRunning) StopCam();
             if (CurrentCamera != null)
             {
                 liveStream = new VideoCaptureDevice(CurrentCamera.MonikerString);
@@ -749,7 +811,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             var saveFile = new JpegBitmapEncoder();
             saveFile.Frames.Add(BitmapFrame.Create(bi));
             saveFile.Save(file);
-            file.Close();
+            file.Dispose();
         }
 
         #endregion

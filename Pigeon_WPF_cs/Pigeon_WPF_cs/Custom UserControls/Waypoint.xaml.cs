@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -31,7 +32,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
     /// </summary>
     public partial class Waypoint : UserControl
     {
-        private double lat = -7.275869, longt = 112.794307;
+        //private double lat = -7.275869, longt = 112.794307;
+        private double idn_lat = -1.5437881d, idn_lon = 119.095757d;
         double markerWidth = 50, markerHeight = 50;
 
         public Waypoint()
@@ -42,12 +44,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             thePoints = new List<PointLatLng>();
         }
 
-        #region Waypoint Listing
+        #region Waypoint List Window
 
         private bool isWPDockHidden = true;
         private void toggleWPDock(object sender, RoutedEventArgs e)
         {
-            var nextHeight = 0;
+            var nextHeight = 25;
             if (isWPDockHidden)
             {
                 nextHeight = 300;
@@ -55,19 +57,15 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
             else
             {
-                nextHeight = 25;
                 wp_dock_btn.Content = "Markers \u25B2";
             }
             isWPDockHidden = !isWPDockHidden;
 
-            var toggleDock = new DoubleAnimation()
-            {
+            wp_dock.BeginAnimation(HeightProperty, new DoubleAnimation() {
                 From = wp_dock.Height,
                 To = nextHeight,
                 Duration = TimeSpan.FromMilliseconds(200)
-            };
-
-            wp_dock.BeginAnimation(DockPanel.HeightProperty, toggleDock);
+            });
             wp_dock.Height = nextHeight;
         }
 
@@ -77,26 +75,28 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void mapView_Loaded(object sender, RoutedEventArgs e)
         {
+            MainWindow win = (MainWindow)Window.GetWindow(this);
+
+            mapView.ShowCenter = false;
+            mapView.CacheLocation = System.IO.Path.GetDirectoryName(win.flight_Ctrl.Path + "/MapCache/");
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
             mapView.MultiTouchEnabled = true;
             mapView.MapProvider = GoogleSatelliteMapProvider.Instance;
-            //mapView.CacheLocation = System.IO.Path.GetDirectoryName(Application.ExecutablePath)
-            mapView.MinZoom = 2;
-            mapView.MaxZoom = 25;
-            mapView.Zoom = 18;
-            mapView.MouseWheelZoomType = MouseWheelZoomType.MousePositionWithoutCenter;
+            mapView.MinZoom = 3;
+            mapView.MaxZoom = 20;
+            mapView.MouseWheelZoomType = MouseWheelZoomType.MousePositionAndCenter;
             mapView.CanDragMap = true;
-            mapView.DragButton = MouseButton.Right;
+            mapView.DragButton = MouseButton.Left;
             mapView.IgnoreMarkerOnMouseWheel = true;
-            mapView.ShowCenter = false;
-            mapView.CenterPosition = mapView.Position = new PointLatLng(lat, longt);
             mapView.Markers.CollectionChanged += UpdateWaypointList;
 
-            setHomePos(lat, longt);
+            mapView.Position = new PointLatLng(idn_lat, idn_lon);
+            mapView.Zoom = 5.75f;
+
+            //setHomePos(lat, longt);
             //mapView.Markers.Remove(homeIco);
         }
 
-        int wp_index = 0;
         private void UpdateWaypointList(object sender, NotifyCollectionChangedEventArgs e)
         {
             try
@@ -106,19 +106,20 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     case NotifyCollectionChangedAction.Add:
                         foreach (var themarker in e.NewItems)
                         {
-                            //Console.WriteLine(themarker.GetType().ToString());
                             switch (themarker.GetType().Name.ToString())
                             {
                                 case "GMapMarker":
                                     var str = ((GMapMarker)themarker).Tag.ToString().ToLower().Replace(" ", "");
-                                    Console.WriteLine("Added marker: " + str);
+                                    Debug.WriteLine("\nAdded new marker: " + str);
+                                    
                                     var wpitem = new WaypointItem((GMapMarker)themarker) { Name = str };
                                     wp_dock_stack.Children.Add(wpitem);
+                                    
                                     try { ((CustomMarker)((GMapMarker)themarker).Shape).wpItem = wpitem; }
                                     catch { }
                                     break;
                                 case "GMapRoute":
-                                    //Console.WriteLine("Added route: " + ((GMapRoute)themarker).Tag.ToString());
+                                    //Debug.WriteLine("Added route: " + ((GMapRoute)themarker).Tag.ToString());
                                     break;
                             }
                         }
@@ -131,7 +132,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                             {
                                 case "GMapMarker":
                                     var str = ((GMapMarker)item).Tag.ToString().ToLower().Replace(" ", "");
-                                    Console.WriteLine("Removed: " + str);
+                                    Debug.WriteLine("Removed: " + str);
                                     foreach (WaypointItem stack in wp_dock_stack.Children)
                                     {
                                         if (stack.Name.ToString() == str) wp_dock_stack.Children.Remove(stack);
@@ -144,7 +145,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
             catch (Exception exc)
             {
-                Console.WriteLine(exc.StackTrace);
+                Debug.WriteLine(exc.StackTrace);
                 return;
             }
         }
@@ -236,7 +237,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 Duration = TimeSpan.FromSeconds(1)
             };
 
-            //Console.WriteLine(pindahAnimX.To.ToString() + " " + pindahAnimY.To.ToString());
+            //Debug.WriteLine(pindahAnimX.To.ToString() + " " + pindahAnimY.To.ToString());
 
             var rotateTrans = new RotateTransform();
             homeIco.Shape.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -280,7 +281,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 mapView.Markers.Add(trackerWahana);
             }
 
-            Console.WriteLine(string.Format("Created posgcs at {0} , {1}", thelat, thelongt));
+            Debug.WriteLine(string.Format("Created posgcs at {0} , {1}", thelat, thelongt));
         }
         public void SetHeadingGCS(float bearing)
         {
@@ -329,7 +330,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         float lastbearing; Point lastpos;
         bool isIkutiWahana = false;
-        public void setPosWahana(double currlat, double currlongt, float bearing)
+        public async void SetPosWahana(double currlat, double currlongt, float bearing)
         {
             //if (currlat - lastpos.X > 1.0f || currlat - lastpos.X < -1.0f || currlongt - lastpos.Y > 1.0f || currlongt - lastpos.Y < -1.0f) return;
 
@@ -415,27 +416,26 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void relokasiMap(object sender, EventArgs e)
         {
-            //Console.WriteLine("PINDAH");
+            //Debug.WriteLine("PINDAH");
             mapView.CenterPosition = mapView.Position = poswahana.Position;
         }
 
         //Flight Mode
         internal void SetMode(byte fmode)
         {
-            FmodeEnable(true);
             switch (fmode)
             {
                 case 0x00:
                     fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 255, 255, 80));
                     fmode_lbl.Content = "MANUAL MODE";
                     break;
-                case 0x01:
+                case 0x08:
                     fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 12, 161, 166));
                     fmode_lbl.Content = "STABILIZER MODE";
                     break;
-                case 0x02:
+                case 0x80:
                     fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 200, 140, 0));
-                    fmode_lbl.Content = "LOITER MODE";
+                    fmode_lbl.Content = "AUTO MODE";
                     break;
             }
         }
@@ -467,7 +467,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             Point addMark = e.GetPosition(mapView);
             PointLatLng addMarkP = mapView.FromLocalToLatLng(Convert.ToInt32(addMark.X), Convert.ToInt32(addMark.Y));
             AddMarkerAt(addMarkP, wayIndex++, routeIndex++);
-            //Console.WriteLine("Double clicked at : " + addMarkP.Lat + " " + addMarkP.Lng);
+            //Debug.WriteLine("Double clicked at : " + addMarkP.Lat + " " + addMarkP.Lng);
         }
 
         //waypoint placing

@@ -20,6 +20,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Pigeon_WPF_cs
 {
@@ -135,12 +136,20 @@ namespace Pigeon_WPF_cs
 
         /// <summary>
         /// Set properti baterai
+        /// <br/><paramref name="tegangan"/> dalam Volt
+        /// <br/><paramref name="arus"/> dalam Ampere
         /// </summary>
-        internal void SetBaterai(float baterai)
+        internal void SetBaterai(float tegangan, float arus, byte jmlcell = 3)
         {
-            //Console.WriteLine("Baterai Convert: " + Convert.ToInt32(map(baterai, 10.5f, 12.8f, 80.0f, 750.0f)).ToString());
-            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, 500, 396));
-            val_batt.Content = baterai.ToString("0.00") + " V";
+            Debug.WriteLine("SetBaterai : \n"
+                + "jml cell : " + jmlcell.ToString()
+                + "tegangan : " + tegangan.ToString() + " V"
+                + "arus : " + arus.ToString() + " A"
+            );
+
+            int persen_px = (int)map(tegangan/jmlcell, 3.0f, 4.2f, 70.0f, 640.0f);
+            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, persen_px, 396));
+            val_batt.Content = tegangan.ToString("#.##") + " V | " + arus.ToString("#.###") + " A";
         }
 
         #endregion
@@ -283,9 +292,10 @@ namespace Pigeon_WPF_cs
         /// </summary>
         public bool isTrackerConnected = false;
         /// <summary>
-        /// Set status koneksi<br/>
-        /// <paramref name="tipe"/> : wahana = false, tracker = true
+        /// Set status koneksi
         /// </summary>
+        /// <param name="status"></param>
+        /// <param name="tipe"></param>
         public void setConnStat(bool status, bool tipe)
         {
             if (status && tipe) //tracker online
@@ -334,8 +344,8 @@ namespace Pigeon_WPF_cs
         {
             if (isTimerFirstTime)
             {
-                detikan = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(1) };
-                detikan.Tick += detikTerbang;
+                detikan = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(10) };
+                detikan.Tick += TickTerbang;
                 waktuStart = DateTime.Now;
                 detikan.Start();
                 isTimerFirstTime = false;
@@ -353,7 +363,7 @@ namespace Pigeon_WPF_cs
             else detikan.Start();
         }
 
-        private void detikTerbang(object sender, EventArgs e)
+        private void TickTerbang(object sender, EventArgs e)
         {
             waktuTerbang = DateTime.Now - waktuStart;
             val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");

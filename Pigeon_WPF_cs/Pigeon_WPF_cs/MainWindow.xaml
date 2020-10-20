@@ -209,7 +209,7 @@
                     </Grid>
                     <DockPanel Margin="4,0,0,0" LastChildFill="False" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <Label x:Name="lbl_batt" Content="Batt" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Top" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway"/>
-                        <Label x:Name="val_batt" Content="(N/A)" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" FontSize="14" Padding="0" FontFamily="Raleway SemiBold" VerticalContentAlignment="Center" DockPanel.Dock="Bottom" HorizontalContentAlignment="Center"/>
+                        <Label x:Name="val_batt" Content="N/A" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" FontSize="14" Padding="0" FontFamily="Raleway SemiBold" VerticalContentAlignment="Center" DockPanel.Dock="Bottom" HorizontalContentAlignment="Center"/>
                     </DockPanel>
                 </DockPanel>
                 <Button x:Name="btn_exit" Height="40" VerticalAlignment="Center" BorderThickness="0" Background="{x:Null}" Padding="0" Grid.Column="4" Width="40" Click="closeApp" HorizontalAlignment="Right" Margin="0,-3,16,-3.8" AutomationProperties.HelpText="Exit Pigeon app">

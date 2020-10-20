@@ -20,7 +20,7 @@
             <ColumnDefinition Width="130*"/>
         </Grid.ColumnDefinitions>
         <Label x:Name="judul_flight" Content="Flight View" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="207"/>
-        <Grid Margin="5,4,5,5" Grid.Row="1" Grid.RowSpan="3">
+        <Grid Margin="2.5,2.5" Grid.Row="1" Grid.RowSpan="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="80*"/>
                 <ColumnDefinition Width="80*"/>
@@ -30,11 +30,11 @@
                 <RowDefinition Height="15*"/>
             </Grid.RowDefinitions>
 
-            <DockPanel Margin="0,0,10,0" Grid.Row="1" Background="Gainsboro" VerticalAlignment="Center" Height="30">
+            <DockPanel Margin="0,0,5,0" Grid.Row="1" Background="Gainsboro" VerticalAlignment="Center" Height="30">
                 <Label Content="LAT" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="10,0,0,0" FontFamily="Consolas" FontSize="14"/>
                 <TextBox x:Name="tb_lat" Text="N/A" VerticalContentAlignment="Center" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,3,5,3" FontSize="20" Width="180" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" Foreground="#FF15008B"/>
             </DockPanel>
-            <DockPanel Margin="10,0,0,0" Grid.Row="1" Background="Gainsboro" Grid.Column="1" VerticalAlignment="Center" Height="30">
+            <DockPanel Margin="5,0,0,0" Grid.Row="1" Background="Gainsboro" Grid.Column="1" VerticalAlignment="Center" Height="30">
                 <Label Content="LON" FontFamily="Consolas" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14"/>
                 <TextBox x:Name="tb_longt" Text="N/A" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,5,0" FontSize="20" Width="180" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" Foreground="#FF15008B"/>
             </DockPanel>

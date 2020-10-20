@@ -5,81 +5,26 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Pigeon_WPF_cs.Custom_UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Width="1132" Height="626">
+             d:DesignHeight="632" d:DesignWidth="1132">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="53.6"/>
+            <RowDefinition Height="62.4"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="59*"/>
             <ColumnDefinition Width="54*"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="judul_track" Content="GPS Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="228"/>
-        <Grid Grid.Column="1" Margin="2.667,0,25,5" Grid.RowSpan="2">
+        <Label x:Name="judul_track" Content="Antenna Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="228"/>
+        <Grid Grid.Column="1" Margin="2.5,2.5" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30*"/>
                 <RowDefinition Height="45*"/>
                 <RowDefinition Height="45*"/>
                 <RowDefinition Height="80*"/>
             </Grid.RowDefinitions>
-            <Grid Margin="0,5" Background="Gainsboro" Grid.Row="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150*"/>
-                    <ColumnDefinition Width="30*"/>
-                </Grid.ColumnDefinitions>
-                <DockPanel>
-                    <Label Content="Set Koordinat Tracker" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0"/>
-                    <Grid Margin="10,0,0,0" VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="20*"/>
-                            <ColumnDefinition Width="20*"/>
-                            <ColumnDefinition Width="8*"/>
-                        </Grid.ColumnDefinitions>
-                        <DockPanel Margin="0">
-                            <Label Content="LATITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                            <TextBox x:Name="tb_lat_tracker" Text="-7.27664126611818"  VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
-                        </DockPanel>
-                        <DockPanel Grid.Column="2" Margin="0">
-                            <Label Content="TINGGI" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                            <TextBox x:Name="tb_tinggi_tracker" Text="1" VerticalContentAlignment="Center" Margin="0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
-                        </DockPanel>
-                        <DockPanel Grid.Column="1" Margin="0">
-                            <Label Content="LONGTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                            <TextBox x:Name="tb_longt_tracker" Text="112.793774306774" VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
-                        </DockPanel>
-                    </Grid>
-                </DockPanel>
-                <Button x:Name="btn_postracker" Margin="0" Grid.Column="1" Height="40" VerticalAlignment="Center" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Center" Width="40" Click="pasangTracker" IsEnabled="False">
-                    <Image Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-email-send-80.png" Width="30" Height="30"/>
-                </Button>
-            </Grid>
-            <DockPanel Margin="0,5" Background="Gainsboro" Grid.Row="1">
-                <Label Content="Koordinat Wahana" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0"/>
-                <Grid Margin="25,0" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="10*"/>
-                        <ColumnDefinition Width="10*"/>
-                        <ColumnDefinition Width="10*"/>
-                    </Grid.ColumnDefinitions>
-                    <DockPanel Margin="0">
-                        <Label Content="LATITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_lat_wahana" Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
-                    </DockPanel>
-                    <DockPanel Grid.Column="1" Margin="0">
-                        <Label Content="LONGTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_longt_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
-                    </DockPanel>
-                    <DockPanel Grid.Column="2" Margin="0">
-                        <StackPanel DockPanel.Dock="Top">
-                            <Label Content="ALTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold" Padding="0"/>
-                            <Label Content="(dari posisi start)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" FontSize="10"/>
-                        </StackPanel>
-                        <TextBox x:Name="tb_alti_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
-                    </DockPanel>
-                </Grid>
-            </DockPanel>
-            <DockPanel Margin="0,5" Background="Gainsboro">
+            <Label x:Name="conn_panel_label" Content="Menggunakan Koneksi pada Flight View" FontStretch="ExtraExpanded" FontSize="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontStyle="Oblique" FontWeight="Bold" Foreground="White" Background="#7F000000" Panel.ZIndex="1" Visibility="Collapsed"/>
+            <DockPanel x:Name="conn_panel" Margin="0,2.5" Background="Gainsboro">
                 <Grid Margin="10,0,0,3">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="49*"/>
@@ -106,7 +51,63 @@
                     </DockPanel>
                 </Button>
             </DockPanel>
-            <Grid Margin="0,5" Background="Gainsboro" Grid.Row="3">
+            <DockPanel Margin="0,2.5" Background="Gainsboro" Grid.Row="1">
+                <Label Content="Koordinat Wahana" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0"/>
+                <Grid Margin="25,0" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10*"/>
+                        <ColumnDefinition Width="10*"/>
+                        <ColumnDefinition Width="10*"/>
+                    </Grid.ColumnDefinitions>
+                    <DockPanel Margin="0">
+                        <Label Content="LATITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                        <TextBox x:Name="tb_lat_wahana" Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Margin="0">
+                        <Label Content="LONGTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                        <TextBox x:Name="tb_longt_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="2" Margin="0">
+                        <StackPanel DockPanel.Dock="Top">
+                            <Label Content="ALTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold" Padding="0"/>
+                            <Label Content="(dari posisi start)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" FontSize="10"/>
+                        </StackPanel>
+                        <TextBox x:Name="tb_alti_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
+                    </DockPanel>
+                </Grid>
+            </DockPanel>
+            <Grid Margin="0,2.5" Background="Gainsboro" Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150*"/>
+                    <ColumnDefinition Width="30*"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Koordinat Tracker" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0" Grid.ColumnSpan="2"/>
+                <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,25">
+                    <Grid Margin="10,0,0,0" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20*"/>
+                            <ColumnDefinition Width="20*"/>
+                            <ColumnDefinition Width="8*"/>
+                        </Grid.ColumnDefinitions>
+                        <DockPanel Margin="0">
+                            <Label Content="LATITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                            <TextBox x:Name="tb_lat_tracker" Text="N/A"  VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
+                        </DockPanel>
+                        <DockPanel Grid.Column="1" Margin="0">
+                            <Label Content="LONGTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                            <TextBox x:Name="tb_longt_tracker" Text="N/A" VerticalContentAlignment="Center" Margin="5,0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
+                        </DockPanel>
+                        <DockPanel Grid.Column="2" Margin="0">
+                            <Label Content="TINGGI" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
+                            <TextBox x:Name="tb_tinggi_tracker" Text="1" VerticalContentAlignment="Center" Margin="0" FontSize="18" Background="White" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsUndoEnabled="True" HorizontalContentAlignment="Center"/>
+                        </DockPanel>
+                    </Grid>
+                </DockPanel>
+                <Button x:Name="btn_postracker" Margin="0" Grid.Column="1" Height="40" VerticalAlignment="Center" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Center" Width="40" Click="pasangTracker" IsEnabled="False">
+                    <Image Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-email-send-80.png" Width="30" Height="30"/>
+                </Button>
+            </Grid>
+            <Grid Margin="0,2.5" Background="Gainsboro" Grid.Row="3">
                 <Label Content="Status Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="28" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" Margin="15,5,0,0"/>
                 <Button x:Name="btn_tracking" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,25,0" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="toggleTracking" IsEnabled="False">
                     <DockPanel>
