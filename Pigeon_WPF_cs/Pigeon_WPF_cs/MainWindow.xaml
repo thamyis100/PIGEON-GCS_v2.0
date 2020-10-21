@@ -22,28 +22,21 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid IsEnabled="True">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20*"/>
-            <RowDefinition Height="240*"/>
+            <RowDefinition Height="55.2"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="79*"/>
-            <ColumnDefinition Width="797*"/>
+            <ColumnDefinition Width="79.2"/>
+            <ColumnDefinition Width="798*"/>
             <ColumnDefinition Width="397*"/>
         </Grid.ColumnDefinitions>
-        <Grid Margin="0,0,0.2,0.2">
-            <Grid.Background>
-                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
-                    <GradientStop Color="#FF6A6A6A" Offset="0.316"/>
-                    <GradientStop Color="#FF1F1F1F" Offset="1"/>
-                    <GradientStop Color="#FF8F8F8F"/>
-                </LinearGradientBrush>
-            </Grid.Background>
+        <Grid Background="#FF4D1012">
             <DockPanel>
                 <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" UseLayoutRounding="False" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="4,4,4,0">
                     <Image.Effect>
-                        <DropShadowEffect ShadowDepth="2" Direction="275" BlurRadius="0"/>
+                        <DropShadowEffect ShadowDepth="1" Direction="275" BlurRadius="3" Color="White" Opacity="0.65"/>
                     </Image.Effect>
                 </Image>
                 <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="4,0,4,4" DockPanel.Dock="Bottom" UseLayoutRounding="False"/>
@@ -51,7 +44,7 @@
         </Grid>
         <Grid MouseLeftButtonDown="clickedWindow" Grid.RowSpan="2" Margin="0,55,0.2,-0.4">
             <Grid.RowDefinitions>
-                <RowDefinition/>
+                <RowDefinition Height="110.4"/>
                 <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
@@ -66,7 +59,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Rectangle Grid.RowSpan="6" Grid.ColumnSpan="4" Fill="#FF1F1F1F"/>
+            <Rectangle Grid.RowSpan="6" Grid.ColumnSpan="4" Fill="#FF4D1012"/>
             <!--<Button Click="muteVoice"  Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" >
                 <Label Content="Mute" FontSize="11"/>
             </Button>-->
@@ -147,27 +140,27 @@
                 </DockPanel>
             </Button>
             <Button x:Name="btn_help" Content="?" Style="{StaticResource leftPaneButtonStyle}" Margin="10,9.667,0,0" Grid.Row="5" VerticalAlignment="Top" BorderBrush="{x:Null}" Background="{x:Null}" Foreground="White" FontFamily="Unispace" FontWeight="Bold" RenderTransformOrigin="0.067,1.037" HorizontalAlignment="Left" ToolTip="Help about Pigeon" MouseEnter="hoverButton" MouseLeave="dehoverButton" Padding="0" Width="30" Height="30" VerticalContentAlignment="Center" Grid.ColumnSpan="2" FontSize="16"/>
-            <Rectangle x:Name="tab_flight" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="1" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <Rectangle x:Name="tab_map" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <Rectangle x:Name="tab_stats" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
-            <Rectangle x:Name="tab_track" Grid.Column="3" Fill="#FFE5E5E5" Height="60" Margin="0,0,-40,0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center" Width="20"/>
+            <Rectangle x:Name="tab_flight" Grid.Column="4" Fill="#FFE5E5E5" Height="60" Margin="0" Grid.Row="1" StrokeThickness="0" VerticalAlignment="Center"/>
+            <Rectangle x:Name="tab_map" Grid.Column="4" Fill="#FFE5E5E5" Height="60" Margin="0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center"/>
+            <Rectangle x:Name="tab_stats" Grid.Column="4" Fill="#FFE5E5E5" Height="60" Margin="0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center"/>
+            <Rectangle x:Name="tab_track" Grid.Column="4" Fill="#FFE5E5E5" Height="60" Margin="0" Grid.Row="4" StrokeThickness="0" VerticalAlignment="Center"/>
             <TextBlock x:Name="digital_clock" Margin="5,50,5,0" Grid.Row="5" TextWrapping="Wrap" Text="Waktu Sekarang" VerticalAlignment="Top" Grid.ColumnSpan="4" Foreground="White" FontSize="9"/>
         </Grid>
-        <Grid Background="#FF008C8C" MouseLeftButtonDown="clickedWindow" Grid.ColumnSpan="3" Margin="79,0,-0.4,0.2">
+        <Grid Background="#FF4D1012" MouseLeftButtonDown="clickedWindow" Grid.ColumnSpan="3" Margin="79,0,-0.4,0.2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
                 <RowDefinition Height="9*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*"/>
-                <ColumnDefinition Width="9*"/>
+                <ColumnDefinition Width="297"/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
             <Rectangle Fill="WhiteSmoke" Margin="0" StrokeThickness="0" Grid.Row="1" Grid.Column="1"/>
 
-            <Image x:Name="header" Source="Resources/images/Header.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+            <Image x:Name="header" Source="Resources/images/header-new.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Top" HorizontalAlignment="Left" Grid.Row="1"/>
 
-            <Grid Margin="45,5,0,5" Grid.Column="1" Grid.Row="1">
+            <Grid Margin="0,5" Grid.Column="1" Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="208*"/>
                     <ColumnDefinition Width="179*"/>
@@ -219,24 +212,23 @@
         </Grid>
 
         <!-- imagine this is a tab control area-->
-        <Border Grid.Row="1" Grid.Column="1" Margin="9.8,9.8,9.6,9.6" BorderBrush="#FFA8A8A8" BorderThickness="2" Grid.ColumnSpan="2">
+        <Border Grid.Row="1" Grid.Column="1" Margin="0,5,5,5" BorderBrush="#FFA8A8A8" BorderThickness="2" Grid.ColumnSpan="2">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="314*"/>
-                    <RowDefinition Height="27*"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="41.6"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150*"/>
-                    <ColumnDefinition Width="70*"/>
-                    <ColumnDefinition Width="130*"/>
+                    <ColumnDefinition Width="484.8"/>
+                    <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Grid x:Name="mapGrid" Margin="2.5" >
+                <Grid x:Name="mapGrid" Margin="0">
                     <controls:Waypoint x:Name="map_Ctrl" HorizontalAlignment="Stretch"/>
                 </Grid>
-                <controls:FlightControl x:Name="flight_Ctrl" Grid.ColumnSpan="3" Grid.RowSpan="2" />
-                <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
-                <controls:TrackerControl x:Name="track_Ctrl" Visibility="Hidden" Grid.ColumnSpan="3" Margin="60,28,59,28" Grid.RowSpan="2"/>
+                <controls:FlightControl x:Name="flight_Ctrl" Visibility="Hidden" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="0,0,-0.2,0" />
+                <controls:StatisticControl x:Name="stats_Ctrl" Visibility="Hidden" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="0,0,-0.2,0"/>
+                <controls:TrackerControl x:Name="track_Ctrl"  Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="0,0,-0.2,0"/>
             </Grid>
         </Border>
         <!-- tab control area, up to this point-->

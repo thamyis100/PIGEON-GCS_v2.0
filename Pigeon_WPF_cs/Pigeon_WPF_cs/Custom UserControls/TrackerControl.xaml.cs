@@ -33,37 +33,39 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             public double Lat, Longt;
             public float Alti;
         }
-        
+
+        private float Yaw, Pitch;
+
         public TrackerControl()
         {
             InitializeComponent();
             DataContext = this;
             PrepareUSBConn();
-            //foreach(ItemCollection ports in cb_ports.Items)
-            //{
-            //    Console.WriteLine(ports.ToString());
-            //}
         }
 
+        private bool isIntegrated = false;
+        /// <summary>
+        /// Menyatakan penggunaan telemetri dengan tracker secara integrasi. Menutup koneksi tracker jika diset false
+        /// </summary>
+        /// <param name="it"></param>
         public void Integration(bool it)
         {
             if (it)
             {
+                isIntegrated = true;
+                toggleConn(true);
                 conn_panel.IsEnabled = false;
                 conn_panel_label.Visibility = Visibility.Visible;
             }
             else
             {
+                isIntegrated = false;
+                toggleConn(false);
                 conn_panel.IsEnabled = true;
                 conn_panel_label.Visibility = Visibility.Collapsed;
             }
         }
-        //our connection is integrated in efalcon tracker
-        public void DataFromFlightView(byte[] thedata)
-        {
-            
-        }
-
+        
         #region WIFI UDP
 
         private bool isUsingWifi = false;
@@ -174,7 +176,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error opening serial port :: " + ex.Message, "Error!");
+                MessageBox.Show("Error opening serial port :: " + ex.Message, "Error!", MessageBoxButton.OK, MessageBoxImage.Warning);
                 Console.WriteLine(ex.StackTrace);
                 return;
             }
@@ -199,9 +201,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
             else
             {
-                if (thePort != null) thePort.Close();
+                if (thePort != null) thePort.Dispose();
                 isCurrentlyRecv = false;
-                if (udpSocket != null) udpSocket.Close();
+                if (udpSocket != null) udpSocket.Dispose();
 
                 toggleConn(false);
             }
@@ -291,20 +293,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             return returned;
         }
 
-        public void StartTracking()
-        {
-            toggleConn(true);
-            track_conn_bt.IsEnabled = false;
-        }
-
-        public void SetKoorTrack(double lat, double longt)
-        {
-            tb_lat_tracker.Text = lat.ToString();
-            GCS.Lat = lat;
-            tb_longt_tracker.Text = longt.ToString();
-            GCS.Longt = longt;
-        }
-
         float heading;
         public void dataMasukan(byte[] theData)
         {
@@ -363,6 +351,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #endregion
 
+        public void SetAttitude(float yaw, float pitch)
+        {
+            Yaw = yaw;
+            tb_bearing.Text = yaw.ToString("#.##") + '°';
+            Pitch = pitch;
+            tb_pitch.Text = pitch.ToString("#.##") + '°';
+
+            ((MainWindow)Window.GetWindow(this)).map_Ctrl.SetHeadingGCS(yaw);
+        }
+
+        public void StartTracking()
+        {
+            toggleConn(true);
+            track_conn_bt.IsEnabled = false;
+        }
+
+        public void SetKoorTrack(double lat, double longt)
+        {
+            tb_lat_tracker.Text = lat.ToString();
+            GCS.Lat = lat;
+            tb_longt_tracker.Text = longt.ToString();
+            GCS.Longt = longt;
+        }
+
         private Posisi GCS, Wahana;
         public void SetKoorGCS(double lat, double longt, float alti)
         {
@@ -416,23 +428,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
         }
 
-        short rotasi = 0; byte pitch = 0;
-        private void cmd_rotateTracker(object sender, EventArgs e)
-        {
-            if (!isTracking)
-            {
-                var it = (DispatcherTimer)sender;
-                it.Stop();
-            }
-            
-            //if (rotasi > 359) rotasi = 0;
-            //if (pitch > 90) pitch = 0;
-            //rotasi += 2;
-            //pitch++;
-            //thePort.WriteLine(pitch.ToString() + "," + rotasi.ToString());
-            //Console.WriteLine("Sendin Tracker: " + pitch.ToString() + "," + rotasi.ToString());
-        }
-
         #region Kalkulasi
 
         private float JarakHorizon()
@@ -469,34 +464,37 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //double ArahVerti = Math.Acos(jarakDarat / jarakLangsung);
             double ArahVerti = Math.Atan(Math.Tan(deltaTinggi / jarakDarat)) * (180 / Math.PI);
 
-            try {
+            //send data to tracker
+            MainWindow win = (MainWindow)Window.GetWindow(this);
+
+            try
+            {
                 // The Sent Data Goes :
                 // [0] = '#' command start identifier   (0)
                 // [1] = Pan (000.00) 4 byte            (1-4)
                 // [2] = Tilt (00.00) 4 byte            (5-8)
                 // \n endline
-                string data = "i," + ArahVerti.ToString("0.00") + ',' + ArahHorizon.ToString("0.00");
+                string data = "i," + ArahVerti.ToString("#.###") + ',' + ArahHorizon.ToString("#.###");
+                
+                win.flight_Ctrl.SendToConnection(Encoding.ASCII.GetBytes(data));
 
-                if (!isTrackerReady) return;
-                if (isUsingWifi)
-                {
-                    byte[] datagram = Encoding.ASCII.GetBytes(data + '\n');
-                    udpSocket.SendAsync(datagram, datagram.Length, new IPEndPoint(IPAddress.Parse("192.168.4.1"), 60111));
-                }
-                else thePort.WriteLine(string.Format("i,{0},{1}", Convert.ToInt16(ArahVerti), Convert.ToInt32(ArahHorizon)));
+                //if (!isTrackerReady) return;
+                //if (isUsingWifi)
+                //{
+                //    byte[] datagram = Encoding.ASCII.GetBytes(data + '\n');
+                //    udpSocket.SendAsync(datagram, datagram.Length, new IPEndPoint(IPAddress.Parse("192.168.4.1"), 60111));
+                //}
+                //else thePort.WriteLine(string.Format("i,{0},{1}", Convert.ToInt16(ArahVerti), Convert.ToInt32(ArahHorizon)));
                 //Console.WriteLine("Sending: " + data);
             }
-            catch(Exception e) { Console.WriteLine(e.StackTrace); }
+            catch (Exception e) { Console.WriteLine(e.StackTrace); }
             //Console.WriteLine(string.Format("Alti = {0}, Darat = {1}, Verti = {2} ", GCS.Alti, jarakDarat, ArahVerti));
             //Console.WriteLine(string.Format("Sending: {0},{1}", ArahVerti, ArahHorizon));
 
-            MainWindow win = (MainWindow)Window.GetWindow(this);
-            win.map_Ctrl.SetHeadingGCS(Convert.ToSingle(ArahHorizon));
-
-            if (jarakDarat / 1000 >= 1.0f) tb_jarak_horizon.Text = (jarakDarat / 1000).ToString("0.000",CultureInfo.InvariantCulture) + " km";
-            else tb_jarak_horizon.Text = jarakDarat.ToString("0.00", CultureInfo.InvariantCulture) + " m";
-            if (jarakLangsung / 1000 >= 1.0f) tb_jarak_lsg.Text = (jarakLangsung / 1000).ToString("0.000", CultureInfo.InvariantCulture) + " km";
-            else tb_jarak_lsg.Text = jarakLangsung.ToString("0.00", CultureInfo.InvariantCulture) + " m";
+            if (jarakDarat / 1000 >= 1.0f) tb_jarak_horizon.Text = (jarakDarat / 1000).ToString("#.###",CultureInfo.InvariantCulture) + " km";
+            else tb_jarak_horizon.Text = jarakDarat.ToString("#.##", CultureInfo.InvariantCulture) + " m";
+            if (jarakLangsung / 1000 >= 1.0f) tb_jarak_lsg.Text = (jarakLangsung / 1000).ToString("#.###", CultureInfo.InvariantCulture) + " km";
+            else tb_jarak_lsg.Text = jarakLangsung.ToString("#.##", CultureInfo.InvariantCulture) + " m";
         }
 
         #endregion

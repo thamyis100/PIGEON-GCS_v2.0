@@ -151,17 +151,17 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private float heading_val, pitch_val, roll_val, alti_val, batt_volt, batt_cur, tracker_yaw, tracker_pitch;
         
         private byte fmode;
-        // 0b00000000 = 0x00 = MATI
-        // 0b00001000 = 0x08 = 
-        // 0b10000000 = 0x80 = 
+        // 0b00000000 = 0x00 = Mati
+        // 0b00001000 = 0x08 = Stabilizer
+        // 0b10000000 = 0x80 = Hold Altitude
         
         private ushort airspeed_val = 0;
         //private double lat = -7.275869000d, longt = 112.794307000d;
         GPSData efalcongps = new GPSData(), trackergps = new GPSData();
 
         //global path for saving data
-        private string path = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
-        public string Path => path;
+        private string docpath = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
+        public string Path => docpath;
 
         //The Data Goes :
 
@@ -174,9 +174,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             InitializeComponent();
 
             DataContext = this;
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(docpath));
             PrepareWebcam(); //Cari webcam
             PrepareUSBConn(); //Cari usb
+
+            capturefolder = docpath + "/Camera Captures/" + DateTime.Now.ToString("MMM dd, yyyy") + '/';
 
             //dataTimer = new DispatcherTimer();
             //dataTimer.Interval = TimeSpan.FromSeconds(8);
@@ -441,13 +443,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                         tracker_pitch = BitConverter.ToSingle(dataIn, 5);
 
                         byte[] thobytes = new byte[5];
-                        Array.Copy(dataIn, 6, thobytes, 0, 5);
+                        Array.Copy(dataIn, 9, thobytes, 0, 5);
                         trackergps.SetLatitude(thobytes);
-                        thebytes = new byte[6];
-                        Array.Copy(dataIn, 11, thobytes, 0, 6);
+                        thobytes = new byte[6];
+                        Array.Copy(dataIn, 14, thobytes, 0, 6);
                         trackergps.SetLongitude(thobytes);
-
-
 
                         #region Tracker data debugging
                         #if DEBUGDATA
@@ -467,7 +467,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 }
             } catch (Exception e)
             {
-                Debug.WriteLine(e.Message);
+                Debug.WriteLine("ParseDataAsync :" + e.Message);
             }
 
             Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(UpdateFlightData), dataIn[0]);
@@ -492,10 +492,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                         win.ToggleWaktuTerbang();
                         win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
                         win.setConnStat(true, false);
-                        menulis = new CsvFileWriter(new FileStream(path + "BlackBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
                     }
                     win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
                     win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
+
+                    if(win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
 
                     tb_yaw.Text = heading_val.ToString("0.##", CultureInfo.InvariantCulture) + "°";
                     ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
@@ -530,10 +531,23 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     break;
 
                 case 'T':
+                    if (isFirstTracker)
+                    {
+                        isFirstTracker = false;
+                        win.track_Ctrl.Integration(true);
+                        win.track_Ctrl.isTrackerReady = true;
+                        win.track_Ctrl.btn_tracking.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        win.map_Ctrl.StartPosGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal());
+                    }
                     win.track_Ctrl.SetKoorGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal(), 1.5f);
+                    win.track_Ctrl.SetAttitude(tracker_yaw, tracker_pitch);
                     break;
             }
-            if (isFirstNav == isFirstMode == isFirstBatt == false) WriteBlackBox();
+            if (!isFirstNav && !isFirstMode && !isFirstBatt)
+            {
+                if(menulis == null) menulis = new CsvFileWriter(new FileStream(docpath + "BlackBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
+                WriteBlackBox();
+            }
 
             //if (!win.track_Ctrl.isTrackerReady) win.track_Ctrl.SetKoorTrack(lat, longt);
 
@@ -626,6 +640,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             string total = marker.Position.Lat.ToString() + ',' + marker.Position.Lng.ToString();
             var data = Encoding.ASCII.GetBytes(total);
+            if (!connected) return;
             switch (isCurrentlyRecv)
             {
                 case true: //using wifi
@@ -636,6 +651,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     break;
             }
         }
+
+        //dont forget to change to gateway
+        public async void SendToConnection(byte[] data) { if (isUsingWifi) udpSocket.Send(data, data.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12727)); }
 
         #endregion
 
@@ -668,32 +686,23 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
         #endregion
 
-        #region LiveStreamCamera
+        #region CameraStream prepare
 
         public ObservableCollection<FilterInfo> Cameras { get; set; }
 
+        private FilterInfo currCam;
         public FilterInfo CurrentCamera
         {
             get { return currCam; }
             set { currCam = value; OnPropertyChanged("CurrentCamera"); }
         }
 
-        private FilterInfo currCam;
         FileSystemWatcher watcher;
         private async void PrepareWebcam()
         {
             cb_cams.IsEnabled = false;
             Cameras = new ObservableCollection<FilterInfo>();
             getCameras();
-
-            watcher = new FileSystemWatcher()
-            {
-                Path = path,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
-                Filter = "*.jpeg",
-                EnableRaisingEvents = true
-            };
-            watcher.Created += GambarBaru;
         }
 
         private void getCameras()
@@ -732,51 +741,27 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             btn_refreshcam.IsEnabled = true;
         }
 
-        private delegate void UpdateScreenshotList(string path);
-        private void GambarBaru(object sender, FileSystemEventArgs e)
-        {
-            //Console.WriteLine("New File at " + e.FullPath);
-            if (e.FullPath.Contains("Capture_"))
-            {
-                Dispatcher.BeginInvoke(new UpdateScreenshotList(ShowSavedCaptures), e.FullPath);
-            }
-        }
-
-        private void ShowSavedCaptures(string path)
-        {
-            screenshot_List.Children.Insert(0,new System.Windows.Controls.Image()
-            {
-                Source = new BitmapImage(new Uri(path)),
-                Margin = new Thickness(0, 0, 2, 0),
-            });
-            RenderOptions.SetBitmapScalingMode(screenshot_List.Children[0], BitmapScalingMode.HighQuality);
-            screenshot_List.Children[0].MouseLeftButtonDown += popupCapturedImage;
-        }
-
-        private void popupCapturedImage(object sender, MouseButtonEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
-
         public void stopControl() => StopCam(); //Exit Trigger
         private void StopCam()
         {
-            if(liveStream != null && liveStream.IsRunning)
+            if(liveStream != null)
             {
                 liveStream.SignalToStop();
                 liveStream.NewFrame -= new NewFrameEventHandler(cam_AvailFrame);
+                btn_livestream.Content = "Start Stream";
             }
         }
 
         private IVideoSource liveStream;
         private void startOnboardCam(object sender, RoutedEventArgs e)
         {
-            if (liveStream != null || liveStream.IsRunning) StopCam();
-            if (CurrentCamera != null)
+            if (liveStream != null) StopCam();
+            else if (CurrentCamera != null)
             {
                 liveStream = new VideoCaptureDevice(CurrentCamera.MonikerString);
                 liveStream.NewFrame += cam_AvailFrame;
                 liveStream.Start();
+                btn_livestream.Content = "Stop Stream";
             }
         }
 
@@ -794,24 +779,74 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
             catch (Exception exc)
             {
-                MessageBox.Show("Error upon receiving new frame:\n" + exc.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Error camera stream:\n" + exc.Message + "\n\nMemberhentikan camera stream...", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 StopCam();
             }
         }
 
-        byte i = 0;
+        #endregion
+
+        #region CameraStream captures
+
+        string capturefolder;
+        bool isFirstCapture = true;
+        byte i = 1;
         private void AmbilGambar(object sender, RoutedEventArgs e)
         {
             if (bi == null) return;
             FileStream file;
-            
-            try { file = new FileStream(path + "Capture_" + DateTime.Now.ToString("mm_ss[dd-M-yy]_") + ".jpeg", FileMode.CreateNew); }
-            catch { file = new FileStream(path + "Capture_" + DateTime.Now.ToString("mm_ss[dd-M-yy]_") + (i++).ToString() + ".jpeg", FileMode.CreateNew); }
+
+            if (isFirstCapture)
+            {
+                isFirstCapture = false;
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(capturefolder));
+                watcher = new FileSystemWatcher()
+                {
+                    Path = capturefolder,
+                    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
+                    Filter = "*.jpeg",
+                    EnableRaisingEvents = true
+                };
+                watcher.Created += GambarBaru;
+            }
+
+            try { file = new FileStream(capturefolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss") + ".jpeg", FileMode.CreateNew); }
+            catch { file = new FileStream(capturefolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss_") + (i++).ToString() + ".jpeg", FileMode.CreateNew); }
 
             var saveFile = new JpegBitmapEncoder();
             saveFile.Frames.Add(BitmapFrame.Create(bi));
             saveFile.Save(file);
             file.Dispose();
+        }
+
+        private delegate void UpdateScreenshotList(string path);
+        private void GambarBaru(object sender, FileSystemEventArgs e)
+        {
+            if (e.FullPath.Contains("Capture_"))
+            {
+                Dispatcher.BeginInvoke(new UpdateScreenshotList(ShowSavedCaptures), e.FullPath);
+            }
+        }
+
+        private void ShowSavedCaptures(string path)
+        {
+            screenshot_List.Children.Insert(0, new System.Windows.Controls.Image()
+            {
+                Source = new BitmapImage(new Uri(path)),
+                Margin = new Thickness(8, 8, 10, 8),
+                
+            });
+            RenderOptions.SetBitmapScalingMode(screenshot_List.Children[0], BitmapScalingMode.HighQuality);
+            screenshot_List.Children[0].MouseLeftButtonDown += (sender, mousevent) => Process.Start(path);
+            ((System.Windows.Controls.Image)screenshot_List.Children[0]).RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+            screenshot_List.Children[0].MouseEnter += (sender, mousevent) => {
+                ((System.Windows.Controls.Image)sender).RenderTransform = new ScaleTransform(1.1, 1.1);
+                Cursor = Cursors.Hand;
+            };
+            screenshot_List.Children[0].MouseLeave += (sender, mousevent) => {
+                ((System.Windows.Controls.Image)sender).RenderTransform = new ScaleTransform(1.0, 1.0);
+                Cursor = Cursors.Arrow;
+            };
         }
 
         #endregion
@@ -826,13 +861,17 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         #region Property Binding Handler
 
         public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string theProp)
+        private void OnPropertyChanged(string propertyName)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            switch (propertyName)
             {
-                var e = new PropertyChangedEventArgs(theProp);
-                handler(this, e);
+                case "CurrentCamera":
+                    if (liveStream != null)
+                    {
+                        btn_livestream.Content = "Ubah Stream";
+                    }
+                    break;
             }
         }
 

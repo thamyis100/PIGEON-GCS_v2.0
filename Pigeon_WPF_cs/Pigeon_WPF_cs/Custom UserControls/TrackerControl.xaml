@@ -8,15 +8,15 @@
              d:DesignHeight="632" d:DesignWidth="1132">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="62.4"/>
+            <RowDefinition Height="54.4"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="59*"/>
             <ColumnDefinition Width="54*"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="judul_track" Content="Antenna Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="228"/>
-        <Grid Grid.Column="1" Margin="2.5,2.5" Grid.RowSpan="2">
+        <Label x:Name="judul_track" Content="Antenna Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" />
+        <Grid Grid.Column="1" Margin="2.5,0" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30*"/>
                 <RowDefinition Height="45*"/>
@@ -61,18 +61,18 @@
                     </Grid.ColumnDefinitions>
                     <DockPanel Margin="0">
                         <Label Content="LATITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_lat_wahana" Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
+                        <TextBox x:Name="tb_lat_wahana" Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
                     </DockPanel>
                     <DockPanel Grid.Column="1" Margin="0">
                         <Label Content="LONGTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold"/>
-                        <TextBox x:Name="tb_longt_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
+                        <TextBox x:Name="tb_longt_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
                     </DockPanel>
                     <DockPanel Grid.Column="2" Margin="0">
                         <StackPanel DockPanel.Dock="Top">
                             <Label Content="ALTITUDE" FontFamily="Consolas" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" FontSize="16" FontWeight="Bold" Padding="0"/>
                             <Label Content="(dari posisi start)" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0" FontSize="10"/>
                         </StackPanel>
-                        <TextBox x:Name="tb_alti_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Width="120" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
+                        <TextBox x:Name="tb_alti_wahana"  Text="N/A" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="20" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" Focusable="False" IsUndoEnabled="False" HorizontalContentAlignment="Center" Foreground="#FF15008B" IsReadOnly="True"/>
                     </DockPanel>
                 </Grid>
             </DockPanel>

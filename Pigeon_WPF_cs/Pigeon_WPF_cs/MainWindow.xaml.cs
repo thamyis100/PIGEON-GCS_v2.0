@@ -21,6 +21,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Windows.Forms.VisualStyles;
 
 namespace Pigeon_WPF_cs
 {
@@ -374,7 +375,12 @@ namespace Pigeon_WPF_cs
 
         #region window control
 
-        private void clickedWindow(object sender, MouseButtonEventArgs e) { try { DragMove(); } catch { return; } }
+        private void clickedWindow(object sender, MouseButtonEventArgs e) 
+        { 
+            try {
+                if (WindowState != WindowState.Normal) WindowState = WindowState.Normal;
+                DragMove(); 
+            } catch { return; } }
 
         /// <summary>
         /// Cek apakah wahana aman (eg. sudah mendarat)
@@ -440,6 +446,17 @@ namespace Pigeon_WPF_cs
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
             Grid.SetRowSpan(mapGrid, 1);
             Grid.SetColumnSpan(mapGrid, 1);
+            mapGrid.Margin = new Thickness(0, 0, 0, 0);
+        }
+        /// <summary>
+        /// Kecilkan ukuran map view ke tracker view
+        /// </summary>
+        public void MinimizeMapTracker()
+        {
+            map_Ctrl.judul_map.Visibility = Visibility.Hidden;
+            Grid.SetRowSpan(mapGrid, 2);
+            Grid.SetColumnSpan(mapGrid, 1);
+            mapGrid.Margin = new Thickness(0, 0, -130, 0);
         }
         /// <summary>
         /// Besarkan ukuran map view
@@ -448,7 +465,8 @@ namespace Pigeon_WPF_cs
         {
             map_Ctrl.judul_map.Visibility = Visibility.Visible;
             Grid.SetRowSpan(mapGrid, 2);
-            Grid.SetColumnSpan(mapGrid, 3);
+            Grid.SetColumnSpan(mapGrid, 2);
+            mapGrid.Margin = new Thickness(0, 0, 0, 0);
         }
 
         #endregion
@@ -497,7 +515,7 @@ namespace Pigeon_WPF_cs
                     break;
                 case "btn_track":
                     setCurrentlyActive(tab_track, btn_track, track_Ctrl);
-                    MinimizeMap();
+                    MinimizeMapTracker();
                     break;
             }
         }
