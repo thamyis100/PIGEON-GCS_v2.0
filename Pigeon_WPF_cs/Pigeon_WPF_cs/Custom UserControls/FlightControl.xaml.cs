@@ -342,7 +342,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
                 thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
                 thePort.NewLine = "\n";
-                thePort.ReceivedBytesThreshold = 8;
                 if (!(thePort.IsOpen)) thePort.Open();
 
                 connected = true;

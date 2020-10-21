@@ -11,53 +11,5 @@
             <RowDefinition Height="50*"/>
             <RowDefinition Height="369*"/>
         </Grid.RowDefinitions>
-        <!--<Border VerticalAlignment="Center" Background="Gainsboro" Padding="0" CornerRadius="4" Margin="142,6,142,4" HorizontalAlignment="Center" Height="40" Width="508">
-            <DockPanel LastChildFill="False" Margin="10,3,5,3">
-                <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway"/>
-                <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedPort}" ItemsSource="{Binding sPorts}" Width="110" SelectionChanged="Cb_ports_SelectionChanged" FontSize="14"/>
-                <ComboBox x:Name="cb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedBaud}" Width="110" VerticalContentAlignment="Center" FontSize="14">
-                    <ComboBoxItem>BAUDRATE</ComboBoxItem>
-                    <ComboBoxItem>9600</ComboBoxItem>
-                    <ComboBoxItem>19200</ComboBoxItem>
-                    <ComboBoxItem>57600</ComboBoxItem>
-                    <ComboBoxItem>115200</ComboBoxItem>
-                    <ComboBoxItem>128000</ComboBoxItem>
-                </ComboBox>
-                <Button MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" Padding="0" Click="ToggleSerial">
-                    <DockPanel>
-                        --><!--<Image x:Name="img_conn" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-disconnected-80.png"  Margin="4,0" HorizontalAlignment="Center"/>--><!--
-                        <Label x:Name="ind_conn_status" Content="Disconnected" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="16" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
-                    </DockPanel>
-                </Button>
-            </DockPanel>
-        </Border>-->
-        <DockPanel  Grid.Column="1" Margin="2.5" Grid.Row="1" Grid.RowSpan="2" >
-            <DockPanel Height="35" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <Label Content="HEADING" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
-                <TextBox x:Name="tb_yaw" Text="{Binding Heading}" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <Label Content="PITCH" Padding="0" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
-                <TextBox x:Name="tb_pitch" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <Label Content="ROLL" Padding="0" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
-                <TextBox x:Name="tb_roll" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" DockPanel.Dock="Right" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0">
-                    <Label Content="SPEED" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontFamily="Consolas"/>
-                    <Label Content="(GPS / IMU)" FontSize="9" HorizontalAlignment="Left" Margin="0" Padding="0" FontFamily="Consolas"/>
-                </StackPanel>
-                <TextBox x:Name="tb_airspeed" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0">
-                    <Label Content="ALTITUDE" Padding="0" VerticalAlignment="Center" Margin="0" FontSize="14" FontFamily="Consolas" HorizontalAlignment="Left"/>
-                    <Label Content="(GPS / ALTM)" FontSize="9" HorizontalAlignment="Left" Margin="0" Padding="0" FontFamily="Consolas"/>
-                </StackPanel>
-                <TextBox x:Name="tb_alti" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-        </DockPanel>
     </Grid>
 </Window>

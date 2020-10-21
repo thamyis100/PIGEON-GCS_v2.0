@@ -74,7 +74,7 @@ namespace Flight_Data_emulator
             //Debug.WriteLine(packet.)
         }
 
-        private async void HeadingAsync()
+        private async void RotateCoordinateAsync()
         {
             while (true)
             {
