@@ -19,7 +19,7 @@
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <ContentSQLiteInteropFiles>true</ContentSQLiteInteropFiles>
-    <PublishUrl>F:\Downloads\Share Download\PigeonGCS\</PublishUrl>
+    <PublishUrl>C:\Users\ASUS\Downloads\share download\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -473,6 +473,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\images\header-new.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\icons\ikon-quadcopter.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -267,7 +267,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/ikon-gcs-1.png")),
                     ToolTip = "Antenna Tracker"
                 },
-                Offset = new Point(-markerWidth / 2, -markerHeight)
+                Offset = new Point(-markerWidth / 2.0d, -markerHeight)
             };
             RenderOptions.SetBitmapScalingMode(posgcs.Shape, BitmapScalingMode.HighQuality);
             mapView.Markers.Add(posgcs);
@@ -315,7 +315,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 {
                     Width = markerWidth,
                     Height = markerHeight,
-                    Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/ikon-wahana-pesawat-1.png")),
+                    Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/ikon-quadcopter.png")),
                     ToolTip = "poswahana"
                 },
                 Offset = new Point(-markerWidth / 2, -markerHeight / 2)
