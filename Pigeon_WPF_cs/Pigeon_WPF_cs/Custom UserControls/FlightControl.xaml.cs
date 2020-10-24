@@ -1,4 +1,4 @@
-﻿#define DEBUGDATA
+﻿//#define DEBUGDATA
 
 using System;
 using System.Collections.Generic;
@@ -280,6 +280,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public ComboBoxItem selectedBaud { get; set; }
         private SerialPort thePort;
         public bool connected = false;
+        private byte[] rxbuff;
         private async void PrepareUSBConn()
         {
             sPorts = new ObservableCollection<ComboBoxItem>();
@@ -288,6 +289,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             sPorts.Add(new ComboBoxItem { Content = "WIFI AP/UDP" });
             getPortList();
             selectedBaud = (ComboBoxItem)cb_bauds.Items[0];
+
+            rxbuff = new byte[255];
         }
         private void getPortList()
         {
@@ -362,12 +365,26 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         TimeSpan lastRecv = TimeSpan.Zero;
-        private delegate void UpdateUiTextDelegate(char dataType);    
+        private delegate void UpdateUiTextDelegate(char dataType);
+        byte index = 0;
         private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort receive = (SerialPort)sender;
 
-            try { ParseDataAsync(Encoding.ASCII.GetBytes(receive.ReadTo("#"))); Debug.WriteLine("Done reading to #"); }
+            try
+            {
+                while(receive.BytesToRead > 0)
+                {
+                    rxbuff[index++] = (byte)receive.ReadByte();
+                }
+
+                if (rxbuff[index - 1] == '#')
+                {
+                    ParseDataAsync(rxbuff);
+                    index = 0;
+                    Debug.WriteLine("Done read bytes to #");
+                }
+            }
             catch (Exception exc)
             {
                 Debug.WriteLine("invalid");
@@ -382,6 +399,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         //parse data
         private async void ParseDataAsync(byte[] dataIn)
         {
+            Debug.Write("ParseDataAsync: DataIN: [");
+            foreach (byte item in dataIn)
+            {
+                Debug.Write(item.ToString("X2") + ' ');
+            }
+            Debug.WriteLine(']');
+
             try
             {
                 switch (dataIn[0])
@@ -482,65 +506,71 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + efalcongps.GetLatDecimal() + " | " + efalcongps.GetLonDecimal() + " | " + batt_volt;
 
-            switch (dataType)
+            try
             {
-                case 'N':
-                    if(isFirstNav)
-                    {
-                        isFirstNav = false;
-                        win.ToggleWaktuTerbang();
-                        win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
-                        win.setConnStat(true, false);
-                    }
-                    win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
-                    win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
+                switch (dataType)
+                {
+                    case 'N':
+                        if (isFirstNav)
+                        {
+                            isFirstNav = false;
+                            win.ToggleWaktuTerbang();
+                            win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
+                            win.setConnStat(true, false);
+                        }
+                        win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
+                        win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
 
-                    if(win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
+                        //if (win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
 
-                    tb_yaw.Text = heading_val.ToString("0.##", CultureInfo.InvariantCulture) + "°";
-                    ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
+                        tb_yaw.Text = heading_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                        ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
 
-                    tb_pitch.Text = pitch_val.ToString("0.##", CultureInfo.InvariantCulture) + "°";
-                    tb_roll.Text = roll_val.ToString("0.##", CultureInfo.InvariantCulture) + "°";
-                    ind_attitude.SetAttitudeIndicatorParameters(pitch_val, -roll_val);
+                        tb_pitch.Text = pitch_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                        tb_roll.Text = roll_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                        ind_attitude.SetAttitudeIndicatorParameters(pitch_val, -roll_val);
 
-                    //tb_airspeed.Text = airspeed_val.ToString(CultureInfo.CurrentUICulture) + " km/j";
-                    //ind_airspeed.SetAirSpeedIndicatorParameters(airspeed_val);
+                        //tb_airspeed.Text = airspeed_val.ToString(CultureInfo.CurrentUICulture) + " km/j";
+                        //ind_airspeed.SetAirSpeedIndicatorParameters(airspeed_val);
 
-                    tb_alti.Text = alti_val.ToString("0.##", CultureInfo.InvariantCulture) + " m";
+                        tb_alti.Text = alti_val.ToString("0.00", CultureInfo.InvariantCulture) + " m";
 
-                    tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.########", CultureInfo.InvariantCulture);
-                    tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.########", CultureInfo.InvariantCulture);
+                        tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
+                        tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
 
-                    win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val, win.waktuTerbang);
-                    break;
+                        win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val, win.waktuTerbang);
+                        break;
 
-                case 'M':
-                    if (isFirstMode)
-                    {
-                        isFirstMode = false;
-                        win.map_Ctrl.FmodeEnable(true);
-                    }
-                    win.map_Ctrl.SetMode(fmode);
-                    break;
+                    case 'M':
+                        if (isFirstMode)
+                        {
+                            isFirstMode = false;
+                            win.map_Ctrl.FmodeEnable(true);
+                        }
+                        win.map_Ctrl.SetMode(fmode);
+                        break;
 
-                case 'B':
-                    if (isFirstBatt) isFirstBatt = false;
-                    win.SetBaterai(batt_volt, batt_cur);
-                    break;
+                    case 'B':
+                        if (isFirstBatt) isFirstBatt = false;
+                        win.SetBaterai(batt_volt, batt_cur);
+                        break;
 
-                case 'T':
-                    if (isFirstTracker)
-                    {
-                        isFirstTracker = false;
-                        win.track_Ctrl.Integration(true);
-                        win.track_Ctrl.isTrackerReady = true;
-                        win.track_Ctrl.btn_tracking.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                        win.map_Ctrl.StartPosGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal());
-                    }
-                    win.track_Ctrl.SetKoorGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal(), 1.5f);
-                    win.track_Ctrl.SetAttitude(tracker_yaw, tracker_pitch);
-                    break;
+                    case 'T':
+                        if (isFirstTracker)
+                        {
+                            isFirstTracker = false;
+                            win.track_Ctrl.Integration(true);
+                            win.track_Ctrl.isTrackerReady = true;
+                            win.track_Ctrl.btn_tracking.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                            win.map_Ctrl.StartPosGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal());
+                        }
+                        win.track_Ctrl.SetKoorGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal(), 1.5f);
+                        win.track_Ctrl.SetAttitude(tracker_yaw, tracker_pitch);
+                        break;
+                }
+            }catch(Exception e)
+            {
+                Debug.WriteLine(e.Message);
             }
             if (!isFirstNav && !isFirstMode && !isFirstBatt)
             {
@@ -549,8 +579,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
 
             //if (!win.track_Ctrl.isTrackerReady) win.track_Ctrl.SetKoorTrack(lat, longt);
-
-            //if (win.track_Ctrl.GetTrackStatus()) win.track_Ctrl.ArahkanTracker();
         }
         
         //speak out our current heading, speed, altitude
@@ -748,6 +776,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 liveStream.SignalToStop();
                 liveStream.NewFrame -= new NewFrameEventHandler(cam_AvailFrame);
                 btn_livestream.Content = "Start Stream";
+                liveStream.Stop();
             }
         }
 
@@ -764,9 +793,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
         }
 
-        BitmapImage bi;
         private void cam_AvailFrame(object sender, NewFrameEventArgs eventArgs)
         {
+            BitmapImage bi;
             try
             {
                 using (var bitmap = (Bitmap)eventArgs.Frame.Clone())
@@ -792,7 +821,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         byte i = 1;
         private void AmbilGambar(object sender, RoutedEventArgs e)
         {
-            if (bi == null) return;
+            if (liveCam.Source == null) return;
             FileStream file;
 
             if (isFirstCapture)
@@ -813,7 +842,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             catch { file = new FileStream(capturefolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss_") + (i++).ToString() + ".jpeg", FileMode.CreateNew); }
 
             var saveFile = new JpegBitmapEncoder();
-            saveFile.Frames.Add(BitmapFrame.Create(bi));
+            saveFile.Frames.Add(BitmapFrame.Create((BitmapImage)liveCam.Source));
             saveFile.Save(file);
             file.Dispose();
         }

@@ -354,9 +354,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public void SetAttitude(float yaw, float pitch)
         {
             Yaw = yaw;
-            tb_bearing.Text = yaw.ToString("#.##") + '°';
+            tb_bearing.Text = yaw.ToString("0.00") + '°';
             Pitch = pitch;
-            tb_pitch.Text = pitch.ToString("#.##") + '°';
+            tb_pitch.Text = pitch.ToString("0.00") + '°';
 
             ((MainWindow)Window.GetWindow(this)).map_Ctrl.SetHeadingGCS(yaw);
         }
@@ -379,15 +379,15 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public void SetKoorGCS(double lat, double longt, float alti)
         {
             GCS.Lat = lat; GCS.Longt = longt; GCS.Alti = alti;
-            tb_lat_tracker.Text = lat.ToString("#.########");
-            tb_longt_tracker.Text = longt.ToString("#.########");
-            tb_tinggi_tracker.Text = alti.ToString("#.########");
+            tb_lat_tracker.Text = lat.ToString("0.00000000");
+            tb_longt_tracker.Text = longt.ToString("0.00000000");
+            tb_tinggi_tracker.Text = alti.ToString("0.00000000");
         }
         public async void SetKoorWahana(double lat, double longt, float alti)
         {
             Wahana.Lat = lat; Wahana.Longt = longt; Wahana.Alti = alti;
-            tb_lat_wahana.Text = lat.ToString("#.########");
-            tb_longt_wahana.Text = longt.ToString("#.########");
+            tb_lat_wahana.Text = lat.ToString("0.00000000");
+            tb_longt_wahana.Text = longt.ToString("0.00000000");
             tb_alti_wahana.Text = alti.ToString() + " m";
         }
 
@@ -474,7 +474,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 // [1] = Pan (000.00) 4 byte            (1-4)
                 // [2] = Tilt (00.00) 4 byte            (5-8)
                 // \n endline
-                string data = "i," + ArahVerti.ToString("#.###") + ',' + ArahHorizon.ToString("#.###");
+                string data = "i," + ArahVerti.ToString("0.00") + ',' + ArahHorizon.ToString("0.00");
                 
                 win.flight_Ctrl.SendToConnection(Encoding.ASCII.GetBytes(data));
 
@@ -491,10 +491,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //Console.WriteLine(string.Format("Alti = {0}, Darat = {1}, Verti = {2} ", GCS.Alti, jarakDarat, ArahVerti));
             //Console.WriteLine(string.Format("Sending: {0},{1}", ArahVerti, ArahHorizon));
 
-            if (jarakDarat / 1000 >= 1.0f) tb_jarak_horizon.Text = (jarakDarat / 1000).ToString("#.###",CultureInfo.InvariantCulture) + " km";
-            else tb_jarak_horizon.Text = jarakDarat.ToString("#.##", CultureInfo.InvariantCulture) + " m";
-            if (jarakLangsung / 1000 >= 1.0f) tb_jarak_lsg.Text = (jarakLangsung / 1000).ToString("#.###", CultureInfo.InvariantCulture) + " km";
-            else tb_jarak_lsg.Text = jarakLangsung.ToString("#.##", CultureInfo.InvariantCulture) + " m";
+            if (jarakDarat / 1000 >= 1.0f) tb_jarak_horizon.Text = (jarakDarat / 1000).ToString("0.00", CultureInfo.InvariantCulture) + " km";
+            else tb_jarak_horizon.Text = jarakDarat.ToString("0.00", CultureInfo.InvariantCulture) + " m";
+            if (jarakLangsung / 1000 >= 1.0f) tb_jarak_lsg.Text = (jarakLangsung / 1000).ToString("0.00", CultureInfo.InvariantCulture) + " km";
+            else tb_jarak_lsg.Text = jarakLangsung.ToString("0.00", CultureInfo.InvariantCulture) + " m";
         }
 
         #endregion
