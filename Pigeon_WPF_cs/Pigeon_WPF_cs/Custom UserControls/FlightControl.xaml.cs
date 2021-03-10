@@ -185,6 +185,29 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //dataTimer.Tick += SpeakOutLoud;
         }
 
+        #region Internet Connect
+
+        private bool isUsingInternet = false;
+        private TcpClient tcpSock;
+        
+        private async void doInternetConn()
+        {
+            await tcpSock.ConnectAsync("tekat.co", 16767);
+            NetworkStream it = tcpSock.GetStream();
+
+            while (tcpSock.Connected)
+            {
+
+            }
+        }
+
+        void closeInetConn()
+        {
+            tcpSock.Close();
+        }
+
+        #endregion
+
         #region WIFI Connect
 
         private bool isUsingWifi = false;
@@ -214,8 +237,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private void ToggleSerial(object sender, RoutedEventArgs e)
         {
             var win = (MainWindow)Window.GetWindow(this);
-            
-            if (isUsingWifi)
+
+            if (isUsingInternet)
+            {
+                toggleConn(true);
+                doInternetConn();
+                Debug.WriteLine("ToggleConn: Internet TCP to tekat.co");
+                connected = true;
+                toggleConn(true);
+            }
+            else if (isUsingWifi)
             {
                 isUsingWifi = !isUsingWifi;
                 isCurrentlyRecv = true;
@@ -287,6 +318,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             sPorts.Add(new ComboBoxItem { Content = "COM PORTS" });
             sPorts.Add(new ComboBoxItem { Content = "..REFRESH.." });
             sPorts.Add(new ComboBoxItem { Content = "WIFI AP/UDP" });
+            sPorts.Add(new ComboBoxItem { Content = "INTERNET" });
             getPortList();
             selectedBaud = (ComboBoxItem)cb_bauds.Items[0];
 
@@ -305,15 +337,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             string now = selectedPort.Content.ToString();
             if (now == "..REFRESH..") { refreshPortList(); cb.SelectedIndex = 0; }
             else if (now == "WIFI AP/UDP") { cb_bauds.IsEnabled = false; isUsingWifi = true; return; }
+            else if (now == "INTERNET") { cb_bauds.IsEnabled = false; isUsingInternet = true; return; }
             else cb_bauds.IsEnabled = true;
-            isUsingWifi = false;
+            isUsingWifi = isUsingInternet = false;
         }
 
         private void refreshPortList()
         {
-            while (sPorts.Count > 3)
+            while (sPorts.Count > 4)
             {
-                sPorts.RemoveAt(3);
+                sPorts.RemoveAt(4);
             }
             getPortList();
             //refreshing();
