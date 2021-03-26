@@ -49,12 +49,12 @@ namespace Flight_Data_emulator
 
         #endregion
 
-        MavLinkSerialPortTransport it = new MavLinkSerialPortTransport()
-        {
-            SerialPortName = "COM3",
-            BaudRate = 115200,
-            HeartBeatUpdateRateMs = 1500
-        };
+        //MavLinkSerialPortTransport it = new MavLinkSerialPortTransport()
+        //{
+        //    SerialPortName = "COM3",
+        //    BaudRate = 115200,
+        //    HeartBeatUpdateRateMs = 1500
+        //};
 
         public class GPSData
         {
@@ -123,7 +123,7 @@ namespace Flight_Data_emulator
             //it.Initialize();
             //it.BeginHeartBeatLoop();
 
-            RotateCoordinateAsync();
+            //RotateCoordinateAsync();
         }
 
         private void NewMavlinkPacket(object sender, MavLinkPacket packet)
