@@ -1,5 +1,4 @@
-﻿using MavLinkNet;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -16,6 +15,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
+using WebSocketSharp;
+using WebSocketSharp.Net;
+using WebSocketSharp.Server;
 
 namespace Flight_Data_emulator
 {
@@ -119,6 +122,8 @@ namespace Flight_Data_emulator
             InitializeComponent();
             DataContext = this;
 
+            PrepareWebSocketClient();
+
             //it.OnPacketReceived += NewMavlinkPacket;
             //it.Initialize();
             //it.BeginHeartBeatLoop();
@@ -126,10 +131,57 @@ namespace Flight_Data_emulator
             //RotateCoordinateAsync();
         }
 
-        private void NewMavlinkPacket(object sender, MavLinkPacket packet)
+        WebSocket websocket_client;
+        WebSocketServer websocket_server;
+        Cookie tes;
+        private void PrepareWebSocketClient()
         {
-            Debug.WriteLine("\nReceived :");
-            //Debug.WriteLine(packet.)
+            websocket_client = new WebSocket("ws://localhost:27772");
+            //websocket_client = new WebSocket("wss://traccar.tekat.co/api/socket");
+
+            websocket_client.OnError += Websocket_client_OnError;
+            websocket_client.OnClose += Websocket_client_OnClose;
+            websocket_client.OnMessage += Websocket_client_OnMessage;
+            websocket_client.OnOpen += Websocket_client_OnOpen;
+
+            if (websocket_client.IsSecure) websocket_client.SslConfiguration.EnabledSslProtocols = System.Security.Authentication.SslProtocols.None;
+            //websocket_client.SetCredentials("testcreate", "testcreate", true);
+
+            //tes = new Cookie("JSESSIONID", "node01gc6ctgsyh7s41fspc1hkku4do4998.node0");
+            //websocket_client.SetCookie(tes);
+
+            Debug.WriteLine("Try connecting to " + websocket_client.Url.ToString());
+            websocket_client.Connect();
+        }
+
+        private void Websocket_client_OnOpen(object sender, EventArgs e)
+        {
+            Debug.WriteLine("[CLIENT][CONNECTED]");
+        }
+
+        private void Websocket_client_OnMessage(object sender, MessageEventArgs e)
+        {
+            Debug.WriteLine("[CLIENT][NEW DATA]: ");
+            Debug.WriteLine(e.Data);
+            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateTBTextDelegate(UpdateTB1), "[CLIENT][NEW DATA]: " + e.Data);
+        }
+
+        private void Websocket_client_OnClose(object sender, CloseEventArgs e)
+        {
+            Debug.WriteLine("[CLIENT][CLOSED]: ");
+            Debug.WriteLine(e.Reason + " (" + e.Code.ToString() + ')');
+        }
+
+        private void Websocket_client_OnError(object sender, ErrorEventArgs e)
+        {
+            Debug.WriteLine("[CLIENT][ERROR]: ");
+            Debug.WriteLine(e.Message);
+        }
+
+        delegate void UpdateTBTextDelegate(string text);
+        private void UpdateTB1(string text)
+        {
+            tb2.Text += text;
         }
 
         private byte[] GetLatDDM(float lat_dd)
@@ -148,6 +200,15 @@ namespace Flight_Data_emulator
             while (true)
             {
                 
+            }
+        }
+
+        private void KeyPressed(object sender, KeyEventArgs e)
+        {
+            if (e.Key.Equals(Key.Enter))
+            {
+                websocket_client.Send(tb1.Text);
+                tb1.Text = "";
             }
         }
     }
