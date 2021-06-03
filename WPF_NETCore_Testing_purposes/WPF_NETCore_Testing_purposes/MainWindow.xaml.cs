@@ -24,61 +24,15 @@ using WebSocketSharp.NetCore.Server;
 
 namespace WPF_NETCore_Testing_purposes
 {
-    delegate void UpdateTBTextDelegate(string text);
-
-    public class FlightServer : WebSocketBehavior
-    {
-        class Client
-        {
-            string ClientID, SessionID;
-            public Client(string ClientID, string SessionID)
-            {
-                this.ClientID = ClientID;
-                this.SessionID = SessionID;
-            }
-        }
-
-        List<string> clients;
-
-        protected override void OnMessage(MessageEventArgs e)
-        {
-            Debug.WriteLine("[SERVER:2772][NEW DATA]: " + e.Data);
-            Debug.WriteLine("ID: " + ID);
-
-            foreach (var item in Sessions.IDs)
-            {
-                if (item == ID) continue;
-                Sessions.SendTo(e.RawData, item);
-            }
-        }
-
-        protected override void OnOpen()
-        {
-            Debug.WriteLine("[SERVER:2772][NEW CONN]");
-            clients = Sessions.IDs.ToList();
-            //clients.Add(new Client(Sessions.IDs.Last()));
-            Debug.WriteLine("Current sessions : ");
-            Debug.WriteLine(string.Join("\r\n", clients));
-        }
-
-        protected override void OnClose(CloseEventArgs e)
-        {
-            Debug.WriteLine("[SERVER:2772][CLOSED CONN]: (" + e.Code + ") " + e.Reason);
-        }
-
-        protected override void OnError(ErrorEventArgs e)
-        {
-            Debug.WriteLine("[SERVER:2772][ERROR]: " + e.Message + " (" + e.Exception.Message + ')');
-        }
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
+        delegate void UpdateTBTextDelegate(string text);
+        private delegate void UpdateUiTextDelegate();
+
         WebSocket websocket_client;
-        WebSocketServer websocket_server;
         Cookie tes;
 
         SerialPort sPort;
@@ -102,11 +56,6 @@ namespace WPF_NETCore_Testing_purposes
         public MainWindow()
         {
             InitializeComponent();
-
-            websocket_server = new WebSocketServer(27772);
-            MainWindow mainWindow = (MainWindow)GetWindow(this);
-            websocket_server.AddWebSocketService<FlightServer>("/");
-            websocket_server.Start();
 
             Loaded += MainWindow_Loaded;
 
@@ -140,7 +89,7 @@ namespace WPF_NETCore_Testing_purposes
 
         private void PrepareWebSocketClient()
         {
-            websocket_client = new WebSocket("ws://localhost:27772");
+            websocket_client = new WebSocket("ws://localhost:27772?waw=waw1234&test=create");
             //websocket_client = new WebSocket("wss://echo.websocket.org");
             //websocket_client = new WebSocket("wss://traccar.tekat.co/api/socket");
 
@@ -150,10 +99,16 @@ namespace WPF_NETCore_Testing_purposes
             websocket_client.OnOpen += Websocket_client_OnOpen;
 
             if(websocket_client.IsSecure) websocket_client.SslConfiguration.EnabledSslProtocols = System.Security.Authentication.SslProtocols.None;
-            //websocket_client.SetCredentials("testcreate", "testcreate", true);
+            websocket_client.SetCredentials("device", "device", true);
+
+            //websocket_client.set
 
             //tes = new Cookie("JSESSIONID", "node01gc6ctgsyh7s41fspc1hkku4do4998.node0");
             //websocket_client.SetCookie(tes);
+
+            websocket_client.SetCookie(new Cookie("testosteron", "testosteron4"));
+            websocket_client.SetCookie(new Cookie("testosteron1", "testosteron5"));
+            websocket_client.SetCookie(new Cookie("testosteron2", "testosteron6"));
 
             Debug.WriteLine("Try connecting to " + websocket_client.Url.ToString());
             websocket_client.Connect();
@@ -183,13 +138,6 @@ namespace WPF_NETCore_Testing_purposes
         {
             Debug.WriteLine("[CLIENT][ERROR]: ");
             Debug.WriteLine(e.Message);
-        }
-
-        private delegate void UpdateUiTextDelegate();
-
-        public void PrintTB1(string text)
-        {
-            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateTBTextDelegate(UpdateTB1), text);
         }
 
         private void UpdateTB1(string text)

@@ -49,16 +49,28 @@ namespace Pigeon_WPF_cs
     /// </summary>
     public enum FlightMode
     {
+        /// <summary>
+        /// Terbang secara manual
+        /// </summary>
         MANUAL = 0x00,
+        /// <summary>
+        /// Terbang dengan stabilisasi
+        /// </summary>
         STABILIZER = 0x01,
+        /// <summary>
+        /// Terbang mengitari tempat
+        /// </summary>
         LOITER = 0x02,
+        /// <summary>
+        /// Sedang takeoff
+        /// </summary>
         TAKEOFF = 0x03
     }
 
     /// <summary>
     /// Identifier penggunaan efalcon
     /// </summary>
-    public enum Efalcon
+    public enum TipeEfalcon
     {
         TRACKER = 0x01,
         WAHANA = 0x02
@@ -72,7 +84,7 @@ namespace Pigeon_WPF_cs
         /// <summary>
         /// Fungsi memetakan satu rentang nilai ke rentang nilai yang lain
         /// </summary>
-        float map(float x, float in_min, float in_max, float out_min, float out_max)
+        float Map(float x, float in_min, float in_max, float out_min, float out_max)
         {
             return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
         }
@@ -90,11 +102,16 @@ namespace Pigeon_WPF_cs
             setCurrentlyActive(tab_map, btn_map, map_Ctrl);
             setCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
 
-            setConnStat(false, false); //offline wahana
-            setConnStat(false, true); //offline tracker
+            SetConnStat(TipeEfalcon.WAHANA, false); //offline wahana
+            SetConnStat(TipeEfalcon.TRACKER, false); //offline tracker
+
+            //kecilkan ukuran map
             MinimizeMap();
-            PrepareSpeechSynth();
-            PrepareRecog();
+
+            //siapkan vokalisasi data terbang
+            //PrepareSpeechSynth();
+            //siapkan pengenalan perintah suara
+            //PrepareRecog();
 
             //set bahasa indonesia
             SetBahasa(new CultureInfo("id-ID"));
@@ -136,7 +153,7 @@ namespace Pigeon_WPF_cs
         private void SetBahasa(CultureInfo theLanguage) => Thread.CurrentThread.CurrentUICulture = theLanguage;
 
         /// <summary>
-        /// Set properti baterai
+        /// Set kapasitas baterai
         /// <br/><paramref name="tegangan"/> dalam Volt
         /// <br/><paramref name="arus"/> dalam Ampere
         /// </summary>
@@ -148,7 +165,7 @@ namespace Pigeon_WPF_cs
                 + "arus : " + arus.ToString() + " A"
             );
 
-            int persen_px = (int)map(tegangan/jmlcell, 3.0f, 4.2f, 70.0f, 640.0f);
+            int persen_px = (int)Map(tegangan/jmlcell, 3.0f, 4.2f, 70.0f, 640.0f);
             icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, persen_px, 396));
             val_batt.Content = tegangan.ToString("#.##") + " V | " + arus.ToString("#.###") + " A";
         }
@@ -162,7 +179,7 @@ namespace Pigeon_WPF_cs
         private SpeechSynthesizer synth;
         /// <summary>
         /// Siapkan resources untuk synthesize suara<br/>
-        /// DO NOT USE, CURRENTLY NOT AVAILABLE
+        /// <i><b>SEDANG RUSAK, JANGAN DIGUNAKAN</b></i>
         /// </summary>
         private void PrepareSpeechSynth()
         {
@@ -176,7 +193,6 @@ namespace Pigeon_WPF_cs
             synth.Rate = 3;
         }
 
-        bool MuteVoice = false;
         /// <summary>
         /// Suarakan <paramref name="ssmltxt"/> dengan synthesizer
         /// </summary>
@@ -189,6 +205,9 @@ namespace Pigeon_WPF_cs
             synth.SpeakAsync(prompt);
         }
 
+        /// <summary>
+        /// Dummy synth untuk uji coba
+        /// </summary>
         private void injectSpeak(object sender, RoutedEventArgs e)
         {
             synth.SelectVoice("Microsoft Andika");
@@ -230,6 +249,7 @@ namespace Pigeon_WPF_cs
         private SpeechRecognitionEngine recog = new SpeechRecognitionEngine();
         /// <summary>
         /// Siapkan pengenalan suara dengan mikrofon
+        /// <br/><i><b>SEDANG RUSAK, JANGAN DIGUNAKAN</b></i>
         /// </summary>
         private void PrepareRecog()
         {
@@ -244,6 +264,7 @@ namespace Pigeon_WPF_cs
         bool isRecog = false;
         /// <summary>
         /// Toggle mengenali suara
+        /// <br/><i><b>SEDANG RUSAK, JANGAN DIGUNAKAN</b></i>
         /// </summary>
         private void toggleRecog(object sender, KeyEventArgs e)
         {
@@ -256,6 +277,7 @@ namespace Pigeon_WPF_cs
 
         /// <summary>
         /// Suara berhasil dikenali
+        /// <br/><i><b>SEDANG RUSAK, JANGAN DIGUNAKAN</b></i>
         /// </summary>
         private void speechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
@@ -265,14 +287,14 @@ namespace Pigeon_WPF_cs
             {
                 case "takeoff":
                     Console.WriteLine("Sending TAKE_OFF command");
-                    flight_Ctrl.SendToConnection(command.TAKE_OFF, Efalcon.WAHANA);
+                    flight_Ctrl.SendToConnection(command.TAKE_OFF, TipeEfalcon.WAHANA);
                     break;
                 case "land":
-                    flight_Ctrl.SendToConnection(command.LAND, Efalcon.WAHANA);
+                    flight_Ctrl.SendToConnection(command.LAND, TipeEfalcon.WAHANA);
                     Console.WriteLine("Sending LAND command");
                     break;
                 case "cancel":
-                    flight_Ctrl.SendToConnection(command.BATALKAN, Efalcon.WAHANA);
+                    flight_Ctrl.SendToConnection(command.BATALKAN, TipeEfalcon.WAHANA);
                     Console.WriteLine("Sending BATALKAN command");
                     break;
             }
@@ -294,81 +316,99 @@ namespace Pigeon_WPF_cs
         public bool isTrackerConnected = false;
         /// <summary>
         /// Set status koneksi
+        /// <br/><paramref name="tipe"/> adalah TipeEfalcon
+        /// <br/><paramref name="status"/> :
+        /// <br/>true = online
+        /// <br/>false = offline
         /// </summary>
-        /// <param name="status"></param>
-        /// <param name="tipe"></param>
-        public void setConnStat(bool status, bool tipe)
+        public void SetConnStat(TipeEfalcon tipe, bool status)
         {
-            if (status && tipe) //tracker online
+            switch (tipe)
             {
-                isTrackerConnected = true;
-                lbl_statusTracker.Visibility = Visibility.Visible;
-            }
-            else if (status && !tipe) //wahana online
-            {
-                isWahanaConnected = true;
-                lbl_statusWahana.Visibility = Visibility.Visible;
-            }
-            else if (!status && tipe) //tracker offline
-            {
-                isTrackerConnected = false;
-                lbl_statusTracker.Visibility = Visibility.Collapsed;
-            }
-            else if (!status && !tipe) //wahana offline
-            {
-                isWahanaConnected = false;
-                lbl_statusWahana.Visibility = Visibility.Collapsed;
+                case TipeEfalcon.WAHANA:
+                    isWahanaConnected = status;
+                    lbl_statusWahana.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
+                    break;
+                case TipeEfalcon.TRACKER:
+                    isTrackerConnected = status;
+                    lbl_statusTracker.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
+                    break;
             }
 
             if (isTrackerConnected || isWahanaConnected)
             {
                 lbl_statusLine.Content = "ONLINE";
                 lbl_statusLine.Foreground = Brushes.Green;
-            } else
+            }
+            else
             {
                 lbl_statusLine.Content = "OFFLINE";
                 lbl_statusLine.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF969696"));
             }
-            if (isTrackerConnected && isWahanaConnected) lbl_statusPlus.Visibility = Visibility.Visible;
-            else lbl_statusPlus.Visibility = Visibility.Collapsed;
-            MuteVoice = !MuteVoice;
+
+            lbl_statusPlus.Visibility = (isTrackerConnected && isWahanaConnected) ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Total waktu terbang
+        /// </summary>
         public TimeSpan waktuTerbang = TimeSpan.Zero;
+        /// <summary>
+        /// Tanggal & Waktu mulai terbang
+        /// </summary>
         private DateTime waktuStart;
+        /// <summary>
+        /// Stopwatch untuk waktu terbang
+        /// </summary>
         private DispatcherTimer detikan;
         bool isTimerFirstTime = true;
         /// <summary>
-        /// Toggle stopwatch lama waktu penerbangan tiap satu detik
+        /// Resume/Pause stopwatch waktu penerbangan
+        /// <br/><paramref name="status"/> :
+        /// <br/>true = Resume
+        /// <br/>false = Pause
         /// </summary>
-        public void ToggleWaktuTerbang()
+        public bool ToggleWaktuTerbang(bool status)
         {
-            if (isTimerFirstTime)
+            if (status)
             {
-                detikan = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(10) };
-                detikan.Tick += TickTerbang;
-                waktuStart = DateTime.Now;
-                detikan.Start();
-                isTimerFirstTime = false;
-                return;
-            }
+                if (isTimerFirstTime)
+                {
+                    detikan = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(100) };
+                    detikan.Tick += TickTerbang;
+                    waktuStart = DateTime.Now;
+                    detikan.Start();
+                    isTimerFirstTime = false;
+                }
 
-            if (detikan.IsEnabled)
-            {
-                detikan.Stop();
-                isTimerFirstTime = true;
-                waktuTerbang = TimeSpan.Zero;
-                val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
-                Application.Current.MainWindow.Title = "PIGEON GCS";
+                if (detikan.IsEnabled)
+                {
+                    detikan.Stop();
+                    isTimerFirstTime = true;
+                    waktuTerbang = TimeSpan.Zero;
+                    val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
+                    Application.Current.MainWindow.Title = "PIGEON GCS";
+                }
+                else detikan.Start();
+
+                return true;
             }
-            else detikan.Start();
+            else
+            {
+                return false;
+            }
+        }
+
+        public void ResetWaktuTerbang()
+        {
+
         }
 
         private void TickTerbang(object sender, EventArgs e)
         {
             waktuTerbang = DateTime.Now - waktuStart;
-            val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
-            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString(@"hh\:mm\:ss") + " - PIGEON GCS";
+            val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss.fff");
+            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString(@"hh\:mm\:ss.fff") + " - PIGEON GCS";
         }
 
         #endregion

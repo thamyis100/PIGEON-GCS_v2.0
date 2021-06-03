@@ -549,7 +549,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                             isFirstNav = false;
                             win.ToggleWaktuTerbang();
                             win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
-                            win.setConnStat(true, false);
+                            win.SetConnStat(TipeEfalcon.WAHANA, true);
                         }
                         win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
                         win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
@@ -667,28 +667,28 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             switch (out_stream.Text)
             {
                 case "TAKEOFF":
-                    SendToConnection(command.TAKE_OFF, Efalcon.WAHANA);
+                    SendToConnection(command.TAKE_OFF, TipeEfalcon.WAHANA);
                     break;
                 case "LAND":
-                    SendToConnection(command.LAND, Efalcon.WAHANA);
+                    SendToConnection(command.LAND, TipeEfalcon.WAHANA);
                     break;
                 case "BATAL":
-                    SendToConnection(command.BATALKAN, Efalcon.WAHANA);
+                    SendToConnection(command.BATALKAN, TipeEfalcon.WAHANA);
                     break;
             }
             out_stream.Text = "";
         }
 
-        public void SendToConnection(command cmd, Efalcon tujuan, string track = "")
+        public void SendToConnection(command cmd, TipeEfalcon tujuan, string track = "")
         {
             Debug.WriteLine(cmd.ToString("X"));
             if (thePort != null || isCurrentlyRecv == true)
             { 
                 switch (tujuan) {
-                    case Efalcon.WAHANA:
+                    case TipeEfalcon.WAHANA:
                         thePort.BaseStream.WriteByte((Byte)cmd);
                         break;
-                    case Efalcon.TRACKER:
+                    case TipeEfalcon.TRACKER:
                         thePort.Write(string.Format("i,{0}", track));
                         break;
                 }
