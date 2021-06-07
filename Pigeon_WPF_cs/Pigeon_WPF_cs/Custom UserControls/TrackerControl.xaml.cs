@@ -220,14 +220,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 cb_ports.IsEnabled = false;
                 cb_bauds.IsEnabled = false;
                 tb_received.IsEnabled = true;
-                mainWin.setConnStat(true, true);
+                mainWin.SetConnStat(TipeEfalcon.TRACKER, true);
             }
             else
             {
                 cb_ports.IsEnabled = true;
                 cb_bauds.IsEnabled = true;
                 tb_received.IsEnabled = false;
-                mainWin.setConnStat(false, true);
+                mainWin.SetConnStat(TipeEfalcon.TRACKER, false);
                 connected = false;
                 isTrackerReady = false;
                 isTracking = false;
