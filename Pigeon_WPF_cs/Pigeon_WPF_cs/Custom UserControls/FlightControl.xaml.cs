@@ -547,7 +547,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                         if (isFirstNav)
                         {
                             isFirstNav = false;
-                            win.ToggleWaktuTerbang();
+                            win.ToggleWaktuTerbang(true);
                             win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
                             win.SetConnStat(TipeEfalcon.WAHANA, true);
                         }

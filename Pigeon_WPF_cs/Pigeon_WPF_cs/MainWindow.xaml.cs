@@ -198,7 +198,6 @@ namespace Pigeon_WPF_cs
         /// </summary>
         public void SpeakOutloud(string ssmltxt)
         {
-            if (MuteVoice) return;
             if (ssmltxt == null || synth.State != SynthesizerState.Ready) return;
             var prompt = new PromptBuilder();
             prompt.AppendSsmlMarkup(ssmltxt);
@@ -587,6 +586,6 @@ namespace Pigeon_WPF_cs
 
         #endregion
 
-        private void muteVoice(object sender, RoutedEventArgs e) => MuteVoice = !MuteVoice;
+        //private void muteVoice(object sender, RoutedEventArgs e) => MuteVoice = !MuteVoice;
     }
 }
