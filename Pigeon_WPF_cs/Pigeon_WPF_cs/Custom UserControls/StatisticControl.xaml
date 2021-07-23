@@ -63,7 +63,8 @@
                                 Fill="Transparent"/>
             </lvc:CartesianChart.Series>
             <lvc:CartesianChart.AxisX>
-                <lvc:Axis Title="Waktu Terbang"
+                <lvc:Axis x:Name="yaw_axis_x"
+                          Title="Waktu Terbang"
                           FontSize="12"
                           LabelFormatter="{Binding DateTimeFormatter}" 
                           MaxValue="{Binding AxisMax}" 
@@ -98,7 +99,8 @@
                                 Fill="Transparent"/>
             </lvc:CartesianChart.Series>
             <lvc:CartesianChart.AxisX>
-                <lvc:Axis Title="Waktu Terbang"
+                <lvc:Axis x:Name="pitch_axis_x"
+                          Title="Waktu Terbang"
                           FontSize="12"
                           LabelFormatter="{Binding DateTimeFormatter}" 
                           MaxValue="{Binding AxisMax}" 
@@ -133,7 +135,8 @@
                                 Fill="Transparent"/>
             </lvc:CartesianChart.Series>
             <lvc:CartesianChart.AxisX>
-                <lvc:Axis Title="Waktu Terbang"
+                <lvc:Axis x:Name="roll_axis_x"
+                          Title="Waktu Terbang"
                           FontSize="12"
                           LabelFormatter="{Binding DateTimeFormatter}" 
                           MaxValue="{Binding AxisMax}" 

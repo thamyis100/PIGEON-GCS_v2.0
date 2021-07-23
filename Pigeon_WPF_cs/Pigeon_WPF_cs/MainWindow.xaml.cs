@@ -136,12 +136,43 @@ namespace Pigeon_WPF_cs
             {
                 case "bhs_indo":
                     SetBahasa(new CultureInfo("id-ID"));
-                    bhs_lbl.Content = "Language :";
+                    // Header/Sidebar
+                    bhs_lbl.Content = "Bahasa:";
+                    lbl_signal.Content = "Sinyal";
+                    lbl_flightTime.Content = "Waktu Terbang";
+                    lbl_batt.Content = "Baterai";
+                    // Flight
+                    flight_Ctrl.judul_flight.Content = "Tampilan Terbang";
+                    flight_Ctrl.stream_panel_read_btn.Content = "BACA";
+                    flight_Ctrl.btn_take_picture.Content = "Ambil Gambar";
+                    flight_Ctrl.btn_livestream.Content = "Mulai Siaran";
+                    flight_Ctrl.label.Content = "Koneksi :";
+                    flight_Ctrl.ind_conn_status.Content = "Terputus";
+                    // Stats 
+                    stats_Ctrl.judul_stats.Content = "Statistik Data IMU";
+                    stats_Ctrl.yaw_axis_x.Title = "Waktu Terbang";
+                    stats_Ctrl.pitch_axis_x.Title = "Waktu Terbang";
+                    stats_Ctrl.roll_axis_x.Title = "Waktu Terbang";
                     bhs_indo.Background = Brushes.Lime;
                     break;
                 case "bhs_inggris":
                     SetBahasa(new CultureInfo("en-EN"));
-                    bhs_lbl.Content = "Bahasa :";
+                    // Header/Sidebar
+                    bhs_lbl.Content = "Lang:";
+                    lbl_signal.Content = "Signal";
+                    lbl_flightTime.Content = "Flight Time";
+                    lbl_batt.Content = "Battery";
+                    // Flight
+                    flight_Ctrl.judul_flight.Content = "Flight View";
+                    flight_Ctrl.stream_panel_read_btn.Content = "READ";
+                    flight_Ctrl.btn_take_picture.Content = "Take Picture";
+                    flight_Ctrl.label.Content = "Connection :";
+                    flight_Ctrl.ind_conn_status.Content = "Disconnected";
+                    // Stats
+                    stats_Ctrl.judul_stats.Content = "IMU Data Statistics";
+                    stats_Ctrl.yaw_axis_x.Title = "Flight Time";
+                    stats_Ctrl.pitch_axis_x.Title = "Flight Time";
+                    stats_Ctrl.roll_axis_x.Title = "Flight Time";
                     bhs_inggris.Background = Brushes.Lime;
                     break;
             }
