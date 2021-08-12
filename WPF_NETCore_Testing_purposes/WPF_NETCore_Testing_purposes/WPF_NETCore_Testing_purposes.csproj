@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
@@ -12,6 +12,12 @@
     <PackageReference Include="System.IO.Ports" Version="5.0.1" />
     <PackageReference Include="WebSocket4Net" Version="0.15.2" />
     <PackageReference Include="WebSocketSharp.NetCore" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="mavlink">
+      <HintPath>..\..\..\..\..\Downloads\Libs\mavlink.net-master\mavlink.net\bin\Debug\net5.0\mavlink.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
