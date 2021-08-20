@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <Reference Include="mavlink">
-      <HintPath>..\..\..\..\..\Downloads\Libs\mavlink.net-master\mavlink.net\bin\Debug\net5.0\mavlink.dll</HintPath>
+      <HintPath>..\..\DLLs\mavlink.dll</HintPath>
     </Reference>
   </ItemGroup>
 
