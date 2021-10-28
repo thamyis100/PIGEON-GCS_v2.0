@@ -217,16 +217,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public bool GetCurrentRecv { get => isCurrentlyRecv; }
         private async void StartListening()
         {
+            UdpReceiveResult it;
+
             while (isCurrentlyRecv)
             {
-                UdpReceiveResult it;
-                try { 
-                    it = await udpSocket.ReceiveAsync();
-                }
+                try { it = await udpSocket.ReceiveAsync(); }
                 catch { break; }
 
-                ParseDataAsync(it.Buffer);
+                if(it != null) Task.Run(()=>ParseDataAsync(it.Buffer));
             }
+
             return;
         }
 
@@ -311,7 +311,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public ComboBoxItem selectedBaud { get; set; }
         private SerialPort thePort;
         public bool connected = false;
-        private byte[] rxbuff;
+        
         private async void PrepareUSBConn()
         {
             sPorts = new ObservableCollection<ComboBoxItem>();
@@ -321,8 +321,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             sPorts.Add(new ComboBoxItem { Content = "INTERNET" });
             getPortList();
             selectedBaud = (ComboBoxItem)cb_bauds.Items[0];
-
-            rxbuff = new byte[255];
         }
         private void getPortList()
         {
@@ -376,7 +374,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             try
             {
                 thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
-                thePort.DataReceived += new SerialDataReceivedEventHandler(sp_DataReceived);
+                thePort.DataReceived += new SerialDataReceivedEventHandler(Sp_DataReceived);
                 thePort.NewLine = "\n";
                 if (!(thePort.IsOpen)) thePort.Open();
 
@@ -399,30 +397,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         TimeSpan lastRecv = TimeSpan.Zero;
         private delegate void UpdateUiTextDelegate(char dataType);
-        byte index = 0;
-        private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+
+        private async void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            SerialPort receive = (SerialPort)sender;
 
-            try
-            {
-                while(receive.BytesToRead > 0)
-                {
-                    rxbuff[index++] = (byte)receive.ReadByte();
-                }
+            var recvPort = (SerialPort)sender;
 
-                if (rxbuff[index - 1] == '#')
-                {
-                    ParseDataAsync(rxbuff);
-                    index = 0;
-                    Debug.WriteLine("Done read bytes to #");
-                }
-            }
-            catch (Exception exc)
-            {
-                Debug.WriteLine("invalid");
-                Debug.WriteLine(exc.StackTrace);
-            }
+            byte[] rxbuff = new byte[recvPort.BytesToRead];
+            await recvPort.BaseStream.ReadAsync(rxbuff, 0, recvPort.BytesToRead);
+
+            Task.Run(() => ParseDataAsync(rxbuff));
         }
 
         #endregion
@@ -430,16 +414,23 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         #region Update Data
 
         //parse data
-        private async void ParseDataAsync(byte[] dataIn)
+        private void ParseDataAsync(byte[] recvBuf)
         {
-            Debug.Write("ParseDataAsync: DataIN: [");
-            foreach (byte item in dataIn)
-            {
-                Debug.Write(item.ToString("X2") + ' ');
-            }
-            Debug.WriteLine(']');
+            Debug.Write("ParseDataAsync: ASCII-> ");
+            Debug.WriteLine(Encoding.ASCII.GetString(recvBuf));
 
-            try
+            Debug.Write("HEX-> ");
+            recvBuf.ToList().ForEach(item => Debug.Write(item.ToString("X2") + ' '));
+            Debug.WriteLine("");
+
+            #region New Parsing
+
+
+
+            #endregion
+
+            #region Old Parsing
+            /*try
             {
                 switch (dataIn[0])
                 {
@@ -526,7 +517,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 Debug.WriteLine("ParseDataAsync :" + e.Message);
             }
 
-            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(UpdateFlightData), dataIn[0]);
+            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(UpdateFlightData), dataIn[0]);*/
+            #endregion
+
+
         }
 
         //Update Data on UI
