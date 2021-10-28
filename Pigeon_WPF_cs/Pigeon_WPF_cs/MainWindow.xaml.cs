@@ -156,7 +156,7 @@ namespace Pigeon_WPF_cs
                     bhs_indo.Background = Brushes.Lime;
                     break;
                 case "bhs_inggris":
-                    SetBahasa(new CultureInfo("en-EN"));
+                    SetBahasa(new CultureInfo("en-US"));
                     // Header/Sidebar
                     bhs_lbl.Content = "Lang:";
                     lbl_signal.Content = "Signal";
