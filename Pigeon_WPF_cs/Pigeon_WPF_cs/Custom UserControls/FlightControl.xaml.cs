@@ -211,20 +211,29 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         #region WIFI Connect
 
         private bool isUsingWifi = false;
-        private UdpClient udpSocket;
-        
+        private TcpClient tcpSocket;
+
+        // Header and trailer for TCP buffer
+        const byte HEADER_BUF = (byte)'H';
+        const byte TRAILER_BUF = (byte)'\n';
+
         private bool isCurrentlyRecv = false;
         public bool GetCurrentRecv { get => isCurrentlyRecv; }
         private async void StartListening()
         {
-            UdpReceiveResult it;
+            tcpSocket = new TcpClient("localhost", 61258);
+            Debug.WriteLine($"Connected to {tcpSocket.Client.RemoteEndPoint}");
 
             while (isCurrentlyRecv)
             {
-                try { it = await udpSocket.ReceiveAsync(); }
-                catch { break; }
+                if (tcpSocket.Available > 0)
+                {
+                    byte[] tcpBuf = new byte[tcpSocket.Available];
+                    int bufLength = await tcpSocket.GetStream().ReadAsync(tcpBuf, 0, tcpSocket.Available);
 
-                if(it != null) Task.Run(()=>ParseDataAsync(it.Buffer));
+                    if (tcpBuf[0] == HEADER_BUF && tcpBuf[bufLength - 1] == TRAILER_BUF)
+                        Task.Run(() => ParseDataAsync(tcpBuf, bufLength));
+                }
             }
 
             return;
@@ -250,9 +259,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             {
                 isUsingWifi = !isUsingWifi;
                 isCurrentlyRecv = true;
-                udpSocket = new UdpClient(60111);
-                Debug.WriteLine("ToggleConn: UDP PORT is " + ((IPEndPoint)udpSocket.Client.LocalEndPoint).Port.ToString());
-                StartListening();
+                Task.Run(() => StartListening());
                 connected = true;
                 toggleConn(true);
             }
@@ -292,7 +299,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 isCurrentlyRecv = false;
 
                 if (menulis != null) menulis.Dispose();
-                if (udpSocket != null) udpSocket.Dispose();
+                if (tcpSocket != null) tcpSocket.Dispose();
             }
         }
 
@@ -315,7 +322,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private async void PrepareUSBConn()
         {
             sPorts = new ObservableCollection<ComboBoxItem>();
-            sPorts.Add(new ComboBoxItem { Content = "COM PORTS" });
+            sPorts.Add(new ComboBoxItem { Content = "CONNECTION" });
             sPorts.Add(new ComboBoxItem { Content = "..REFRESH.." });
             sPorts.Add(new ComboBoxItem { Content = "WIFI AP/UDP" });
             sPorts.Add(new ComboBoxItem { Content = "INTERNET" });
@@ -363,7 +370,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             if (comPort.Content.ToString().Length > 5 || comPort.Content.ToString() == "")
             {
-                MessageBox.Show("Tidak ada COM PORT yang dipilih!");
+                MessageBox.Show("Tidak ada Koneksi yang dipilih!");
                 return 0;
             }
             if (cb_bauds.SelectedIndex == 0)
@@ -403,10 +410,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             var recvPort = (SerialPort)sender;
 
-            byte[] rxbuff = new byte[recvPort.BytesToRead];
-            await recvPort.BaseStream.ReadAsync(rxbuff, 0, recvPort.BytesToRead);
+            byte[] rxBuf = new byte[recvPort.BytesToRead];
+            int bufLength = await recvPort.BaseStream.ReadAsync(rxBuf, 0, recvPort.BytesToRead);
 
-            Task.Run(() => ParseDataAsync(rxbuff));
+            if (rxBuf[0] == HEADER_BUF && rxBuf[bufLength - 1] == TRAILER_BUF)
+                Task.Run(() => ParseDataAsync(rxBuf, bufLength));
         }
 
         #endregion
@@ -414,22 +422,37 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         #region Update Data
 
         //parse data
-        private void ParseDataAsync(byte[] recvBuf)
+        private void ParseDataAsync(byte[] recvBuf, int bufLength)
         {
             Debug.Write("ParseDataAsync: ASCII-> ");
             Debug.WriteLine(Encoding.ASCII.GetString(recvBuf));
 
             Debug.Write("HEX-> ");
-            recvBuf.ToList().ForEach(item => Debug.Write(item.ToString("X2") + ' '));
+            for (int i = 0; i < bufLength; i++)
+            {
+                Debug.Write(recvBuf[i].ToString("X2") + ' ');
+            }
             Debug.WriteLine("");
 
-            #region New Parsing
+            #region New Parsing (Efalcon 4.0)
+            byte parse_conn_status;
+            byte parse_signal;
+            byte parse_battery_volt;
+            byte parse_battery_curr;
+            byte parse_flight_mode;
+            byte parse_lat;
+            byte parse_lon;
+            byte parse_heading;
+            byte parse_pitch;
+            byte parse_roll;
+            byte parse_speed;
+            byte parse_altitude;
 
-
-
+            //efalcongps.SetLatitude(parse_lat);
+            //efalcongps.SetLongitude(parse_lon);
             #endregion
 
-            #region Old Parsing
+            #region Old Parsing (Efalcon 3.0)
             /*try
             {
                 switch (dataIn[0])
@@ -698,7 +721,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             switch (isCurrentlyRecv)
             {
                 case true: //using wifi
-                    udpSocket.SendAsync(data, total.Length);
+                    //tcpSocket.SendAsync(data, total.Length);
                     break;
                 case false: //using usb serial
                     thePort.Write(total + '\n');
@@ -707,7 +730,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         //dont forget to change to gateway
-        public async void SendToConnection(byte[] data) { if (isUsingWifi) udpSocket.Send(data, data.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12727)); }
+        public async void SendToConnection(byte[] data) { 
+            //if (isUsingWifi) 
+            //    udpSocket.Send(data, data.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12727));
+        }
 
         #endregion
 
