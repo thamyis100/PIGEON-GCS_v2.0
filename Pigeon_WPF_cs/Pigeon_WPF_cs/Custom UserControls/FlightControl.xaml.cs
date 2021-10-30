@@ -221,7 +221,44 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public bool GetCurrentRecv { get => isCurrentlyRecv; }
         private async void StartListening()
         {
-            tcpSocket = new TcpClient("localhost", 61258);
+            Task.Run(() =>
+            {
+                byte[] txBuf = new byte[]
+                {
+                    HEADER_BUF,
+                    (byte)FlightMode.MANUAL,
+                    (byte)90,
+                    (byte)75,
+                    0xb8, 0x9e, 0x15, 0x43,
+                    0x71, 0x3d, 0x6c, 0xc1,
+                    0x66, 0x66, 0xba, 0x40,
+                    0x00, 0x00, 0xcc, 0x41,
+                    0x00, 0x00, 0x80, 0x40,
+                    0xeb, 0xd3, 0xe8, 0xc0,
+                    0xaf, 0x96, 0xe1, 0x42,
+                    TRAILER_BUF
+                };
+
+                TcpListener dummy_server = new TcpListener(IPAddress.Loopback, 61258);
+                TcpClient theClient = null;
+
+                dummy_server.Start();
+
+                while (theClient == null)
+                {
+                    theClient = dummy_server.AcceptTcpClient();
+                    Debug.WriteLine("Waiting for connection");
+                    Thread.Sleep(1000);
+                }
+
+                new Timer((state) =>
+                {
+                    theClient.Client.Send(txBuf);
+                }, null, 0, 1000);
+            });
+
+            tcpSocket = new TcpClient();
+            tcpSocket.Connect(IPAddress.Loopback, 61258);
             Debug.WriteLine($"Connected to {tcpSocket.Client.RemoteEndPoint}");
 
             while (isCurrentlyRecv)
@@ -231,7 +268,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     byte[] tcpBuf = new byte[tcpSocket.Available];
                     int bufLength = await tcpSocket.GetStream().ReadAsync(tcpBuf, 0, tcpSocket.Available);
 
-                    if (tcpBuf[0] == HEADER_BUF && tcpBuf[bufLength - 1] == TRAILER_BUF)
+                    if (tcpBuf[0] == HEADER_BUF && tcpBuf[bufLength - 1] == TRAILER_BUF && bufLength == 33)
                         Task.Run(() => ParseDataAsync(tcpBuf, bufLength));
                 }
             }
@@ -404,6 +441,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         TimeSpan lastRecv = TimeSpan.Zero;
         private delegate void UpdateUiTextDelegate(char dataType);
+        private delegate void UpdateUIDelegate(FlightDataParse fdata);
 
         private async void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -413,13 +451,28 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             byte[] rxBuf = new byte[recvPort.BytesToRead];
             int bufLength = await recvPort.BaseStream.ReadAsync(rxBuf, 0, recvPort.BytesToRead);
 
-            if (rxBuf[0] == HEADER_BUF && rxBuf[bufLength - 1] == TRAILER_BUF)
+            if (rxBuf[0] == HEADER_BUF && rxBuf[bufLength - 1] == TRAILER_BUF && bufLength == 33)
                 Task.Run(() => ParseDataAsync(rxBuf, bufLength));
         }
 
         #endregion
 
         #region Update Data
+
+        public struct FlightDataParse
+        {
+            public byte conn_status; // dudu efalcon
+            public byte flight_mode;
+            public byte battery_percentage;
+            public byte signal_strength;
+            public float yaw;
+            public float pitch;
+            public float roll;
+            public float altitude;
+            public float speed;
+            public float lat;
+            public float lon;
+        }
 
         //parse data
         private void ParseDataAsync(byte[] recvBuf, int bufLength)
@@ -435,18 +488,46 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             Debug.WriteLine("");
 
             #region New Parsing (Efalcon 4.0)
-            byte parse_conn_status;
-            byte parse_signal;
-            byte parse_battery_volt;
-            byte parse_battery_curr;
-            byte parse_flight_mode;
-            byte parse_lat;
-            byte parse_lon;
-            byte parse_heading;
-            byte parse_pitch;
-            byte parse_roll;
-            byte parse_speed;
-            byte parse_altitude;
+
+            /* Urutan data Efalcon (angka terakhir itu index)
+             * [Header]     = HEADER_BUF uint8          (1 byte) 0
+		     *
+		     * [Flight M.]  = FLAG uint8                (1 byte) 1
+		     *
+		     * [Bat. Cap.]  = persen uint8              (1 byte) 2
+		     *
+		     * [Sign. Str.] = persen uint8              (1 byte) 3
+		     * 
+		     * [Yaw]		= derajat float32		    (4 byte) 4
+		     * [Pitch]		= derajat float32		    (4 byte) 8
+		     * [Roll]		= derajat float32		    (4 byte) 12
+		     *
+		     * [Altitude]	= meter float32			    (4 byte) 16
+		     * 
+		     * [Speed]      = meter float32             (4 byte) 20
+		     *
+		     * [Lat]		= decimal degrees float32	(4 byte) 24
+		     * [Lon]		= decimal degrees float32	(4 byte) 28
+		     *
+		     * [Trailer]    = TRAILER_BUF uint8         (1 byte) 32
+		     *
+		     * Total		=========================   33 bytes
+		     */
+
+            FlightDataParse fdata = new FlightDataParse();
+
+            fdata.flight_mode = recvBuf[1];
+            fdata.battery_percentage = recvBuf[2];
+            fdata.signal_strength = recvBuf[3];
+            fdata.yaw = BitConverter.ToSingle(recvBuf, 4);
+            fdata.pitch = BitConverter.ToSingle(recvBuf, 8);
+            fdata.roll = BitConverter.ToSingle(recvBuf, 12);
+            fdata.altitude = BitConverter.ToSingle(recvBuf, 16);
+            fdata.speed = BitConverter.ToSingle(recvBuf, 20);
+            //fdata.lat = BitConverter.ToSingle(recvBuf, 24);
+            //fdata.lon = BitConverter.ToSingle(recvBuf, 28);
+
+            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUIDelegate(UpdateDataTerbang), fdata);
 
             //efalcongps.SetLatitude(parse_lat);
             //efalcongps.SetLongitude(parse_lon);
@@ -546,6 +627,51 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         }
 
+        bool IsFirstData { get; set; } = true;
+
+        private void UpdateDataTerbang(FlightDataParse fdata)
+        {
+            var win = (MainWindow)Window.GetWindow(this);
+
+            in_stream.Text = fdata.flight_mode + " | " + fdata.yaw + " | " + fdata.pitch + " | " + fdata.roll + " | " + fdata.speed + " | " + fdata.altitude + " | " + efalcongps.GetLatDecimal() + " | " + efalcongps.GetLonDecimal() + " | " + fdata.battery_percentage;
+
+            if (IsFirstData)
+            {
+                IsFirstData = false;
+
+                win.ToggleWaktuTerbang(true);
+                win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), fdata.yaw);
+                win.SetConnStat(TipeEfalcon.WAHANA, true);
+            }
+
+            win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
+            win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
+
+            //if (win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
+
+            tb_yaw.Text = fdata.yaw.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+            ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(fdata.yaw));
+
+            tb_pitch.Text = fdata.pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+            tb_roll.Text = fdata.roll.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+            ind_attitude.SetAttitudeIndicatorParameters(fdata.pitch, -fdata.roll);
+
+            tb_airspeed.Text = fdata.speed.ToString(CultureInfo.InvariantCulture) + " km/j";
+            ind_airspeed.SetAirSpeedIndicatorParameters((int)fdata.speed * 100);
+
+            tb_alti.Text = fdata.altitude.ToString("0.00", CultureInfo.InvariantCulture) + " m";
+
+            tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
+            tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
+
+            win.stats_Ctrl.addToStatistik(fdata.yaw, fdata.pitch, fdata.roll, win.waktuTerbang);
+
+            win.map_Ctrl.SetMode(fdata.flight_mode);
+
+            // TODO: rubah parameter, sesuaikan dengan kapasitas
+            //win.SetBaterai(batt_volt, batt_cur);
+        }
+        
         //Update Data on UI
         bool isFirstNav = true, isFirstMode = true, isFirstBatt = true, isFirstTracker = true;
         bool isBlackBoxRecord = true;
