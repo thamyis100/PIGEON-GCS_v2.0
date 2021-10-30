@@ -434,8 +434,8 @@ namespace Pigeon_WPF_cs
         private void TickTerbang(object sender, EventArgs e)
         {
             waktuTerbang = DateTime.Now - waktuStart;
-            val_flightTime.Content = waktuTerbang.ToString("hh\\:mm\\:ss.fff");
-            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString("hh\\:mm\\:ss.fff") + " - PIGEON GCS";
+            val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
+            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString(@"hh\:mm\:ss") + " - PIGEON GCS";
         }
 
         #endregion
