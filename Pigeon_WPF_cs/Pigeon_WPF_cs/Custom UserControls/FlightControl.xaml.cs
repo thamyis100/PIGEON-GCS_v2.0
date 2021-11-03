@@ -214,8 +214,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private TcpClient tcpSocket;
 
         // Header and trailer for TCP buffer
-        const byte HEADER_BUF = (byte)'H';
-        const byte TRAILER_BUF = (byte)'\n';
+        const byte BUF_HEADER_TRACKER = (byte)'T';
+        const byte BUF_HEADER_WAHANA = (byte)'W';
+        const byte BUF_TRAILER = (byte)'\n';
 
         private bool isCurrentlyRecv = false;
         public bool GetCurrentRecv { get => isCurrentlyRecv; }
@@ -225,7 +226,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             {
                 byte[] txBuf = new byte[]
                 {
-                    HEADER_BUF,
+                    BUF_HEADER_TRACKER,
                     (byte)FlightMode.MANUAL,
                     (byte)90,
                     (byte)75,
@@ -236,7 +237,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     0x00, 0x00, 0x80, 0x40,
                     0xeb, 0xd3, 0xe8, 0xc0,
                     0xaf, 0x96, 0xe1, 0x42,
-                    TRAILER_BUF
+                    BUF_TRAILER
                 };
 
                 TcpListener dummy_server = new TcpListener(IPAddress.Loopback, 61258);
@@ -268,7 +269,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     byte[] tcpBuf = new byte[tcpSocket.Available];
                     int bufLength = await tcpSocket.GetStream().ReadAsync(tcpBuf, 0, tcpSocket.Available);
 
-                    if (tcpBuf[0] == HEADER_BUF && tcpBuf[bufLength - 1] == TRAILER_BUF && bufLength == 33)
+                    if (tcpBuf[0] == BUF_HEADER_TRACKER && tcpBuf[bufLength - 1] == BUF_TRAILER && bufLength == 33)
                         Task.Run(() => ParseDataAsync(tcpBuf, bufLength));
                 }
             }
@@ -451,7 +452,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             byte[] rxBuf = new byte[recvPort.BytesToRead];
             int bufLength = await recvPort.BaseStream.ReadAsync(rxBuf, 0, recvPort.BytesToRead);
 
-            if (rxBuf[0] == HEADER_BUF && rxBuf[bufLength - 1] == TRAILER_BUF && bufLength == 33)
+            if (rxBuf[0] == BUF_HEADER_TRACKER && rxBuf[bufLength - 1] == BUF_TRAILER && bufLength == 33)
                 Task.Run(() => ParseDataAsync(rxBuf, bufLength));
         }
 
@@ -462,6 +463,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public struct FlightDataParse
         {
             public byte conn_status; // dudu efalcon
+            public byte buffer_header;
             public byte flight_mode;
             public byte battery_percentage;
             public byte signal_strength;
@@ -480,7 +482,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             Debug.Write("ParseDataAsync: ASCII-> ");
             Debug.WriteLine(Encoding.ASCII.GetString(recvBuf));
 
-            Debug.Write("HEX-> ");
+            Debug.Write(" HEX-> ");
             for (int i = 0; i < bufLength; i++)
             {
                 Debug.Write(recvBuf[i].ToString("X2") + ' ');
@@ -516,6 +518,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             FlightDataParse fdata = new FlightDataParse();
 
+            fdata.buffer_header = recvBuf[0];
             fdata.flight_mode = recvBuf[1];
             fdata.battery_percentage = recvBuf[2];
             fdata.signal_strength = recvBuf[3];
@@ -528,7 +531,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //fdata.lon = BitConverter.ToSingle(recvBuf, 28);
 
             Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUIDelegate(UpdateDataTerbang), fdata);
-
             //efalcongps.SetLatitude(parse_lat);
             //efalcongps.SetLongitude(parse_lon);
             #endregion
@@ -635,41 +637,49 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             in_stream.Text = fdata.flight_mode + " | " + fdata.yaw + " | " + fdata.pitch + " | " + fdata.roll + " | " + fdata.speed + " | " + fdata.altitude + " | " + efalcongps.GetLatDecimal() + " | " + efalcongps.GetLonDecimal() + " | " + fdata.battery_percentage;
 
-            if (IsFirstData)
+            switch (fdata.buffer_header)
             {
-                IsFirstData = false;
+                case BUF_HEADER_TRACKER:
+                    if (IsFirstData)
+                    {
+                        IsFirstData = false;
 
-                win.ToggleWaktuTerbang(true);
-                win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), fdata.yaw);
-                win.SetConnStat(TipeEfalcon.WAHANA, true);
+                        win.ToggleWaktuTerbang(true);
+                        win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), fdata.yaw);
+                        win.SetConnStat(TipeEfalcon.WAHANA, true);
+                    }
+
+                    win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
+                    win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
+
+                    //if (win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
+
+                    tb_yaw.Text = fdata.yaw.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(fdata.yaw));
+
+                    tb_pitch.Text = fdata.pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    tb_roll.Text = fdata.roll.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    ind_attitude.SetAttitudeIndicatorParameters(fdata.pitch, -fdata.roll);
+
+                    tb_airspeed.Text = fdata.speed.ToString(CultureInfo.InvariantCulture) + " km/j";
+                    ind_airspeed.SetAirSpeedIndicatorParameters((int)fdata.speed * 100);
+
+                    tb_alti.Text = fdata.altitude.ToString("0.00", CultureInfo.InvariantCulture) + " m";
+
+                    tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
+                    tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
+
+                    win.stats_Ctrl.addToStatistik(fdata.yaw, fdata.pitch, fdata.roll, win.waktuTerbang);
+
+                    win.map_Ctrl.SetMode(fdata.flight_mode);
+
+                    // TODO: rubah parameter, sesuaikan dengan kapasitas
+                    //win.SetBaterai(batt_volt, batt_cur);
+                    break;
+
+                case BUF_HEADER_WAHANA:
+                    break;
             }
-
-            win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
-            win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
-
-            //if (win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
-
-            tb_yaw.Text = fdata.yaw.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-            ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(fdata.yaw));
-
-            tb_pitch.Text = fdata.pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-            tb_roll.Text = fdata.roll.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-            ind_attitude.SetAttitudeIndicatorParameters(fdata.pitch, -fdata.roll);
-
-            tb_airspeed.Text = fdata.speed.ToString(CultureInfo.InvariantCulture) + " km/j";
-            ind_airspeed.SetAirSpeedIndicatorParameters((int)fdata.speed * 100);
-
-            tb_alti.Text = fdata.altitude.ToString("0.00", CultureInfo.InvariantCulture) + " m";
-
-            tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
-            tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
-
-            win.stats_Ctrl.addToStatistik(fdata.yaw, fdata.pitch, fdata.roll, win.waktuTerbang);
-
-            win.map_Ctrl.SetMode(fdata.flight_mode);
-
-            // TODO: rubah parameter, sesuaikan dengan kapasitas
-            //win.SetBaterai(batt_volt, batt_cur);
         }
         
         //Update Data on UI
