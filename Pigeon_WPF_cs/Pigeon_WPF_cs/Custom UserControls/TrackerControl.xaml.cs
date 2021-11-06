@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Pigeon_WPF_cs.Enums;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
@@ -220,16 +221,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 cb_ports.IsEnabled = false;
                 cb_bauds.IsEnabled = false;
                 tb_received.IsEnabled = true;
-                mainWin.SetConnStat(TipeEfalcon.TRACKER, true);
+                mainWin.SetConnStat(TipeDevice.TRACKER, true);
             }
             else
             {
                 cb_ports.IsEnabled = true;
                 cb_bauds.IsEnabled = true;
                 tb_received.IsEnabled = false;
-                mainWin.SetConnStat(TipeEfalcon.TRACKER, false);
+                mainWin.SetConnStat(TipeDevice.TRACKER, false);
                 connected = false;
-                isTrackerReady = false;
+                IsTrackerReady = false;
                 isTracking = false;
                 btn_tracking.IsEnabled = false;
                 btn_postracker.IsEnabled = false;
@@ -383,6 +384,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             tb_longt_tracker.Text = longt.ToString("0.00000000");
             tb_tinggi_tracker.Text = alti.ToString("0.00000000");
         }
+
+        /// <summary>
+        /// Set koordinat wahana untuk perhitungan auto tracker
+        /// </summary>
+        /// <param name="lat"></param>
+        /// <param name="longt"></param>
+        /// <param name="alti">Ketinggian wahana dalam satuan milimeter</param>
         public async void SetKoorWahana(double lat, double longt, float alti)
         {
             Wahana.Lat = lat; Wahana.Longt = longt; Wahana.Alti = alti;
@@ -391,13 +399,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             tb_alti_wahana.Text = alti.ToString() + " m";
         }
 
-        public bool isTrackerReady = false;
+        public bool IsTrackerReady = false;
         private void pasangTracker(object sender, RoutedEventArgs e)
         {
             if (tb_lat_tracker.Text != "" && tb_longt_tracker.Text != "" && tb_tinggi_tracker.Text != "" && connected)
             {
                 SetKoorGCS(GCS.Lat, GCS.Longt, float.Parse(tb_tinggi_tracker.Text, CultureInfo.InvariantCulture));
-                isTrackerReady = true;
+                IsTrackerReady = true;
                 btn_tracking.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
             }
             else if (!connected)

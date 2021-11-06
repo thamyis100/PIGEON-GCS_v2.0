@@ -38,164 +38,177 @@ using System.Runtime.InteropServices;
 using MessagePack;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using Pigeon_WPF_cs.Data_Classes;
+using MavLinkNet;
+using System.Net.NetworkInformation;
+using System.Reflection;
+using Pigeon_WPF_cs.Enums;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
-    #region Custom Bitmap to BitmapImage
-
-    static class BitmapHelper
-    {
-        /// <summary>
-        /// Convert Bitmap to BitmapImage
-        /// </summary>
-        /// <returns>BitmapImage</returns>
-        //Bitmap to BitmapImage
-        public static BitmapImage ToBitmapImage(this Bitmap bitmap)
-        {
-            BitmapImage bi = new BitmapImage();
-            bi.BeginInit();
-            MemoryStream ms = new MemoryStream();
-            bitmap.Save(ms, ImageFormat.Bmp);
-            ms.Seek(0, SeekOrigin.Begin);
-            bi.StreamSource = ms;
-            bi.EndInit();
-            return bi;
-        }
-    }
-
-    #endregion
-
-    [MessagePackObject]
-    public class FlightData
-    {
-        public byte FlightMode;
-        public float Bearing;
-        public float NosePitch;
-        public float Roll;
-        public short Airspeed;
-        public float Altitude;
-        GPSData GPSLocation;
-        public float BatteryVolt;
-        public float BatteryCur;
-    }
-
-    [MessagePackObject]
-    public class TrackerData
-    {
-        public float Bearing;
-        public float Pitch;
-        public float BatteryVolt;
-    }
-
-    public class GPSData
-    {
-        private sbyte lat_int8; //dd
-        private short lon_int16; //ddd
-        private float lat_float, lon_float; //mm.mmmm
-        private double lat_dd, lon_dd; //decimals
-
-        /// <summary>
-        /// Masukkan nilai latitude dalam format
-        /// <br/><paramref name="thebytes"/> = 1 bytes (signed int8 [dd]), 4 bytes (signed float32 [mm.mmmmm])
-        /// </summary>
-        /// <returns>true if conversion works, else false</returns>
-        public bool SetLatitude(byte[] thebytes)
-        {
-            try
-            {
-                lat_int8 = (sbyte)thebytes[0];
-                lat_float = BitConverter.ToSingle(thebytes, 1);
-                lat_dd = lat_int8 + (lat_float / 60.0f);
-                return true;
-            }
-            catch { return false; }
-        }
-        /// <summary>
-        /// Masukkan nilai longitude dalam format
-        /// <br/><paramref name="thebytes"/> = 2 bytes (signed int16 [ddd])<br/>, 4 bytes (signed float32 [mm.mmmmm])
-        /// </summary>
-        /// <returns>true if conversion works, else false</returns>
-        public bool SetLongitude(byte[] thebytes)
-        {
-            try
-            {
-                lon_int16 = BitConverter.ToInt16(thebytes, 0);
-                lon_float = BitConverter.ToSingle(thebytes, 2);
-                lon_dd = lon_int16 + (lon_float / 60.0f);
-                return true;
-            }
-            catch { return false; }
-        }
-
-        /// <summary>
-        /// Decimal, Minutes, fraction of Minutes
-        /// </summary>
-        /// <returns>signed string : "ddmm.mmmmmm"</returns>
-        public string GetLatDDMString() => $"{lat_int8}{lat_float}";
-        /// <summary>
-        /// Decimal, Minutes, fraction of Minutes
-        /// </summary>
-        /// <returns>signed string : "ddmm.mmmmmm"</returns>
-        public string GetLonDDMString() => $"{lon_int16}{lon_float}";
-        /// <summary>
-        /// Ambil nilai Latitude GPS
-        /// </summary>
-        /// <returns>nilai decimal dalam tipe double(float64)</returns>
-        public double GetLatDecimal() => lat_dd;
-        public double GetLonDecimal() => lon_dd;
-    }
-
     public partial class FlightControl : UserControl, INotifyPropertyChanged
     {
-        FlightData Wahana;
-        private float heading_val, pitch_val, roll_val, alti_val, batt_volt, batt_cur, tracker_yaw, tracker_pitch;
-        
-        private byte fmode;
-        // 0b00000000 = 0x00 = Mati
-        // 0b00001000 = 0x08 = Stabilizer
-        // 0b10000000 = 0x80 = Hold Altitude
-        
-        private ushort airspeed_val = 0;
-        //private double lat = -7.275869000d, longt = 112.794307000d;
-        GPSData efalcongps = new GPSData(), trackergps = new GPSData();
+        // UI Update Delegates
+        private delegate void UpdateUiTextDelegate(char dataType);
+        private delegate void UpdateUIDelegate();
 
-        //global path for saving data
-        private string docpath = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
-        public string Path => docpath;
-
-        //The Data Goes :
-
-
-
-        //speakoutloud timer
-        DispatcherTimer dataTimer;
         public FlightControl()
         {
+            DataContext = this;
             InitializeComponent();
 
-            DataContext = this;
-            Directory.CreateDirectory(System.IO.Path.GetDirectoryName(docpath));
+            PrepConnection(); //Cari usb
             PrepareWebcam(); //Cari webcam
-            PrepareUSBConn(); //Cari usb
-
-            capturefolder = docpath + "/Camera Captures/" + DateTime.Now.ToString("MMM dd, yyyy") + '/';
-
-            //dataTimer = new DispatcherTimer();
-            //dataTimer.Interval = TimeSpan.FromSeconds(8);
-            //dataTimer.Tick += SpeakOutLoud;
         }
+
+        #region BUTTONS
+
+        private async void ToggleConnection(object sender, RoutedEventArgs e)
+        {
+            switch (ConnectionType)
+            {
+                case ConnType.Internet:
+                    DoInternetConn();
+                    break;
+
+                case ConnType.WIFI:
+                    if (!await ConnectWIFIAsync())
+                        return;
+                    break;
+
+                case ConnType.SerialPort:
+                    if (!await ConnectSerialPort(SelectedConn, SelectedBaud))
+                        return;
+                    break;
+
+                default:
+                    if (Sp_Used != null) Sp_Used.Dispose();
+                    else if (WIFISocket != null) WIFISocket.Dispose();
+                    else if (WIFIAsyncEvent != null) WIFIAsyncEvent.Dispose();
+                    else return;
+
+                    IsConnected = false;
+                    SetConnection(false);
+                    
+                    return;
+            }
+
+            SetConnection(true);
+            IsConnected = true;
+        }
+
+        private void SetConnection(bool s)
+        {
+            // We are connected
+            if (s)
+            {
+                cb_ports.IsEnabled = false;
+                cb_bauds.IsEnabled = false;
+
+                stream_panel.IsEnabled = true;
+
+                //img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-connected-80.png"));
+                img_conn.Source = Properties.Resources.icons8_connected_80.ToBitmapImage();
+                ind_conn_status.Content = "Connected";
+            }
+
+            // We are disconnected
+            else
+            {
+                cb_ports.IsEnabled = true;
+                cb_bauds.IsEnabled = true;
+
+                stream_panel.IsEnabled = false;
+
+                //img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
+                img_conn.Source = Properties.Resources.icons8_disconnected_80.ToBitmapImage();
+                ind_conn_status.Content = "Disconnected";
+
+                if (WhiteBoxWriter != null) WhiteBoxWriter.Dispose();
+            }
+        }
+
+        #endregion
+
+
+        #region Connections
+
+        // List of connections
+        public ObservableCollection<ComboBoxItem> ConnList { get; set; } = new ObservableCollection<ComboBoxItem>();
+
+        // 1st ComboBox option (Selected connection)
+        public ComboBoxItem SelectedConn { get; set; } = new ComboBoxItem();
+        ConnType ConnectionType;
+
+        // 2nd ComboBox option (Baudrate)
+        public ComboBoxItem SelectedBaud { get; set; } = new ComboBoxItem();
+
+        public bool IsConnected = false;
+
+        private void PrepConnection()
+        {
+            cb_ports.IsEnabled = cb_bauds.IsEnabled = false;
+
+            ConnList.Add(new ComboBoxItem { Content = "KONEKSI" });
+            ConnList.Add(new ComboBoxItem { Content = "..REFRESH.." });
+            ConnList.Add(new ComboBoxItem { Content = "WIFI" });
+            ConnList.Add(new ComboBoxItem { Content = "INTERNET" });
+
+            ListAllSerialPorts();
+
+            cb_ports.IsEnabled = cb_bauds.IsEnabled = true;
+        }
+
+        private void ConnSelection_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            switch (SelectedConn.Content)
+            {
+                case "..REFRESH..":
+                    cb_ports.IsEnabled = cb_bauds.IsEnabled = false;
+
+                    while (ConnList.Count > 4)
+                    {
+                        ConnList.RemoveAt(4);
+                    }
+
+                    ListAllSerialPorts();
+
+                    cb_ports.SelectedIndex = 0;
+                    cb_bauds.SelectedIndex = 0;
+
+                    cb_ports.IsEnabled = cb_bauds.IsEnabled = true;
+                    break;
+
+                case "WIFI":
+                    cb_bauds.IsEnabled = false;
+                    ConnectionType = ConnType.WIFI;
+                    break;
+
+                case "INTERNET":
+                    cb_bauds.IsEnabled = false;
+                    ConnectionType = ConnType.Internet;
+                    break;
+
+                default:
+                    cb_bauds.IsEnabled = true;
+                    ConnectionType = ConnType.SerialPort;
+                    break;
+            }
+        }
+
+        #endregion
 
         #region Internet Connect
 
-        private bool isUsingInternet = false;
-        private TcpClient tcpSock;
-        
-        private async void doInternetConn()
-        {
-            await tcpSock.ConnectAsync("tekat.co", 16767);
-            NetworkStream it = tcpSock.GetStream();
+        private bool IsUsingInternet = false;
+        private TcpClient IntSocket;
 
-            while (tcpSock.Connected)
+        private async void DoInternetConn()
+        {
+            await IntSocket.ConnectAsync("tekat.co", 16767);
+            NetworkStream it = IntSocket.GetStream();
+
+            while (IntSocket.Connected)
             {
 
             }
@@ -203,30 +216,25 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         void closeInetConn()
         {
-            tcpSock.Close();
+            IntSocket.Close();
         }
 
         #endregion
 
         #region WIFI Connect
 
-        private bool isUsingWifi = false;
-        private TcpClient tcpSocket;
+        TcpClient WIFISocket;
+        SocketAsyncEventArgs WIFIAsyncEvent;
 
-        // Header and trailer for TCP buffer
-        const byte BUF_HEADER_TRACKER = (byte)'T';
-        const byte BUF_HEADER_WAHANA = (byte)'W';
-        const byte BUF_TRAILER = (byte)'\n';
-
-        private bool isCurrentlyRecv = false;
-        public bool GetCurrentRecv { get => isCurrentlyRecv; }
-        private async void StartListening()
+        private async Task<bool> ConnectWIFIAsync()
         {
+            #region Dummy data server
+
             Task.Run(() =>
             {
                 byte[] txBuf = new byte[]
                 {
-                    BUF_HEADER_TRACKER,
+                    (byte)BufferHeader.EFALCON4,
                     (byte)FlightMode.MANUAL,
                     (byte)90,
                     (byte)75,
@@ -237,7 +245,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     0x00, 0x00, 0x80, 0x40,
                     0xeb, 0xd3, 0xe8, 0xc0,
                     0xaf, 0x96, 0xe1, 0x42,
-                    BUF_TRAILER
                 };
 
                 TcpListener dummy_server = new TcpListener(IPAddress.Loopback, 61258);
@@ -258,560 +265,527 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 }, null, 0, 1000);
             });
 
-            tcpSocket = new TcpClient();
-            tcpSocket.Connect(IPAddress.Loopback, 61258);
-            Debug.WriteLine($"Connected to {tcpSocket.Client.RemoteEndPoint}");
+            #endregion
 
-            while (isCurrentlyRecv)
+            WIFISocket = new TcpClient() { NoDelay = true };
+            WIFIAsyncEvent = new SocketAsyncEventArgs();
+
+            WIFIAsyncEvent.Completed += WIFIAsyncEvent_Completed;
+
+            List<NetworkInterface> interfaces = new List<NetworkInterface>(NetworkInterface.GetAllNetworkInterfaces().Where(intf => intf.OperationalStatus == OperationalStatus.Up));
+            if (interfaces.Count == 0)
             {
-                if (tcpSocket.Available > 0)
-                {
-                    byte[] tcpBuf = new byte[tcpSocket.Available];
-                    int bufLength = await tcpSocket.GetStream().ReadAsync(tcpBuf, 0, tcpSocket.Available);
+                MessageBox.Show("Perangkat anda tidak memiliki WIFI, GCS tidak bisa dijalankan!\n",
+                    "ERROR : Perangkat tidak didukung!", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
 
-                    if (tcpBuf[0] == BUF_HEADER_TRACKER && tcpBuf[bufLength - 1] == BUF_TRAILER && bufLength == 33)
-                        Task.Run(() => ParseDataAsync(tcpBuf, bufLength));
+            foreach (var interf in interfaces)
+            {
+                foreach (var gatewayIP in interf.GetIPProperties().GatewayAddresses)
+                {
+                    Debug.WriteLine($"Try Connecting to [ {gatewayIP.Address} ]");
+
+                    if (await Task.WhenAny(WIFISocket.ConnectAsync(gatewayIP.Address, 61258), Task.Delay(1000)) != null && WIFISocket.Connected)
+                    {
+                        WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
+
+                        Debug.WriteLine($"Connected to {WIFISocket.Client.RemoteEndPoint}");
+
+                        return true;
+                    }
                 }
             }
+            MessageBox.Show("Periksa kesesuaian Access Point wahana!\n" +
+                "Koneksikan sistem dengan Access Point wahana dan klik [OK].\n\n",
+                "ERROR : Alat tidak ditemukan!", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return false;
+        }
 
-            return;
+        private void WIFIAsyncEvent_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            Task.Run(() => ParseData(e.Buffer, e.BytesTransferred));
+
+            WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
         }
 
         #endregion
 
-        #region BUTTONS
-        
-        private void ToggleSerial(object sender, RoutedEventArgs e)
-        {
-            var win = (MainWindow)Window.GetWindow(this);
+        #region USB Serial
 
-            if (isUsingInternet)
-            {
-                toggleConn(true);
-                doInternetConn();
-                Debug.WriteLine("ToggleConn: Internet TCP to tekat.co");
-                connected = true;
-                toggleConn(true);
-            }
-            else if (isUsingWifi)
-            {
-                isUsingWifi = !isUsingWifi;
-                isCurrentlyRecv = true;
-                Task.Run(() => StartListening());
-                connected = true;
-                toggleConn(true);
-            }
-            else if (!connected) {
-                if (startSerial(selectedPort, selectedBaud) == 1) Debug.WriteLine("Serial is fine");
-                else return;
-            }
-            else
-            {
-                if (thePort != null) thePort.Dispose();
-                isCurrentlyRecv = false;
-                connected = false;
-                toggleConn(false);
-                isFirstNav = isFirstMode = isFirstBatt = isFirstTracker = true;
-            }
-        }
+        /// <summary>
+        /// The Serial Port used for connection
+        /// </summary>
+        private SerialPort Sp_Used;
 
-        private void toggleConn(bool s)
-        {
-            MainWindow mainWin = (MainWindow)Window.GetWindow(this);
-            if (s)
-            {
-                cb_ports.IsEnabled = false;
-                cb_bauds.IsEnabled = false;
-                stream_panel.IsEnabled = true;
-                img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-connected-80.png"));
-                ind_conn_status.Content = "Connected";
-            } else
-            {
-                cb_ports.IsEnabled = true;
-                cb_bauds.IsEnabled = true;
-                stream_panel.IsEnabled = false;
-                img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
-                ind_conn_status.Content = "Disconnected";
-                
-                mainWin.map_Ctrl.FmodeEnable(false);
-                isCurrentlyRecv = false;
-
-                if (menulis != null) menulis.Dispose();
-                if (tcpSocket != null) tcpSocket.Dispose();
-            }
-        }
-
-        #endregion
-
-        #region MAVLINK PARSING
-
-
-
-        #endregion
-
-        #region USBSerial
-
-        public ObservableCollection<ComboBoxItem> sPorts { get; set; }
-        public ComboBoxItem selectedPort { get; set; }
-        public ComboBoxItem selectedBaud { get; set; }
-        private SerialPort thePort;
-        public bool connected = false;
-        
-        private async void PrepareUSBConn()
-        {
-            sPorts = new ObservableCollection<ComboBoxItem>();
-            sPorts.Add(new ComboBoxItem { Content = "CONNECTION" });
-            sPorts.Add(new ComboBoxItem { Content = "..REFRESH.." });
-            sPorts.Add(new ComboBoxItem { Content = "WIFI AP/UDP" });
-            sPorts.Add(new ComboBoxItem { Content = "INTERNET" });
-            getPortList();
-            selectedBaud = (ComboBoxItem)cb_bauds.Items[0];
-        }
-        private void getPortList()
+        private void ListAllSerialPorts()
         {
             string[] ports = SerialPort.GetPortNames();
-            for (int indeks = 0; indeks < ports.Length; indeks++) sPorts.Add(new ComboBoxItem { Content = ports[indeks] });
-            selectedPort = sPorts[0];
+            for (int indeks = 0; indeks < ports.Length; indeks++)
+                ConnList.Add(new ComboBoxItem { Content = ports[indeks] });
         }
 
-        private void Cb_ports_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private Task<bool> ConnectSerialPort(ComboBoxItem comPort, ComboBoxItem baud)
         {
-            ComboBox cb = (ComboBox)sender;
-            string now = selectedPort.Content.ToString();
-            if (now == "..REFRESH..") { refreshPortList(); cb.SelectedIndex = 0; }
-            else if (now == "WIFI AP/UDP") { cb_bauds.IsEnabled = false; isUsingWifi = true; return; }
-            else if (now == "INTERNET") { cb_bauds.IsEnabled = false; isUsingInternet = true; return; }
-            else cb_bauds.IsEnabled = true;
-            isUsingWifi = isUsingInternet = false;
-        }
-
-        private void refreshPortList()
-        {
-            while (sPorts.Count > 4)
+            if (!SerialPort.GetPortNames().Any(port => port == comPort.Content.ToString()))
             {
-                sPorts.RemoveAt(4);
+                MessageBox.Show("Tidak ada Koneksi yang dipilih!\r\n" +
+                    "Atau port yang dipilih sudah tidak tersedia, Silakan refresh!");
+                return Task.FromResult(false);
             }
-            getPortList();
-            //refreshing();
-        }
-
-        private async void refreshing()
-        {
-            sPorts[0].Content = "[refreshing]";
-            cb_ports.IsEnabled = false;
-            await Task.Delay(1000);
-            cb_ports.IsEnabled = true;
-            sPorts[0].Content = "COM PORTS";
-        }
-
-        private int startSerial(ComboBoxItem comPort, ComboBoxItem baud)
-        {
-            if (comPort.Content.ToString().Length > 5 || comPort.Content.ToString() == "")
-            {
-                MessageBox.Show("Tidak ada Koneksi yang dipilih!");
-                return 0;
-            }
-            if (cb_bauds.SelectedIndex == 0)
+            else if (cb_bauds.SelectedIndex == 0)
             {
                 MessageBox.Show("Tidak ada Baudrate yang dipilih!");
-                return 0;
+                return Task.FromResult(false);
             }
+
             try
             {
-                thePort = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
-                thePort.DataReceived += new SerialDataReceivedEventHandler(Sp_DataReceived);
-                thePort.NewLine = "\n";
-                if (!(thePort.IsOpen)) thePort.Open();
+                Sp_Used = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
+                Sp_Used.DataReceived += new SerialDataReceivedEventHandler(Sp_DataReceived);
+                Sp_Used.NewLine = "\n";
 
-                connected = true;
-                toggleConn(true);
+                Sp_Used.Open();
             }
             catch (UnauthorizedAccessException ex)
             {
-                MessageBox.Show("Port sudah digunakan,\nsilakan pilih port lain.\n" + ex.Message, "Port digunakan", MessageBoxButton.OK, MessageBoxImage.Information);
-                return 0;
+                MessageBox.Show("Port sudah digunakan,\r\nsilakan pilih port lain.\n" + ex.Message,
+                    "Port digunakan", MessageBoxButton.OK, MessageBoxImage.Information);
+                return Task.FromResult(false);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error opening serial port :: " + ex.Message, "Error!");
                 Debug.WriteLine(ex.StackTrace);
-                return 0;
+                return Task.FromResult(false);
             }
-            return 1;
-        }
 
-        TimeSpan lastRecv = TimeSpan.Zero;
-        private delegate void UpdateUiTextDelegate(char dataType);
-        private delegate void UpdateUIDelegate(FlightDataParse fdata);
+            return Task.FromResult(true);
+        }
 
         private async void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            var rxPort = (SerialPort)sender;
 
-            var recvPort = (SerialPort)sender;
+            byte[] rxBuf = new byte[rxPort.BytesToRead];
+            int bufLength = await rxPort.BaseStream.ReadAsync(rxBuf, 0, rxPort.BytesToRead);
 
-            byte[] rxBuf = new byte[recvPort.BytesToRead];
-            int bufLength = await recvPort.BaseStream.ReadAsync(rxBuf, 0, recvPort.BytesToRead);
-
-            if (rxBuf[0] == BUF_HEADER_TRACKER && rxBuf[bufLength - 1] == BUF_TRAILER && bufLength == 33)
-                Task.Run(() => ParseDataAsync(rxBuf, bufLength));
+            Task.Run(() => ParseData(rxBuf, bufLength));
         }
 
         #endregion
 
-        #region Update Data
 
-        public struct FlightDataParse
-        {
-            public byte conn_status; // dudu efalcon
-            public byte buffer_header;
-            public byte flight_mode;
-            public byte battery_percentage;
-            public byte signal_strength;
-            public float yaw;
-            public float pitch;
-            public float roll;
-            public float altitude;
-            public float speed;
-            public float lat;
-            public float lon;
-        }
+        #region Data Parsing
 
-        //parse data
-        private void ParseDataAsync(byte[] recvBuf, int bufLength)
+        /// <summary>
+        /// Parse the incoming data hopefully asynchrounously
+        /// </summary>
+        /// <param name="RxBuf">Received data buffer</param>
+        /// <param name="BufLen">Buffer's length</param>
+        private void ParseData(byte[] RxBuf, int BufLen)
         {
+            #region Debugging Purpose
             Debug.Write("ParseDataAsync: ASCII-> ");
-            Debug.WriteLine(Encoding.ASCII.GetString(recvBuf));
+            Debug.WriteLine(Encoding.ASCII.GetString(RxBuf));
 
             Debug.Write(" HEX-> ");
-            for (int i = 0; i < bufLength; i++)
+            for (int i = 0; i < BufLen; i++)
             {
-                Debug.Write(recvBuf[i].ToString("X2") + ' ');
+                Debug.Write(RxBuf[i].ToString("X2") + ' ');
             }
             Debug.WriteLine("");
-
-            #region New Parsing (Efalcon 4.0)
-
-            /* Urutan data Efalcon (angka terakhir itu index)
-             * [Header]     = HEADER_BUF uint8          (1 byte) 0
-		     *
-		     * [Flight M.]  = FLAG uint8                (1 byte) 1
-		     *
-		     * [Bat. Cap.]  = persen uint8              (1 byte) 2
-		     *
-		     * [Sign. Str.] = persen uint8              (1 byte) 3
-		     * 
-		     * [Yaw]		= derajat float32		    (4 byte) 4
-		     * [Pitch]		= derajat float32		    (4 byte) 8
-		     * [Roll]		= derajat float32		    (4 byte) 12
-		     *
-		     * [Altitude]	= meter float32			    (4 byte) 16
-		     * 
-		     * [Speed]      = meter float32             (4 byte) 20
-		     *
-		     * [Lat]		= decimal degrees float32	(4 byte) 24
-		     * [Lon]		= decimal degrees float32	(4 byte) 28
-		     *
-		     * [Trailer]    = TRAILER_BUF uint8         (1 byte) 32
-		     *
-		     * Total		=========================   33 bytes
-		     */
-
-            FlightDataParse fdata = new FlightDataParse();
-
-            fdata.buffer_header = recvBuf[0];
-            fdata.flight_mode = recvBuf[1];
-            fdata.battery_percentage = recvBuf[2];
-            fdata.signal_strength = recvBuf[3];
-            fdata.yaw = BitConverter.ToSingle(recvBuf, 4);
-            fdata.pitch = BitConverter.ToSingle(recvBuf, 8);
-            fdata.roll = BitConverter.ToSingle(recvBuf, 12);
-            fdata.altitude = BitConverter.ToSingle(recvBuf, 16);
-            fdata.speed = BitConverter.ToSingle(recvBuf, 20);
-            //fdata.lat = BitConverter.ToSingle(recvBuf, 24);
-            //fdata.lon = BitConverter.ToSingle(recvBuf, 28);
-
-            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUIDelegate(UpdateDataTerbang), fdata);
-            //efalcongps.SetLatitude(parse_lat);
-            //efalcongps.SetLongitude(parse_lon);
             #endregion
 
-            #region Old Parsing (Efalcon 3.0)
-            /*try
+            if (!Enum.IsDefined(typeof(BufferHeader), RxBuf[0])) return;
+
+            #region EFALCON 4.0
+
+            if (RxBuf[0] == (byte)BufferHeader.EFALCON4)
             {
-                switch (dataIn[0])
-                {
-                    case (byte)'N':
-                        heading_val = BitConverter.ToSingle(dataIn, 1); //use (heading_val + 360) % 360; to get positive degrees
-                        pitch_val = BitConverter.ToSingle(dataIn, 5);
-                        roll_val = BitConverter.ToSingle(dataIn, 9);
-                        alti_val = BitConverter.ToSingle(dataIn, 13);
-                        
-                        byte[] thebytes = new byte[5];
-                        Array.Copy(dataIn, 17, thebytes, 0, 5);
-                        efalcongps.SetLatitude(thebytes);
-                        thebytes = new byte[6];
-                        Array.Copy(dataIn, 22, thebytes, 0, 6);
-                        efalcongps.SetLongitude(thebytes);
+                #region Urutan data Efalcon Wahana
+                /* (angka terakhir itu index)
+                * 
+                * [Header]      = HEADER_BUF uint8          (1 byte) 0
+                *
+                * [Flight M.]   = FLAG uint8                (1 byte) 1
+                *
+                * [Bat. Cap.]   = persen uint8              (1 byte) 2
+                *
+                * [Sign. Str.]  = persen uint8              (1 byte) 3
+                * 
+                * [Yaw]		    = derajat float32		    (4 byte) 4
+                * [Pitch]	    = derajat float32		    (4 byte) 8
+                * [Roll]	    = derajat float32		    (4 byte) 12
+                *
+                * [Altitude]    = milimeter int32		    (4 byte) 16
+                * 
+                * [Speed]       = meter/sec float32         (4 byte) 20
+                *
+                * [Lat]		    = decimal degrees float32	(4 byte) 24
+                * [Lon]         = decimal degrees float32	(4 byte) 28
+                */
+                #endregion
 
-                        #region Navigation data debugging
-                        #if DEBUGDATA
-                        Debug.WriteLine("\nNavigation data updated :\n"
-                            + "Yaw : " + heading_val.ToString() + '\n'
-                            + "Pitch : " + pitch_val.ToString() + '\n'
-                            + "Roll : " + roll_val.ToString() + '\n'
-                            + "Altitude : " + alti_val.ToString() + '\n'
-                            + "Lat DDM (DD) : " + efalcongps.GetLatDDMString() + " (" + efalcongps.GetLatDecimal().ToString("#.########") + ")\n"
-                            + "Lon DDM (DD) : " + efalcongps.GetLonDDMString() + " (" + efalcongps.GetLonDecimal().ToString("#.########") + ")\n"
-                        );
-                        #endif
-                        #endregion
-                        break;
+                App.CurrWahana.Tipe = TipeDevice.WAHANA;
 
-                    case (byte)'M':
-                        fmode = dataIn[1];
+                App.CurrWahana.FlightMode = (FlightMode)RxBuf[1];
 
-                        #region Flight mode debugging
-                        #if DEBUGDATA
-                        Debug.WriteLine("Flight Mode updated : " + fmode.ToString("X2"));
-                        #endif
-                        #endregion
-                        break;
+                App.CurrWahana.Battery = RxBuf[2];
 
-                    case (byte)'B':
-                        batt_volt = BitConverter.ToSingle(dataIn, 1);
-                        batt_cur = BitConverter.ToSingle(dataIn, 5);
+                App.CurrWahana.Signal = RxBuf[3];
 
-                        #region Battery data debugging
-                        #if DEBUGDATA
-                        Debug.WriteLine("Battery updated :\n"
-                            + "Volt : " + batt_volt.ToString() + '\n'
-                            + "Arus : " + batt_cur.ToString() + '\n'
-                        );
-                        #endif
-                        #endregion
-                        break;
+                App.CurrWahana.IMU.Yaw = BitConverter.ToSingle(RxBuf, 4);
+                App.CurrWahana.IMU.Pitch = BitConverter.ToSingle(RxBuf, 8);
+                App.CurrWahana.IMU.Roll = BitConverter.ToSingle(RxBuf, 12);
 
-                    case (byte)'T':
-                        tracker_yaw = BitConverter.ToSingle(dataIn, 1);
-                        tracker_pitch = BitConverter.ToSingle(dataIn, 5);
+                App.CurrWahana.Altitude = BitConverter.ToInt32(RxBuf, 16);
 
-                        byte[] thobytes = new byte[5];
-                        Array.Copy(dataIn, 9, thobytes, 0, 5);
-                        trackergps.SetLatitude(thobytes);
-                        thobytes = new byte[6];
-                        Array.Copy(dataIn, 14, thobytes, 0, 6);
-                        trackergps.SetLongitude(thobytes);
+                App.CurrWahana.Speed = BitConverter.ToSingle(RxBuf, 20);
 
-                        #region Tracker data debugging
-                        #if DEBUGDATA
-                        Debug.WriteLine("Tracker data updated :\n"
-                            + "Yaw : " + tracker_yaw.ToString() + '\n'
-                            + "Pitch : " + tracker_pitch.ToString() + '\n'
-                            + "Lat DDM (DD) : " + trackergps.GetLatDDMString() + " (" + trackergps.GetLatDecimal().ToString("#.########") + ")\n"
-                            + "Lon DDM (DD) : " + trackergps.GetLonDDMString() + " (" + trackergps.GetLonDecimal().ToString("#.########") + ")\n"
-                        );
-                        #endif
-                        #endregion
-                        break;
+                App.CurrWahana.GPS.Latitude = BitConverter.ToSingle(RxBuf, 24);
+                App.CurrWahana.GPS.Longitude = BitConverter.ToSingle(RxBuf, 28);
 
-                    default:
-                        Debug.WriteLine("There was data, but no identifier recognized, nothing updated");
-                        return;
-                }
-            } catch (Exception e)
-            {
-                Debug.WriteLine("ParseDataAsync :" + e.Message);
+                Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUIDelegate(UpdateUI));
             }
 
-            Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUiTextDelegate(UpdateFlightData), dataIn[0]);*/
             #endregion
 
+            #region TRITON
 
+            else if (RxBuf[0] == (byte)BufferHeader.TRITON)
+            {
+                #region Urutan data Triton
+                /* (angka terakhir itu index)
+                * 
+                * [Header]      = HEADER_BUF uint8          (1 byte) 0
+                * 
+                * [Yaw]		    = derajat float32		    (4 byte) 1
+                * [Pitch]	    = derajat float32		    (4 byte) 5
+                *
+                * [Altitude]    = milimeter int32		    (4 byte) 9
+                * 
+                * [Lat]		    = decimal degrees float32	(4 byte) 13
+                * [Lon]         = decimal degrees float32	(4 byte) 17
+                */
+                #endregion
+
+                App.CurrWahana.Tipe = TipeDevice.TRACKER;
+
+                App.CurrWahana.IMU.Yaw = BitConverter.ToSingle(RxBuf, 4);
+                App.CurrWahana.IMU.Pitch = BitConverter.ToSingle(RxBuf, 8);
+
+                App.CurrWahana.Altitude = BitConverter.ToInt32(RxBuf, 16);
+
+                App.CurrWahana.Speed = BitConverter.ToSingle(RxBuf, 20);
+
+                App.CurrWahana.GPS.Latitude = BitConverter.ToSingle(RxBuf, 24);
+                App.CurrWahana.GPS.Longitude = BitConverter.ToSingle(RxBuf, 28);
+
+                Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUIDelegate(UpdateUI));
+            }
+
+            #endregion
+
+            #region MAVLink
+
+            else
+            {
+                MavLinkParser.ProcessReceivedBytes(RxBuf, 0, BufLen);
+            }
+
+            #endregion
         }
+
+        #region MAVLINK PARSING
+
+        MavLinkAsyncWalker MavLinkParser;
+
+        private void MavlinkPacketReceived(object sender, MavLinkPacketBase packet)
+        {
+            switch (packet.Message)
+            {
+                case UasHeartbeat HrtMsg:
+                    switch (HrtMsg.BaseMode)
+                    {
+                        case MavModeFlag.ManualInputEnabled:
+                            App.CurrWahana.FlightMode = FlightMode.MANUAL;
+                            break;
+                        case MavModeFlag.StabilizeEnabled:
+                            App.CurrWahana.FlightMode = FlightMode.STABILIZER;
+                            break;
+                        case MavModeFlag.AutoEnabled:
+                            App.CurrWahana.FlightMode = FlightMode.LOITER;
+                            break;
+                    }
+                    //UpdateFlightModeMavlink();
+                    break;
+
+                case UasSysStatus SysMsg:
+                    App.CurrWahana.Battery = (byte)SysMsg.BatteryRemaining;
+                    App.CurrWahana.Signal = 100 - SysMsg.DropRateComm;
+                    //UpdateSysStatusMavlink();
+                    break;
+
+                case UasAttitude AttMsg:
+                    App.CurrWahana.IMU.Yaw = (float)(AttMsg.Yaw * 180 / Math.PI);
+                    App.CurrWahana.IMU.Pitch = (float)(AttMsg.Pitch * 180 / Math.PI);
+                    App.CurrWahana.IMU.Roll = (float)(AttMsg.Roll * 180 / Math.PI);
+                    //UpdateAttitudeMavlink();
+                    break;
+
+                case UasGlobalPositionInt PosMsg:
+                    App.CurrWahana.GPS.Latitude = PosMsg.Lat / 10000000.0;
+                    App.CurrWahana.GPS.Longitude = PosMsg.Lon / 10000000.0;
+                    App.CurrWahana.Altitude = PosMsg.Alt;
+                    //UpdateGPSMavlink();
+                    break;
+
+                default:
+                    Debug.WriteLine($"Mavlink {packet.Message.GetType().Name} message is not supported by this GCS");
+                    break;
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Update UI
 
         bool IsFirstData { get; set; } = true;
 
-        private void UpdateDataTerbang(FlightDataParse fdata)
+        private void UpdateUI()
         {
-            var win = (MainWindow)Window.GetWindow(this);
+            var win = (MainWindow)App.Current.MainWindow;
 
-            in_stream.Text = fdata.flight_mode + " | " + fdata.yaw + " | " + fdata.pitch + " | " + fdata.roll + " | " + fdata.speed + " | " + fdata.altitude + " | " + efalcongps.GetLatDecimal() + " | " + efalcongps.GetLonDecimal() + " | " + fdata.battery_percentage;
+            in_stream.Text =
+                App.CurrWahana.FlightMode.ToString("X2") + " | "
+                
+                + App.CurrWahana.Battery + " | "
 
-            switch (fdata.buffer_header)
+                + App.CurrWahana.Signal + " | "
+
+                + App.CurrWahana.IMU.Yaw + " | "
+                + App.CurrWahana.IMU.Pitch + " | "
+                + App.CurrWahana.IMU.Roll + " | "
+
+                + App.CurrWahana.Altitude + " | "
+
+                + App.CurrWahana.Speed + " | "
+
+                + App.CurrWahana.GPS.Latitude + " | "
+                + App.CurrWahana.GPS.Longitude + " | "
+                ;
+
+            switch (App.CurrWahana.Tipe)
             {
-                case BUF_HEADER_TRACKER:
+                case TipeDevice.WAHANA:
                     if (IsFirstData)
                     {
                         IsFirstData = false;
 
-                        win.ToggleWaktuTerbang(true);
-                        win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), fdata.yaw);
-                        win.SetConnStat(TipeEfalcon.WAHANA, true);
+                        win.StartWaktuTerbang();
+                        win.map_Ctrl.StartPosWahana(App.CurrWahana.GPS.Latitude, App.CurrWahana.GPS.Longitude, App.CurrWahana.IMU.Yaw);
+                        win.SetConnStat(TipeDevice.WAHANA, true);
                     }
 
-                    win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
-                    win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
+                    win.map_Ctrl.SetPosWahana(App.CurrWahana.GPS.Latitude, App.CurrWahana.GPS.Longitude, App.CurrWahana.IMU.Yaw);
 
-                    //if (win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
+                    win.track_Ctrl.SetKoorWahana(App.CurrWahana.GPS.Latitude, App.CurrWahana.GPS.Longitude, App.CurrWahana.Altitude);
 
-                    tb_yaw.Text = fdata.yaw.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-                    ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(fdata.yaw));
+                    win.SetBaterai(App.CurrWahana.Battery);
 
-                    tb_pitch.Text = fdata.pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-                    tb_roll.Text = fdata.roll.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-                    ind_attitude.SetAttitudeIndicatorParameters(fdata.pitch, -fdata.roll);
+                    win.SetSignal(App.CurrWahana.Signal);
 
-                    tb_airspeed.Text = fdata.speed.ToString(CultureInfo.InvariantCulture) + " km/j";
-                    ind_airspeed.SetAirSpeedIndicatorParameters((int)fdata.speed * 100);
+                    tb_yaw.Text = App.CurrWahana.IMU.Yaw.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(App.CurrWahana.IMU.Yaw));
 
-                    tb_alti.Text = fdata.altitude.ToString("0.00", CultureInfo.InvariantCulture) + " m";
+                    tb_pitch.Text = App.CurrWahana.IMU.Pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    tb_roll.Text = App.CurrWahana.IMU.Roll.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    ind_attitude.SetAttitudeIndicatorParameters(App.CurrWahana.IMU.Pitch, -App.CurrWahana.IMU.Roll);
 
-                    tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
-                    tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
+                    tb_airspeed.Text = App.CurrWahana.Speed.ToString(CultureInfo.InvariantCulture) + " km/j";
+                    ind_airspeed.SetAirSpeedIndicatorParameters((int)App.CurrWahana.Speed * 50);
 
-                    win.stats_Ctrl.addToStatistik(fdata.yaw, fdata.pitch, fdata.roll, win.waktuTerbang);
+                    tb_alti.Text = App.CurrWahana.Altitude.ToString("0.00", CultureInfo.InvariantCulture) + " m";
 
-                    win.map_Ctrl.SetMode(fdata.flight_mode);
+                    tb_lat.Text = App.CurrWahana.GPS.Latitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+                    tb_longt.Text = App.CurrWahana.GPS.Longitude.ToString("0.00000000", CultureInfo.InvariantCulture);
 
-                    // TODO: rubah parameter, sesuaikan dengan kapasitas
-                    //win.SetBaterai(batt_volt, batt_cur);
+                    win.stats_Ctrl.addToStatistik(App.CurrWahana.IMU.Yaw, App.CurrWahana.IMU.Pitch, App.CurrWahana.IMU.Roll, win.WaktuTerbang);
+                    
                     break;
 
-                case BUF_HEADER_WAHANA:
+                case TipeDevice.TRACKER:
+                    if (IsFirstData)
+                    {
+                        IsFirstData = false;
+
+
+                    }
                     break;
             }
         }
-        
+
+        #region NOT USED
+
         //Update Data on UI
-        bool isFirstNav = true, isFirstMode = true, isFirstBatt = true, isFirstTracker = true;
-        bool isBlackBoxRecord = true;
+        //bool isFirstNav = true, isFirstMode = true, isFirstBatt = true, isFirstTracker = true;
+        //bool isBlackBoxRecord = true;
         //double lastlat = 0, lastlng = 0;
-        private void UpdateFlightData(char dataType)
-        {
-            MainWindow win = (MainWindow)Window.GetWindow(this);
+        //private void UpdateFlightData(char dataType)
+        //{
+        //    MainWindow win = (MainWindow)Window.GetWindow(this);
 
-            in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + efalcongps.GetLatDecimal() + " | " + efalcongps.GetLonDecimal() + " | " + batt_volt;
+        //    in_stream.Text = fmode + " | " + heading_val + " | " + pitch_val + " | " + roll_val + " | " + airspeed_val + " | " + alti_val + " | " + efalcongps.Latitude + " | " + efalcongps.Longitude + " | " + batt_volt;
 
-            try
-            {
-                switch (dataType)
-                {
-                    case 'N':
-                        if (isFirstNav)
-                        {
-                            isFirstNav = false;
-                            win.ToggleWaktuTerbang(true);
-                            win.map_Ctrl.StartPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
-                            win.SetConnStat(TipeEfalcon.WAHANA, true);
-                        }
-                        win.map_Ctrl.SetPosWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), heading_val);
-                        win.track_Ctrl.SetKoorWahana(efalcongps.GetLatDecimal(), efalcongps.GetLonDecimal(), alti_val);
+        //    try
+        //    {
+        //        switch (dataType)
+        //        {
+        //            case 'N':
+        //                if (isFirstNav)
+        //                {
+        //                    isFirstNav = false;
+        //                    win.StartWaktuTerbang();
+        //                    win.map_Ctrl.StartPosWahana(efalcongps.Latitude, efalcongps.Longitude, heading_val);
+        //                    win.SetConnStat(TipeDevice.WAHANA, true);
+        //                }
+        //                win.map_Ctrl.SetPosWahana(efalcongps.Latitude, efalcongps.Longitude, heading_val);
+        //                win.track_Ctrl.SetKoorWahana(efalcongps.Latitude, efalcongps.Longitude, alti_val);
 
-                        //if (win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
+        //                //if (win.track_Ctrl.isTrackerReady) win.track_Ctrl.ArahkanTracker();
 
-                        tb_yaw.Text = heading_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-                        ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
+        //                tb_yaw.Text = heading_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+        //                ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(heading_val));
 
-                        tb_pitch.Text = pitch_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-                        tb_roll.Text = roll_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
-                        ind_attitude.SetAttitudeIndicatorParameters(pitch_val, -roll_val);
+        //                tb_pitch.Text = pitch_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+        //                tb_roll.Text = roll_val.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+        //                ind_attitude.SetAttitudeIndicatorParameters(pitch_val, -roll_val);
 
-                        //tb_airspeed.Text = airspeed_val.ToString(CultureInfo.CurrentUICulture) + " km/j";
-                        //ind_airspeed.SetAirSpeedIndicatorParameters(airspeed_val);
+        //                //tb_airspeed.Text = airspeed_val.ToString(CultureInfo.CurrentUICulture) + " km/j";
+        //                //ind_airspeed.SetAirSpeedIndicatorParameters(airspeed_val);
 
-                        tb_alti.Text = alti_val.ToString("0.00", CultureInfo.InvariantCulture) + " m";
+        //                tb_alti.Text = alti_val.ToString("0.00", CultureInfo.InvariantCulture) + " m";
 
-                        tb_lat.Text = efalcongps.GetLatDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
-                        tb_longt.Text = efalcongps.GetLonDecimal().ToString("0.00000000", CultureInfo.InvariantCulture);
+        //                tb_lat.Text = efalcongps.Latitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+        //                tb_longt.Text = efalcongps.Longitude.ToString("0.00000000", CultureInfo.InvariantCulture);
 
-                        win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val, win.waktuTerbang);
-                        break;
+        //                win.stats_Ctrl.addToStatistik(heading_val, pitch_val, roll_val, win.WaktuTerbang);
+        //                break;
 
-                    case 'M':
-                        if (isFirstMode)
-                        {
-                            isFirstMode = false;
-                            win.map_Ctrl.FmodeEnable(true);
-                        }
-                        win.map_Ctrl.SetMode(fmode);
-                        break;
+        //            case 'M':
+        //                if (isFirstMode)
+        //                {
+        //                    isFirstMode = false;
+        //                    win.map_Ctrl.FmodeEnable(true);
+        //                }
+        //                win.map_Ctrl.SetMode(fmode);
+        //                break;
 
-                    case 'B':
-                        if (isFirstBatt) isFirstBatt = false;
-                        win.SetBaterai(batt_volt, batt_cur);
-                        break;
+        //            case 'B':
+        //                if (isFirstBatt) isFirstBatt = false;
+        //                win.SetBaterai(batt_volt, batt_cur);
+        //                break;
 
-                    case 'T':
-                        if (isFirstTracker)
-                        {
-                            isFirstTracker = false;
-                            win.track_Ctrl.Integration(true);
-                            win.track_Ctrl.isTrackerReady = true;
-                            win.track_Ctrl.btn_tracking.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                            win.map_Ctrl.StartPosGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal());
-                        }
-                        win.track_Ctrl.SetKoorGCS(trackergps.GetLatDecimal(), trackergps.GetLonDecimal(), 1.5f);
-                        win.track_Ctrl.SetAttitude(tracker_yaw, tracker_pitch);
-                        break;
-                }
-            }catch(Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
-            if (!isFirstNav && !isFirstMode && !isFirstBatt)
-            {
-                if(menulis == null) menulis = new CsvFileWriter(new FileStream(docpath + "BlackBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
-                WriteBlackBox();
-            }
+        //            case 'T':
+        //                if (isFirstTracker)
+        //                {
+        //                    isFirstTracker = false;
+        //                    win.track_Ctrl.Integration(true);
+        //                    win.track_Ctrl.isTrackerReady = true;
+        //                    win.track_Ctrl.btn_tracking.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        //                    win.map_Ctrl.StartPosGCS(trackergps.Latitude, trackergps.Longitude);
+        //                }
+        //                win.track_Ctrl.SetKoorGCS(trackergps.Latitude, trackergps.Longitude, 1.5f);
+        //                win.track_Ctrl.SetAttitude(tracker_yaw, tracker_pitch);
+        //                break;
+        //        }
+        //    }catch(Exception e)
+        //    {
+        //        Debug.WriteLine(e.Message);
+        //    }
+        //    if (!isFirstNav && !isFirstMode && !isFirstBatt)
+        //    {
+        //        if(menulis == null) menulis = new CsvFileWriter(new FileStream(docpath + "BlackBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
+        //        WriteBlackBox();
+        //    }
 
-            //if (!win.track_Ctrl.isTrackerReady) win.track_Ctrl.SetKoorTrack(lat, longt);
-        }
-        
+        //    //if (!win.track_Ctrl.isTrackerReady) win.track_Ctrl.SetKoorTrack(lat, longt);
+        //}
+
         //speak out our current heading, speed, altitude
-        private void SpeakOutLoud(object sender, EventArgs e)
-        {
-            MainWindow win = (MainWindow)Window.GetWindow(this);
-            var str = "<s>Heading <emphasis><say-as interpret-as=\"number\">"+heading_val.ToString("0")+"</say-as></emphasis> derajat</s>" +
-                "<s>Ketinggian <emphasis><say-as interpret-as=\"number\">" + alti_val.ToString("0") + "</say-as></emphasis> meter</s>" +
-                "<s>Kecepatan <emphasis><say-as interpret-as=\"number\">" + airspeed_val.ToString("0") + "</say-as></emphasis> kilometer per jam</s>";
-            win.SpeakOutloud(str);
-        }
+        //private void SpeakOutLoud(object sender, EventArgs e)
+        //{
+        //    MainWindow win = (MainWindow)Window.GetWindow(this);
+        //    var str = "<s>Heading <emphasis><say-as interpret-as=\"number\">"+heading_val.ToString("0")+"</say-as></emphasis> derajat</s>" +
+        //        "<s>Ketinggian <emphasis><say-as interpret-as=\"number\">" + alti_val.ToString("0") + "</say-as></emphasis> meter</s>" +
+        //        "<s>Kecepatan <emphasis><say-as interpret-as=\"number\">" + airspeed_val.ToString("0") + "</say-as></emphasis> kilometer per jam</s>";
+        //    win.SpeakOutloud(str);
+        //}
 
-        // write data to local ground station record
-        CsvFileWriter menulis;
-        private void WriteBlackBox()
+        #endregion
+
+        /// <summary>
+        /// CSV Writer for flight data white box
+        /// </summary>
+        CsvFileWriter WhiteBoxWriter;
+
+        /// <summary>
+        /// Write flight data to white box
+        /// </summary>
+        private void WriteWhiteBox()
         {
-            CsvRow baris = new CsvRow();
-            /*  Urutan blackbox
-             *  0. TimeSpan WaktuTerbang (ticks)
-                1. Fmode
-                2. Heading
-                3. Pitch
-                4. Roll
-                5. Airspeed
-                6. Altitude
-                7. Latitude
-                8. Longitude
-                9. Batt Tegangan
-                10. Batt Arus
+            /*  Urutan data yang disimpan
+             *  
+             *  TimeSpan WaktuTerbang (ticks)
+             *  
+             *  Tipe Device
+             *  
+             *  Flight mode
+             *  
+             *  Kapasitas Baterai
+             *  
+             *  Kualitas Sinyal
+             *  
+             *  Yaw
+             *  Pitch
+             *  Roll
+             *  
+             *  Speed
+             *  
+             *  Altitude
+             *  
+             *  Latitude
+             *  Longitude
             */
-            MainWindow win = (MainWindow)Window.GetWindow(this);
-            baris.Add(win.waktuTerbang.Ticks.ToString());
-            baris.Add(fmode.ToString("D"));
-            baris.Add(heading_val.ToString());
-            baris.Add(pitch_val.ToString());
-            baris.Add(roll_val.ToString());
-            baris.Add(airspeed_val.ToString());
-            baris.Add(alti_val.ToString());
-            baris.Add(efalcongps.GetLatDecimal().ToString("0.########", CultureInfo.CurrentUICulture));
-            baris.Add(efalcongps.GetLonDecimal().ToString("0.########", CultureInfo.CurrentUICulture));
-            baris.Add(batt_volt.ToString());
-            baris.Add(batt_cur.ToString());
 
-            menulis.WriteRow(baris);
+            CsvRow baris = new CsvRow()
+            {
+                ((MainWindow)App.Current.MainWindow).WaktuTerbang.Ticks.ToString(),
+
+                App.CurrWahana.Tipe.ToString(),
+
+                App.CurrWahana.FlightMode.ToString(),
+
+                App.CurrWahana.Battery.ToString(),
+
+                App.CurrWahana.Signal.ToString(),
+
+                App.CurrWahana.IMU.Yaw.ToString(),
+                App.CurrWahana.IMU.Pitch.ToString(),
+                App.CurrWahana.IMU.Roll.ToString(),
+
+                App.CurrWahana.GPS.Latitude.ToString("0.########", CultureInfo.CurrentUICulture),
+                App.CurrWahana.GPS.Longitude.ToString("0.########", CultureInfo.CurrentUICulture)
+            };
+
+            WhiteBoxWriter.WriteRow(baris);
         }
 
         #endregion
+
 
         #region Sending Data
 
@@ -820,49 +794,49 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             switch (out_stream.Text)
             {
                 case "TAKEOFF":
-                    SendToConnection(command.TAKE_OFF, TipeEfalcon.WAHANA);
+                    SendToConnection(Command.TAKE_OFF, TipeDevice.WAHANA);
                     break;
                 case "LAND":
-                    SendToConnection(command.LAND, TipeEfalcon.WAHANA);
+                    SendToConnection(Command.LAND, TipeDevice.WAHANA);
                     break;
                 case "BATAL":
-                    SendToConnection(command.BATALKAN, TipeEfalcon.WAHANA);
+                    SendToConnection(Command.BATALKAN, TipeDevice.WAHANA);
                     break;
             }
             out_stream.Text = "";
         }
 
-        public void SendToConnection(command cmd, TipeEfalcon tujuan, string track = "")
+        public void SendToConnection(Command cmd, TipeDevice tujuan, string track = "")
         {
-            Debug.WriteLine(cmd.ToString("X"));
-            if (thePort != null || isCurrentlyRecv == true)
-            { 
-                switch (tujuan) {
-                    case TipeEfalcon.WAHANA:
-                        thePort.BaseStream.WriteByte((Byte)cmd);
-                        break;
-                    case TipeEfalcon.TRACKER:
-                        thePort.Write(string.Format("i,{0}", track));
-                        break;
-                }
-            }
-            else { MessageBox.Show("Belum terkoneksi dengan efalcon", "Disconnected", MessageBoxButton.OK, MessageBoxImage.Information); }
+            //Debug.WriteLine(cmd.ToString("X"));
+            //if (true)
+            //{ 
+            //    switch (tujuan) {
+            //        case TipeDevice.WAHANA:
+            //            Sp_Used.BaseStream.WriteByte((Byte)cmd);
+            //            break;
+            //        case TipeDevice.TRACKER:
+            //            Sp_Used.Write(string.Format("i,{0}", track));
+            //            break;
+            //    }
+            //}
+            //else { MessageBox.Show("Belum terkoneksi dengan efalcon", "Disconnected", MessageBoxButton.OK, MessageBoxImage.Information); }
         }
 
         public void SendToConnection(GMapMarker marker)
         {
-            string total = marker.Position.Lat.ToString() + ',' + marker.Position.Lng.ToString();
-            var data = Encoding.ASCII.GetBytes(total);
-            if (!connected) return;
-            switch (isCurrentlyRecv)
-            {
-                case true: //using wifi
-                    //tcpSocket.SendAsync(data, total.Length);
-                    break;
-                case false: //using usb serial
-                    thePort.Write(total + '\n');
-                    break;
-            }
+            //string total = marker.Position.Lat.ToString() + ',' + marker.Position.Lng.ToString();
+            //var data = Encoding.ASCII.GetBytes(total);
+            //if (!IsConnected) return;
+            //switch (IsWIFIConnected)
+            //{
+            //    case true: //using wifi
+            //        //tcpSocket.SendAsync(data, total.Length);
+            //        break;
+            //    case false: //using usb serial
+            //        Sp_Used.Write(total + '\n');
+            //        break;
+            //}
         }
 
         //dont forget to change to gateway
@@ -873,10 +847,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #endregion
 
+
         #region Animating back n forth
         private void img_conn_0(object sender, MouseEventArgs e)
         {
-            if (connected)
+            if (IsConnected)
             {
                 img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-disconnected-80.png"));
                 ind_conn_status.Content = "Disconnect";
@@ -889,7 +864,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
         private void img_conn_1(object sender, MouseEventArgs e)
         {
-            if (connected)
+            if (IsConnected)
             {
                 img_conn.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/icons/icons8-connected-80.png"));
                 ind_conn_status.Content = "Connected";
@@ -902,59 +877,47 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
         #endregion
 
+
         #region CameraStream prepare
 
-        public ObservableCollection<FilterInfo> Cameras { get; set; }
+        public ObservableCollection<FilterInfo> Cameras { get; set; } = new ObservableCollection<FilterInfo>();
 
-        private FilterInfo currCam;
-        public FilterInfo CurrentCamera
-        {
-            get { return currCam; }
-            set { currCam = value; OnPropertyChanged("CurrentCamera"); }
-        }
+        public FilterInfo CurrentCamera { get; set; }
 
         FileSystemWatcher watcher;
-        private async void PrepareWebcam()
+        private void PrepareWebcam()
         {
-            cb_cams.IsEnabled = false;
-            Cameras = new ObservableCollection<FilterInfo>();
-            getCameras();
+            cb_cams.IsEnabled = btn_livestream.IsEnabled = btn_take_picture.IsEnabled = false;
+
+            if (!ListCameras()) return;
+
+            cb_cams.SelectedIndex = 0;
+            cb_cams.IsEditable = false;
+            cb_cams.IsEnabled = btn_livestream.IsEnabled = btn_take_picture.IsEnabled = true;
         }
 
-        private void getCameras()
+        private bool ListCameras()
         {
-            foreach (FilterInfo filterInfo in new FilterInfoCollection(FilterCategory.VideoInputDevice)) Cameras.Add(filterInfo);
-            if (Cameras.Any())
+            foreach (FilterInfo vid_input in new FilterInfoCollection(FilterCategory.VideoInputDevice))
+                Cameras.Add(vid_input);
+
+            if (Cameras.Any()) return true;
+            else return false;
+        }
+
+        private void RefreshCameras(object sender, RoutedEventArgs e)
+        {
+            btn_refreshcam.IsEnabled = cb_cams.IsEnabled = btn_livestream.IsEnabled = btn_take_picture.IsEnabled = false;
+
+            Cameras.Clear();
+            if (!ListCameras())
             {
-                cb_cams.SelectedIndex = 0;
-                CurrentCamera = Cameras[0];
-                cb_cams.IsEnabled = true;
-                cb_cams.IsEditable = false;
-                cb_cams.HorizontalContentAlignment = HorizontalAlignment.Left;
-            }
-            else
-            {
-                cb_cams.HorizontalContentAlignment = HorizontalAlignment.Right;
-                cb_cams.IsEnabled = false;
                 cb_cams.IsEditable = true;
+                cb_cams.IsEnabled = false;
             }
-        }
+            cb_cams.SelectedIndex = 0;
 
-        private void refreshCameras(object sender, RoutedEventArgs e)
-        {
-            refreshcam();
-            while (Cameras.Any()) Cameras.RemoveAt(0);
-            getCameras();
-        }
-        private async void refreshcam()
-        {
-            btn_refreshcam.IsEnabled = false;
-            for (int i = 0; i <= 360; i+=90)
-            {
-                img_refreshcam.RenderTransform = new RotateTransform(i);
-                await Task.Delay(125);
-            }
-            btn_refreshcam.IsEnabled = true;
+            btn_refreshcam.IsEnabled = cb_cams.IsEnabled = btn_livestream.IsEnabled = btn_take_picture.IsEnabled = true;
         }
 
         public void stopControl() => StopCam(); //Exit Trigger
@@ -970,7 +933,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         private IVideoSource liveStream;
-        private void startOnboardCam(object sender, RoutedEventArgs e)
+        private void ToggleCamStream(object sender, RoutedEventArgs e)
         {
             if (liveStream != null) StopCam();
             else if (CurrentCamera != null)
@@ -1005,7 +968,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #region CameraStream captures
 
-        string capturefolder;
+        string CapFolder = App.DocsPath + "/Camera Captures/" + DateTime.Now.ToString("MMM dd yyyy") + '/';
         bool isFirstCapture = true;
         byte i = 1;
         private void AmbilGambar(object sender, RoutedEventArgs e)
@@ -1016,10 +979,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             if (isFirstCapture)
             {
                 isFirstCapture = false;
-                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(capturefolder));
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(CapFolder));
                 watcher = new FileSystemWatcher()
                 {
-                    Path = capturefolder,
+                    Path = CapFolder,
                     NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName,
                     Filter = "*.jpeg",
                     EnableRaisingEvents = true
@@ -1027,8 +990,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 watcher.Created += GambarBaru;
             }
 
-            try { file = new FileStream(capturefolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss") + ".jpeg", FileMode.CreateNew); }
-            catch { file = new FileStream(capturefolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss_") + (i++).ToString() + ".jpeg", FileMode.CreateNew); }
+            try { file = new FileStream(CapFolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss") + ".jpeg", FileMode.CreateNew); }
+            catch { file = new FileStream(CapFolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss_") + (i++).ToString() + ".jpeg", FileMode.CreateNew); }
 
             var saveFile = new JpegBitmapEncoder();
             saveFile.Frames.Add(BitmapFrame.Create((BitmapImage)liveCam.Source));
@@ -1050,8 +1013,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             screenshot_List.Children.Insert(0, new System.Windows.Controls.Image()
             {
                 Source = new BitmapImage(new Uri(path)),
-                Margin = new Thickness(8, 8, 10, 8),
-                
+                Margin = new Thickness(4, 4, 2, 4)
             });
             RenderOptions.SetBitmapScalingMode(screenshot_List.Children[0], BitmapScalingMode.HighQuality);
             screenshot_List.Children[0].MouseLeftButtonDown += (sender, mousevent) => Process.Start(path);
@@ -1068,12 +1030,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #endregion
 
+
         #region Avionics Instrument Controling
 
-        public void hideAvionics() => avInst.Visibility = Visibility.Hidden;
-        public void showAvionics() => avInst.Visibility = Visibility.Visible;
+        public void ShowAvionics(bool status) => avInst.Visibility = status ? Visibility.Visible : Visibility.Hidden;
 
         #endregion
+
 
         #region Property Binding Handler
 

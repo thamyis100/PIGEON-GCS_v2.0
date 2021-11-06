@@ -11104,4 +11104,7 @@
         AElFTkSuQmCC
 </value>
   </data>
+  <data name="TestString" xml:space="preserve">
+    <value>TESTING BRO 1234</value>
+  </data>
 </root>

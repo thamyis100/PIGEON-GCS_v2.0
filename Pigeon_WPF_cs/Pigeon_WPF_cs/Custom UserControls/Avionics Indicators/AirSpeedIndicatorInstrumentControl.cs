@@ -27,8 +27,8 @@ namespace AviationInstruments
         int airSpeed; 
 
         // Images
-        Bitmap bmpCadran = new Bitmap(AviationInstruments.AvionicsInstrumentsControlsRessources.AirSpeedIndicator_Background);
-        Bitmap bmpNeedle = new Bitmap(AviationInstruments.AvionicsInstrumentsControlsRessources.AirSpeedNeedle);
+        Bitmap bmpCadran = new Bitmap(AvionicsInstrumentsControlsRessources.AirSpeedIndicator_Background);
+        Bitmap bmpNeedle = new Bitmap(AvionicsInstrumentsControlsRessources.AirSpeedNeedle);
 
         #endregion
 

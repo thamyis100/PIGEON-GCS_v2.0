@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Pigeon_WPF_cs.Custom_UserControls.FlightControl"
+﻿<UserControl
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,145 +6,139 @@
              xmlns:local="clr-namespace:Pigeon_WPF_cs.Custom_UserControls"
              xmlns:indicator="clr-namespace:AviationInstruments"
              xmlns:indikator="clr-namespace:Pigeon_WPF_cs.Custom_UserControls.WPF_Avionics_Indicators"
+             xmlns:Pigeon_WPF_cs="clr-namespace:Pigeon_WPF_cs" x:Class="Pigeon_WPF_cs.Custom_UserControls.FlightControl"
              mc:Ignorable="d" 
-             d:DesignHeight="632" d:DesignWidth="1132">
+             d:DesignHeight="695" d:DesignWidth="1273">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="54.4"/>
-            <RowDefinition Height="77*"/>
-            <RowDefinition Height="501*"/>
+            <RowDefinition Height="55"/>
+            <RowDefinition Height="80*"/>
+            <RowDefinition Height="500*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="484.8"/>
-            <ColumnDefinition Width="226*"/>
-            <ColumnDefinition Width="421*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="{DynamicResource MiddleColWidth}"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Label x:Name="judul_flight" Content="Flight View" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="207"/>
-        <Grid Margin="2.5,2.5" Grid.Row="1" Grid.RowSpan="3">
+        <Grid Margin="0,0,2.5,0" Grid.Row="1" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80*"/>
-                <ColumnDefinition Width="80*"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="180*"/>
-                <RowDefinition Height="15*"/>
-            </Grid.RowDefinitions>
 
-            <DockPanel Margin="0,0,5,5" Grid.Row="1" Background="Gainsboro" VerticalAlignment="Bottom" Height="30">
-                <Label Content="LAT" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="10,0,0,0" FontFamily="Consolas" FontSize="14"/>
-                <TextBox x:Name="tb_lat" Text="N/A" VerticalContentAlignment="Center" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,3,5,3" FontSize="20" Width="180" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" Foreground="#FF15008B"/>
+            <DockPanel Margin="2.5,0,2.5,2.5" Background="Gainsboro" Height="30" VerticalAlignment="Bottom">
+                <Label Content="LAT" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0" Margin="10,0,0,0" FontFamily="Consolas" FontSize="16"/>
+                <TextBox x:Name="tb_lat" Text="N/A" VerticalContentAlignment="Center" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="0" Margin="0,0,5,0" FontSize="24" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" Foreground="#FF15008B"/>
             </DockPanel>
-            <DockPanel Margin="5,0,0,5" Grid.Row="1" Background="Gainsboro" Grid.Column="1" VerticalAlignment="Bottom" Height="30">
-                <Label Content="LON" FontFamily="Consolas" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14"/>
-                <TextBox x:Name="tb_longt" Text="N/A" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,5,0" FontSize="20" Width="180" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" Foreground="#FF15008B"/>
+            <DockPanel Margin="2.5,0,0,2.5" Grid.Row="1" Background="Gainsboro" Grid.Column="1" VerticalAlignment="Bottom" Height="30">
+                <Label Content="LON" FontFamily="Consolas" Padding="0" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="16"/>
+                <TextBox x:Name="tb_longt" Text="N/A" VerticalContentAlignment="Center" HorizontalAlignment="Right" VerticalAlignment="Center" DockPanel.Dock="Right" Margin="0,0,5,0" FontSize="24" Background="{x:Null}" BorderBrush="{x:Null}" FontWeight="Bold" FontFamily="Consolas" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" Foreground="#FF15008B"/>
             </DockPanel>
         </Grid>
         <DockPanel x:Name="stream_panel" Grid.Row="1" Grid.Column="2" Margin="2.5,0,2.5,2.5" Background="Gainsboro" IsEnabled="False">
             <DockPanel DockPanel.Dock="Top" Margin="5,5,5,2">
                 <TextBox x:Name="out_stream" Margin="0,0,5,0" Width="280" BorderBrush="{x:Null}" FontSize="14" AllowDrop="False"/>
                 <Button BorderBrush="{x:Null}" Margin="-1" Width="20" Click="sendCommand">
-                    <Image Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-email-send-80.png" Margin="0,1,0,0"/>
+                    <Image Source="/PIGEON GCS;component/Resources/icons/icons8-email-send-80.png" Margin="0,1,0,0"/>
                 </Button>
                 <Button x:Name="stream_panel_read_btn" Content="READ" DockPanel.Dock="Right" HorizontalAlignment="Right" Padding="10,0" BorderBrush="{x:Null}" Background="#FF9BECEC" Margin="0" FontSize="16" FontFamily="Tw Cen MT" FontWeight="Bold"/>
             </DockPanel>
-            <TextBox Text="" x:Name="in_stream" DockPanel.Dock="Top" BorderBrush="{x:Null}" Margin="5" FontSize="14" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False"/>
+            <TextBox Text="" x:Name="in_stream" DockPanel.Dock="Top" BorderBrush="{x:Null}" Margin="5" FontSize="14" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False" TextWrapping="WrapWithOverflow"/>
         </DockPanel>
         <Grid Grid.Column="2" Margin="2.5" Grid.Row="2" Background="Gainsboro" Grid.RowSpan="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="41*"/>
-                <RowDefinition Height="19*"/>
+                <RowDefinition Height="9*"/>
+                <RowDefinition Height="4*"/>
             </Grid.RowDefinitions>
-            <Border Margin="2,2,2,1" BorderBrush="#FF0A7C80" BorderThickness="1">
+            <Border Margin="2" BorderBrush="#FF0A7C80" BorderThickness="1">
                 <Border.Background>
-                    <ImageBrush RenderOptions.BitmapScalingMode="HighQuality" Stretch="Uniform" ImageSource="/Pigeon_WPF_cs;component/Resources/logo/dirgantara.png"/>
+                    <ImageBrush RenderOptions.BitmapScalingMode="HighQuality" Stretch="Uniform" ImageSource="/PIGEON GCS;component/Resources/logo/dirgantara.png"/>
                 </Border.Background>
                 <Image x:Name="liveCam" Margin="0" RenderOptions.BitmapScalingMode="HighQuality" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
-            <Button x:Name="btn_take_picture" FontSize="14" BorderBrush="Teal" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="154,5,154,0" Background="#FF9BECEC" Content="Ambil Gambar" HorizontalAlignment="Center" VerticalAlignment="Top" Padding="3,2" Height="22" Width="103" Click="AmbilGambar"/>
-            <DockPanel Margin="0,8,0,0" VerticalAlignment="Top" Height="21" Grid.Row="1">
-                <Label Content="Camera :" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontWeight="Bold" FontFamily="Consolas" Padding="5,0"/>
-                <ComboBox x:Name="cb_cams" DisplayMemberPath="Name" Margin="0" VerticalAlignment="Center" SelectedItem="{Binding CurrentCamera}" ItemsSource="{Binding Cameras}" SelectedIndex="0" Text="Tidak ada kamera, refresh &gt;&gt;" IsEditable="True" HorizontalAlignment="Left" Width="200" IsEnabled="False"/>
-                <Button x:Name="btn_livestream" Content="Start Stream" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="14" BorderBrush="{x:Null}" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="0,0,5,0" Background="#FF9BECEC" Click="startOnboardCam" Padding="10,1"/>
-                <Button x:Name="btn_refreshcam" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="refreshCameras" HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <Image x:Name="img_refreshcam" Source="/Pigeon_WPF_cs;component/Resources/icons/refresh.png" RenderTransformOrigin="0.5,0.5" />
+            <Button x:Name="btn_take_picture" FontSize="14" BorderBrush="Transparent" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="154,5,154,0" Background="#FF9BECEC" Content="Ambil Gambar" HorizontalAlignment="Center" VerticalAlignment="Top" Padding="3,2" Height="22" Width="103" Click="AmbilGambar"/>
+            <DockPanel Margin="0,2,0,0" VerticalAlignment="Top" Height="30" Grid.Row="1" HorizontalAlignment="Center">
+                <Label Content="Kamera :" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" FontFamily="Consolas" Padding="5,0"/>
+                <ComboBox x:Name="cb_cams" DisplayMemberPath="Name" Margin="0" VerticalAlignment="Center" SelectedItem="{Binding CurrentCamera}" ItemsSource="{Binding Cameras}" SelectedIndex="0" Text="Tidak ada kamera, refresh &gt;&gt;" IsEditable="True" HorizontalAlignment="Left" IsEnabled="False" FontSize="14" Width="220"/>
+                <Button x:Name="btn_refreshcam" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="RefreshCameras" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" Margin="5,0">
+                    <Image x:Name="img_refreshcam" Source="/PIGEON GCS;component/Resources/icons/refresh.png" RenderTransformOrigin="0.5,0.5" />
                 </Button>
+                <Button x:Name="btn_livestream" Content="Start Stream" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="14" BorderBrush="{x:Null}" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="0" Background="#FF9BECEC" Click="ToggleCamStream" Padding="10,5"/>
             </DockPanel>
-            <ScrollViewer Margin="5,38,5,5" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Background="White">
-                <WrapPanel x:Name="screenshot_List" Margin="2,2,0,2">
-
-                </WrapPanel>
+            <ScrollViewer Margin="5,36,5,5" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Background="White">
+                <WrapPanel x:Name="screenshot_List"/>
             </ScrollViewer>
         </Grid>
-        <Border Grid.Column="1" VerticalAlignment="Center" Background="Gainsboro" Padding="0" CornerRadius="4" Grid.ColumnSpan="2" Margin="0,7" HorizontalAlignment="Center" Height="40" Width="508">
-            <DockPanel Margin="10,3,5,3">
-                <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway"/>
-                <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedPort}" ItemsSource="{Binding sPorts}" Width="110" SelectionChanged="Cb_ports_SelectionChanged" FontSize="14"/>
-                <ComboBox x:Name="cb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedBaud}" Width="110" VerticalContentAlignment="Center" FontSize="14">
-                    <ComboBoxItem>BAUDRATE</ComboBoxItem>
-                    <ComboBoxItem>9600</ComboBoxItem>
-                    <ComboBoxItem>19200</ComboBoxItem>
-                    <ComboBoxItem>57600</ComboBoxItem>
-                    <ComboBoxItem>115200</ComboBoxItem>
-                    <ComboBoxItem>128000</ComboBoxItem>
+        <Border Grid.Column="1" VerticalAlignment="Center" Background="Gainsboro" Padding="0" CornerRadius="4" Grid.ColumnSpan="2" Margin="0,10" HorizontalAlignment="Center" Width="560">
+            <DockPanel Margin="10,2.5,5,2" VerticalAlignment="Center">
+                <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway"/>
+                <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding SelectedConn}" ItemsSource="{Binding ConnList}" Width="150" SelectionChanged="ConnSelection_Changed" FontSize="14" Cursor="Hand" SelectedIndex="0" IsSynchronizedWithCurrentItem="True"/>
+                <ComboBox x:Name="cb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding SelectedBaud}" Width="120" FontSize="14" SelectedIndex="0" Cursor="Hand" IsSynchronizedWithCurrentItem="True">
+                    <ComboBoxItem Content="BAUDRATE"/>
+                    <ComboBoxItem Content="9600"/>
+                    <ComboBoxItem Content="19200"/>
+                    <ComboBoxItem Content="57600"/>
+                    <ComboBoxItem Content="115200"/>
+                    <ComboBoxItem Content="128000"/>
                 </ComboBox>
-                <Button MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" VerticalAlignment="Center" Margin="5,0,0,0" Padding="0" Click="ToggleSerial" HorizontalContentAlignment="Stretch">
+                <Button MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" VerticalAlignment="Center" Margin="5,0,0,0" Padding="0" Click="ToggleConnection" HorizontalContentAlignment="Stretch" HorizontalAlignment="Right" Width="150">
                     <DockPanel>
-                        <Image x:Name="img_conn" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-disconnected-80.png"  Margin="4,0" HorizontalAlignment="Left"/>
-                        <Label x:Name="ind_conn_status" Content="Disconnected" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="16" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                        <Image x:Name="img_conn" Source="/PIGEON GCS;component/Resources/icons/icons8-disconnected-80.png"  Margin="4,0" HorizontalAlignment="Left"/>
+                        <Label x:Name="ind_conn_status" Content="Disconnected" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="16" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
                     </DockPanel>
                 </Button>
             </DockPanel>
         </Border>
-        <DockPanel  Grid.Column="1" Margin="2.5,0,2.5,2.5" Grid.Row="1" Grid.RowSpan="2" >
-            <DockPanel Height="35" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <Label Content="HEADING" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
-                <TextBox x:Name="tb_yaw" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <Label Content="PITCH" Padding="0" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
-                <TextBox x:Name="tb_pitch" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <Label Content="ROLL" Padding="0" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="14" FontFamily="Consolas"/>
-                <TextBox x:Name="tb_roll" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" DockPanel.Dock="Right" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0">
-                    <Label Content="SPEED" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="14" FontFamily="Consolas"/>
-                    <Label Content="(GPS / IMU)" FontSize="9" HorizontalAlignment="Left" Margin="0" Padding="0" FontFamily="Consolas"/>
-                </StackPanel>
-                <TextBox x:Name="tb_airspeed" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
-            <DockPanel Height="35" Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0">
-                    <Label Content="ALTITUDE" Padding="0" VerticalAlignment="Center" Margin="0" FontSize="14" FontFamily="Consolas" HorizontalAlignment="Left"/>
-                    <Label Content="(GPS / ALTM)" FontSize="9" HorizontalAlignment="Left" Margin="0" Padding="0" FontFamily="Consolas"/>
-                </StackPanel>
-                <TextBox x:Name="tb_alti" Text="N/A" VerticalAlignment="Center" Margin="0,0,10,0" Width="130" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="20" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
-            </DockPanel>
+        <ScrollViewer Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" VerticalScrollBarVisibility="Hidden">
+            <DockPanel Margin="2.5,0,2.5,2.5">
+                <Label x:Name="lbl_fmode" Background="#FF474747" Content="FLIGHT MODE" Padding="0,5" Margin="0" FontSize="30" FontWeight="Bold" FontFamily="Consolas" Foreground="White" HorizontalContentAlignment="Center" DockPanel.Dock="Top" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
+                <DockPanel VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro" Margin="0,5,0,0">
+                    <Label Content="HEADING" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" FontSize="16" FontFamily="Consolas"/>
+                    <TextBox x:Name="tb_yaw" Text="N/A" VerticalAlignment="Center" Margin="0,2,10,2" HorizontalAlignment="Right" FontSize="24" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
+                </DockPanel>
+                <DockPanel Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
+                    <Label Content="PITCH" Padding="0" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="16" FontFamily="Consolas"/>
+                    <TextBox x:Name="tb_pitch" Text="N/A" VerticalAlignment="Center" Margin="0,2,10,2" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="24" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
+                </DockPanel>
+                <DockPanel Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
+                    <Label Content="ROLL" Padding="0" VerticalAlignment="Center" Margin="10,0,0,0" FontSize="16" FontFamily="Consolas"/>
+                    <TextBox x:Name="tb_roll" Text="N/A" VerticalAlignment="Center" Margin="0,2,10,2" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="24" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
+                </DockPanel>
+                <DockPanel Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0">
+                        <Label Content="SPEED" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" FontFamily="Consolas"/>
+                        <Label Content="(GPS / IMU)" FontSize="11" HorizontalAlignment="Left" Margin="0" Padding="0" FontFamily="Consolas"/>
+                    </StackPanel>
+                    <TextBox x:Name="tb_airspeed" Text="N/A" VerticalAlignment="Center" Margin="0,5,10,5" HorizontalAlignment="Right" FontSize="24" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
+                </DockPanel>
+                <DockPanel Margin="0,5,0,0" VerticalAlignment="Top" DockPanel.Dock="Top" Background="Gainsboro">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0">
+                        <Label Content="ALTITUDE" Padding="0" VerticalAlignment="Center" Margin="0" FontSize="16" FontFamily="Consolas" HorizontalAlignment="Left"/>
+                        <Label Content="(GPS / ALTM)" FontSize="11" HorizontalAlignment="Left" Margin="0" Padding="0" FontFamily="Consolas"/>
+                    </StackPanel>
+                    <TextBox x:Name="tb_alti" Text="N/A" VerticalAlignment="Center" Margin="0,5,10,5" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="24" Padding="0" FontWeight="Bold" FontFamily="Consolas" Background="{x:Null}" BorderBrush="{x:Null}" IsReadOnly="True" IsUndoEnabled="False" AllowDrop="False" Foreground="#FF15008B" HorizontalContentAlignment="Right"/>
+                </DockPanel>
 
-            <DockPanel x:Name="avInst" Grid.Column="1" Margin="0,5,0,0" Grid.Row="2" Background="Gainsboro">
-                <!--<WindowsFormsHost DockPanel.Dock="Top" Margin="0,5,0,0" VerticalAlignment="Top" Height="210" Width="210" HorizontalAlignment="Center">
-                    <indicator:AttitudeIndicatorInstrumentControl x:Name="ind_attitude"/>
-                </WindowsFormsHost>-->
-                <indikator:AttitudeIndicator x:Name="ind_attitude" Margin="5,5,5,0" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top" HorizontalAlignment="Center" DockPanel.Dock="Top">
-                    <indikator:AttitudeIndicator.LayoutTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="0.54" ScaleY="0.54"/>
-                            <SkewTransform/>
-                            <RotateTransform/>
-                            <TranslateTransform/>
-                        </TransformGroup>
-                    </indikator:AttitudeIndicator.LayoutTransform>
-                </indikator:AttitudeIndicator>
-                <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="105" Height="105" Margin="5,0,0,5">
-                    <indicator:HeadingIndicatorInstrumentControl x:Name="ind_heading"/>
-                </WindowsFormsHost>
-                <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="105" Height="105" DockPanel.Dock="Right" Margin="0,0,5,5">
-                    <indicator:AirSpeedIndicatorInstrumentControl x:Name="ind_airspeed"/>
-                </WindowsFormsHost>
+                <DockPanel x:Name="avInst" Grid.Column="1" Grid.Row="2" Background="Gainsboro" VerticalAlignment="Bottom" Margin="0,5,0,0" DockPanel.Dock="Bottom">
+                    <!--<WindowsFormsHost DockPanel.Dock="Top" Margin="0,5,0,0" VerticalAlignment="Top" Height="210" Width="210" HorizontalAlignment="Center">
+                        <indicator:AttitudeIndicatorInstrumentControl x:Name="ind_attitude"/>
+                    </WindowsFormsHost>-->
+                    <indikator:AttitudeIndicator x:Name="ind_attitude" Margin="5" DockPanel.Dock="Top"/>
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="105" Height="105">
+                            <indicator:HeadingIndicatorInstrumentControl x:Name="ind_heading"/>
+                        </WindowsFormsHost>
+                        <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="105" Height="105" Grid.ColumnSpan="2" Grid.Column="1">
+                            <indicator:AirSpeedIndicatorInstrumentControl x:Name="ind_airspeed"/>
+                        </WindowsFormsHost>
+                    </Grid>
+                </DockPanel>
             </DockPanel>
-        </DockPanel>
-
+        </ScrollViewer>
     </Grid>
 </UserControl>

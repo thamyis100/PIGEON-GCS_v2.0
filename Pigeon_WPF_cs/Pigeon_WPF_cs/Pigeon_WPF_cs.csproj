@@ -8,8 +8,8 @@
     <ProjectGuid>{DCA3A20B-476F-488A-9C10-FAF22E52F18A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Pigeon_WPF_cs</RootNamespace>
-    <AssemblyName>Pigeon_WPF_cs</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <AssemblyName>PIGEON GCS</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -34,6 +34,7 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -101,13 +102,19 @@
     <ManifestKeyFile>Pigeon_WPF_cs_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>pigeonlogo_vkT_icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AForge, Version=2.2.5.0, Culture=neutral, PublicKeyToken=c1db6ff4eaa06aeb, processorArchitecture=MSIL">
@@ -140,8 +147,8 @@
     <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="MavLink4Net.Messages, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MavLink4Net.Messages.0.4.0\lib\netstandard2.0\MavLink4Net.Messages.dll</HintPath>
+    <Reference Include="MavLinkNet">
+      <HintPath>DLLs\MavLinkNet.dll</HintPath>
     </Reference>
     <Reference Include="MessagePack, Version=2.2.0.0, Culture=neutral, PublicKeyToken=b4a0369545f0a1be, processorArchitecture=MSIL">
       <HintPath>..\packages\MessagePack.2.2.60\lib\netstandard2.0\MessagePack.dll</HintPath>
@@ -208,6 +215,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Custom UserControls\Avionics Indicators\AvionicsInstrumentsControlsRessources.Designer.cs">
+      <DependentUpon>AvionicsInstrumentsControlsRessources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Custom UserControls\CustomMarker.xaml.cs">
       <DependentUpon>CustomMarker.xaml</DependentUpon>
     </Compile>
@@ -226,8 +238,11 @@
     <Compile Include="Custom UserControls\WPF Avionics Indicators\AttitudeIndicator.xaml.cs">
       <DependentUpon>AttitudeIndicator.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Resources\ReadWriteCsv.cs" />
-    <Compile Include="Resources\Screenshot.cs" />
+    <Compile Include="Data\Enums.cs" />
+    <Compile Include="Data\DataClasses.cs" />
+    <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\ReadWriteCsv.cs" />
+    <Compile Include="Helpers\Screenshot.cs" />
     <Page Include="Custom UserControls\CustomMarker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -256,7 +271,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="exitPop.xaml">
+    <Page Include="MessagePop.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -277,11 +292,6 @@
     <Compile Include="Custom UserControls\Avionics Indicators\AttitudeIndicatorInstrumentControl.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Custom UserControls\Avionics Indicators\AvionicsInstrumentsControlsRessources1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>AvionicsInstrumentsControlsRessources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Custom UserControls\Avionics Indicators\HeadingIndicatorInstrumentControl.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -297,8 +307,8 @@
     <Compile Include="Custom UserControls\FlightControl.xaml.cs">
       <DependentUpon>FlightControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="exitPop.xaml.cs">
-      <DependentUpon>exitPop.xaml</DependentUpon>
+    <Compile Include="MessagePop.xaml.cs">
+      <DependentUpon>MessagePop.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -320,14 +330,16 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <EmbeddedResource Include="Custom UserControls\Avionics Indicators\AvionicsInstrumentsControlsRessources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>AvionicsInstrumentsControlsRessources1.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>AvionicsInstrumentsControlsRessources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>AviationInstruments</CustomToolNamespace>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -457,7 +469,7 @@
     <Resource Include="Resources\images\Header.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\images\test_webcam_fullhd.jpeg" />
+    <None Include="Resources\images\test_webcam_fullhd.jpeg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Custom UserControls\Capture_34_00[05-9-20]_2.jpeg" />
@@ -476,6 +488,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\icons\ikon-quadcopter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <SplashScreen Include="Resources\logo\pigeonnew_splash.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

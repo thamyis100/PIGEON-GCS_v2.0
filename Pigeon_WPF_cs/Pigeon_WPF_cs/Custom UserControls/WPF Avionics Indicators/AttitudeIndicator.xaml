@@ -4,10 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Pigeon_WPF_cs.Custom_UserControls.WPF_Avionics_Indicators"
-             mc:Ignorable="d" Width="400" Height="400">
+             mc:Ignorable="d" ClipToBounds="True">
     <Grid>
-        <Border Margin="15" ClipToBounds="True">
-            <Image x:Name="img_boule" RenderOptions.BitmapScalingMode="HighQuality" RenderTransformOrigin="0.5,0" Source="Res/Horizon_GroundSky.png" HorizontalAlignment="Center" Stretch="None" Margin="0,-600" VerticalAlignment="Center"/>
+        <Border Margin="15">
+            <Image x:Name="img_boule" RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Horizon_GroundSky.png" Margin="0,-600"/>
         </Border>
         <Image RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Horizon_Background.png"/>
         <Image x:Name="img_avion" RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Maquette_Avion.png" RenderTransformOrigin="0.5,0.5">

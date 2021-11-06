@@ -4,6 +4,10 @@
              xmlns:local="clr-namespace:Pigeon_WPF_cs"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
+        <GridLength x:Key="MiddleColWidth">270</GridLength>
+
+        <SolidColorBrush x:Key="WindowColor" Color="#FF053C3E"/>
+        
     </Application.Resources>
 </Application>

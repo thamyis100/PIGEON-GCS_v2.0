@@ -37,7 +37,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls.WPF_Avionics_Indicators
 
         public void SetAttitudeIndicatorParameters(float aircraftPitchAngle, float aircraftRollAngle)
         {
-            System.Windows.Point thepoint = rotasiPoin(0, aircraftPitchAngle * 5.35, aircraftRollAngle);
+            System.Windows.Point thepoint = rotasiPoin(0, aircraftPitchAngle * 3.35, aircraftRollAngle);
             TransformGroup rotatePindah = new TransformGroup();
             TranslateTransform pindahPoint = new TranslateTransform(thepoint.X, thepoint.Y);
             //Console.WriteLine("translatetransform: " + pindahPoint.X.ToString() + "," + pindahPoint.Y.ToString());

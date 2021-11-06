@@ -22,125 +22,144 @@ using System.Windows.Threading;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Forms.VisualStyles;
+using Pigeon_WPF_cs.Enums;
 
 namespace Pigeon_WPF_cs
 {
-    /// <summary>
-    /// Daftar perintah untuk dikirim ke wahana
-    /// </summary>
-    public enum command
-    {
-        /// <summary>
-        /// Perintah auto take off
-        /// </summary>
-        TAKE_OFF = 0xAA,
-        /// <summary>
-        /// Perintah auto landing
-        /// </summary>
-        LAND = 0xCC,
-        /// <summary>
-        /// Perintah membatalkan auto take-off
-        /// </summary>
-        BATALKAN = 0xBB
-    }
-
-    /// <summary>
-    /// Daftar mode penerbangan
-    /// </summary>
-    public enum FlightMode
-    {
-        /// <summary>
-        /// Terbang secara manual
-        /// </summary>
-        MANUAL = 0x00,
-        /// <summary>
-        /// Terbang dengan stabilisasi
-        /// </summary>
-        STABILIZER = 0x01,
-        /// <summary>
-        /// Terbang mengitari tempat
-        /// </summary>
-        LOITER = 0x02,
-        /// <summary>
-        /// Sedang takeoff
-        /// </summary>
-        TAKEOFF = 0x03
-    }
-
-    /// <summary>
-    /// Identifier penggunaan efalcon
-    /// </summary>
-    public enum TipeEfalcon
-    {
-        TRACKER = 0x01,
-        WAHANA = 0x02
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        /// <summary>
-        /// Fungsi memetakan satu rentang nilai ke rentang nilai yang lain
-        /// </summary>
-        float Map(float x, float in_min, float in_max, float out_min, float out_max)
-        {
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-        }
-
         public MainWindow()
         {
             InitializeComponent();
 
-            //contoh kapasitas baterai
-            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, 400, 396));
+            InitializeFirstTimeOpen();
+        }
 
-            //inisialisasi semua tab
-            setCurrentlyActive(tab_track, btn_track, track_Ctrl);
-            setCurrentlyActive(tab_stats, btn_stats, stats_Ctrl);
-            setCurrentlyActive(tab_map, btn_map, map_Ctrl);
-            setCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
+        private Task<bool> InitializeFirstTimeOpen()
+        {
+            SetBaterai((float)75.25);
 
-            SetConnStat(TipeEfalcon.WAHANA, false); //offline wahana
-            SetConnStat(TipeEfalcon.TRACKER, false); //offline tracker
+            ResizeMapFlight();
 
-            //kecilkan ukuran map
-            MinimizeMap();
+            SetConnStat(TipeDevice.WAHANA, false); //offline wahana
+            SetConnStat(TipeDevice.TRACKER, false); //offline tracker
 
-            //siapkan vokalisasi data terbang
-            //PrepareSpeechSynth();
-            //siapkan pengenalan perintah suara
-            //PrepareRecog();
-
-            //set bahasa indonesia
-            SetBahasa(new CultureInfo("id-ID"));
-
-            //set waktu sekarang
+            // Jam Digital waktu sekarang
             DispatcherTimer timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.DataBind, delegate
             {
                 digital_clock.Text = DateTime.Now.ToString("HH\\:mm\\:ss (G\\MTz) dddd,\ndd MMMM yyyy", CultureInfo.CurrentUICulture);
-            },Dispatcher);
+            }, Dispatcher);
+
+            return Task.FromResult(true);
         }
 
-        #region MainWindow functions
+        #region MainWindow control
+
+        #region Top Bar Control
+
+        /// <summary>
+        /// Mengubah tampilan angka dan tanggal sesuai bahasa
+        /// </summary>
+        private void SetBahasa(CultureInfo Language) => Thread.CurrentThread.CurrentUICulture = Language;
+
+        /// <summary>
+        /// Set kapasitas baterai
+        /// </summary>
+        /// <param name="tegangan">Tegangan baterai dalam satuan Mili Volt (mV)</param>
+        /// <param name="arus">Tegangan baterai dalam satuan Mili Ampere (mA)</param>
+        internal void SetBaterai(float kapasitas, int tegangan = 0, int arus = 0)
+        {
+            float volt = tegangan / 1000;
+            float ampere = arus / 1000;
+
+            //int persen_px = (int)volt.Map(2.9f, 4.2f, 70.0f, 640.0f);
+            int persen_px = (int)kapasitas.Map(0.0f, 100.0f, 70.0f, 640.0f);
+
+            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(
+                new Uri(App.EmbeddedResx + "icons/bat-full.png")),
+                new Int32Rect(0, 0, persen_px, 396));
+
+            val_batt.Content = volt.ToString("0.00") + " V | "
+                + ampere.ToString("0.00") + " A";
+        }
+
+        /// <summary>
+        /// Set kualitas sinyal koneksi
+        /// </summary>
+        /// <param name="signal">Kualitas sinyal dalam satuan Persen (%)</param>
+        internal void SetSignal(float signal)
+        {
+            //int persen_py = signal.Map
+        }
+
+        #endregion
+
+        #region Other
+
+        private void MainWindow_Clicked(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (WindowState != WindowState.Normal) WindowState = WindowState.Normal;
+                DragMove();
+            }
+            catch { return; }
+        }
+
+        /// <summary>
+        /// Tutup aplikasi
+        /// </summary>
+        private void BtnExit_Clicked(object sender, RoutedEventArgs e)
+        {
+            var exitPop = new MessagePop();
+            if (flight_Ctrl.IsConnected)
+            {
+                exitPop = new MessagePop("Wahana masih terkoneksi! Silakan disconnect untuk melanjutkan!", false);
+                exitPop.Owner = this;
+            }
+            else
+            {
+                exitPop = new MessagePop("Anda menekan tombol EXIT, dan akan keluar dari PIGEON GCS", 5000);
+                exitPop.Owner = this;
+            }
+
+            Effect = new BlurEffect() { Radius = 15 };
+            flight_Ctrl.ShowAvionics(false);
+
+            if (exitPop.ShowDialog() == true)
+            {
+                flight_Ctrl.stopControl();
+                Close();
+            }
+            else
+            {
+                Effect = null;
+                flight_Ctrl.ShowAvionics(true);
+            }
+        }
 
         /// <summary>
         /// Event tombol ubah bahasa
         /// </summary>
-        private void ubah_bahasa(object sender, RoutedEventArgs e)
+        private void TombolBahasa(object sender, RoutedEventArgs e)
         {
-            bhs_indo.Background = bhs_inggris.Background = null;
+            bhs_indo.Background = bhs_inggris.Background = Brushes.Transparent;
+
             Button bahasa = (Button)sender;
             switch (bahasa.Name)
             {
                 case "bhs_indo":
                     SetBahasa(new CultureInfo("id-ID"));
+
                     // Header/Sidebar
                     bhs_lbl.Content = "Bahasa:";
                     lbl_signal.Content = "Sinyal";
                     lbl_flightTime.Content = "Waktu Terbang";
                     lbl_batt.Content = "Baterai";
+
                     // Flight
                     flight_Ctrl.judul_flight.Content = "Tampilan Terbang";
                     flight_Ctrl.stream_panel_read_btn.Content = "BACA";
@@ -148,64 +167,50 @@ namespace Pigeon_WPF_cs
                     flight_Ctrl.btn_livestream.Content = "Mulai Siaran";
                     flight_Ctrl.label.Content = "Koneksi :";
                     flight_Ctrl.ind_conn_status.Content = "Terputus";
+
                     // Stats 
                     stats_Ctrl.judul_stats.Content = "Statistik Data IMU";
                     stats_Ctrl.yaw_axis_x.Title = "Waktu Terbang";
                     stats_Ctrl.pitch_axis_x.Title = "Waktu Terbang";
                     stats_Ctrl.roll_axis_x.Title = "Waktu Terbang";
                     bhs_indo.Background = Brushes.Lime;
+
                     break;
+
                 case "bhs_inggris":
                     SetBahasa(new CultureInfo("en-US"));
+
                     // Header/Sidebar
                     bhs_lbl.Content = "Lang:";
                     lbl_signal.Content = "Signal";
                     lbl_flightTime.Content = "Flight Time";
                     lbl_batt.Content = "Battery";
+
                     // Flight
                     flight_Ctrl.judul_flight.Content = "Flight View";
                     flight_Ctrl.stream_panel_read_btn.Content = "READ";
                     flight_Ctrl.btn_take_picture.Content = "Take Picture";
                     flight_Ctrl.label.Content = "Connection :";
                     flight_Ctrl.ind_conn_status.Content = "Disconnected";
+
                     // Stats
                     stats_Ctrl.judul_stats.Content = "IMU Data Statistics";
                     stats_Ctrl.yaw_axis_x.Title = "Flight Time";
                     stats_Ctrl.pitch_axis_x.Title = "Flight Time";
                     stats_Ctrl.roll_axis_x.Title = "Flight Time";
                     bhs_inggris.Background = Brushes.Lime;
+
                     break;
             }
         }
 
-        /// <summary>
-        /// Mengubah bahasa tampilan
-        /// </summary>
-        private void SetBahasa(CultureInfo theLanguage) => Thread.CurrentThread.CurrentUICulture = theLanguage;
-
-        /// <summary>
-        /// Set kapasitas baterai
-        /// <br/><paramref name="tegangan"/> dalam Volt
-        /// <br/><paramref name="arus"/> dalam Ampere
-        /// </summary>
-        internal void SetBaterai(float tegangan, float arus, byte jmlcell = 3)
-        {
-            Debug.WriteLine("SetBaterai : \n"
-                + "jml cell : " + jmlcell.ToString()
-                + "tegangan : " + tegangan.ToString() + " V"
-                + "arus : " + arus.ToString() + " A"
-            );
-
-            int persen_px = (int)Map(tegangan/jmlcell, 3.0f, 4.2f, 70.0f, 640.0f);
-            icon_bat_1.Source = new CroppedBitmap(new BitmapImage(new Uri("pack://application:,,,/Resources/icons/bat-full.png")), new Int32Rect(0, 0, persen_px, 396));
-            val_batt.Content = tegangan.ToString("#.##") + " V | " + arus.ToString("#.###") + " A";
-        }
+        #endregion
 
         #endregion
 
         #region Speech Synth & Recog
 
-        #region synth
+        #region Synthesize
 
         private SpeechSynthesizer synth;
         /// <summary>
@@ -274,7 +279,7 @@ namespace Pigeon_WPF_cs
 
         #endregion
 
-        #region Recog
+        #region Recognition
 
         private SpeechRecognitionEngine recog = new SpeechRecognitionEngine();
         /// <summary>
@@ -317,14 +322,14 @@ namespace Pigeon_WPF_cs
             {
                 case "takeoff":
                     Console.WriteLine("Sending TAKE_OFF command");
-                    flight_Ctrl.SendToConnection(command.TAKE_OFF, TipeEfalcon.WAHANA);
+                    flight_Ctrl.SendToConnection(Command.TAKE_OFF, TipeDevice.WAHANA);
                     break;
                 case "land":
-                    flight_Ctrl.SendToConnection(command.LAND, TipeEfalcon.WAHANA);
+                    flight_Ctrl.SendToConnection(Command.LAND, TipeDevice.WAHANA);
                     Console.WriteLine("Sending LAND command");
                     break;
                 case "cancel":
-                    flight_Ctrl.SendToConnection(command.BATALKAN, TipeEfalcon.WAHANA);
+                    flight_Ctrl.SendToConnection(Command.BATALKAN, TipeDevice.WAHANA);
                     Console.WriteLine("Sending BATALKAN command");
                     break;
             }
@@ -339,33 +344,33 @@ namespace Pigeon_WPF_cs
         /// <summary>
         /// Apakah terkoneksi dengan wahana?
         /// </summary>
-        public bool isWahanaConnected = false;
+        public bool IsWahanaConnected { get; private set; } = false;
+
         /// <summary>
         /// Apakah terkoneksi dengan tracker?
         /// </summary>
-        public bool isTrackerConnected = false;
+        public bool IsTrackerConnected { get; private set; } = false;
+
         /// <summary>
-        /// Set status koneksi
-        /// <br/><paramref name="tipe"/> adalah TipeEfalcon
-        /// <br/><paramref name="status"/> :
-        /// <br/>true = online
-        /// <br/>false = offline
+        /// Set status koneksi PIGEON dengan Flight Controller / Antenna Tracker
         /// </summary>
-        public void SetConnStat(TipeEfalcon tipe, bool status)
+        /// <param name="tipe">Tipe alat</param>
+        /// <param name="status"></param>
+        public void SetConnStat(TipeDevice tipe, bool status)
         {
             switch (tipe)
             {
-                case TipeEfalcon.WAHANA:
-                    isWahanaConnected = status;
+                case TipeDevice.WAHANA:
+                    IsWahanaConnected = status;
                     lbl_statusWahana.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                     break;
-                case TipeEfalcon.TRACKER:
-                    isTrackerConnected = status;
+                case TipeDevice.TRACKER:
+                    IsTrackerConnected = status;
                     lbl_statusTracker.Visibility = status ? Visibility.Visible : Visibility.Collapsed;
                     break;
             }
 
-            if (isTrackerConnected || isWahanaConnected)
+            if (IsWahanaConnected || IsTrackerConnected)
             {
                 lbl_statusLine.Content = "ONLINE";
                 lbl_statusLine.Foreground = Brushes.Green;
@@ -376,129 +381,60 @@ namespace Pigeon_WPF_cs
                 lbl_statusLine.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF969696"));
             }
 
-            lbl_statusPlus.Visibility = (isTrackerConnected && isWahanaConnected) ? Visibility.Visible : Visibility.Collapsed;
+            lbl_statusPlus.Visibility = (IsWahanaConnected && IsTrackerConnected) ? Visibility.Visible : Visibility.Collapsed;
         }
 
         /// <summary>
         /// Total waktu terbang
         /// </summary>
-        public TimeSpan waktuTerbang = TimeSpan.Zero;
+        public TimeSpan WaktuTerbang = TimeSpan.Zero;
+
         /// <summary>
         /// Tanggal & Waktu mulai terbang
         /// </summary>
-        private DateTime waktuStart;
+        private DateTime WaktuStartTerbang;
+
         /// <summary>
         /// Stopwatch untuk waktu terbang
         /// </summary>
-        private DispatcherTimer detikan;
-        bool isTimerFirstTime = true;
-        /// <summary>
-        /// Resume/Pause stopwatch waktu penerbangan
-        /// <br/><paramref name="status"/> :
-        /// <br/>true = Resume
-        /// <br/>false = Pause
-        /// </summary>
-        public bool ToggleWaktuTerbang(bool status)
+        private DispatcherTimer StopWatchTerbang = new DispatcherTimer();
+
+        public bool StartWaktuTerbang()
         {
-            if (status)
+            if (StopWatchTerbang.IsEnabled) return false;
+            else
             {
-                if (isTimerFirstTime)
-                {
-                    detikan = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(100) };
-                    detikan.Tick += TickTerbang;
-                    waktuStart = DateTime.Now;
-                    detikan.Start();
-                    isTimerFirstTime = false;
-                }
+                StopWatchTerbang = new DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(250) };
+                StopWatchTerbang.Tick += StopWatchTerbang_Tick;
+                StopWatchTerbang.Start();
+
+                WaktuStartTerbang = DateTime.Now;
+
                 return true;
             }
+        }
+
+        public bool ResetWaktuTerbang()
+        {
+            if (!StopWatchTerbang.IsEnabled) return false;
             else
             {
-                if (detikan.IsEnabled)
-                {
-                    detikan.Stop();
-                    isTimerFirstTime = true;
-                    waktuTerbang = TimeSpan.Zero;
-                    val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
-                    Application.Current.MainWindow.Title = "PIGEON GCS";
-                }
-                return false;
+                StopWatchTerbang.Stop();
+
+                WaktuTerbang = TimeSpan.Zero;
+                
+                val_flightTime.Content = WaktuTerbang.ToString(@"hh\:mm\:ss");
+
+                Title = "PIGEON GCS";
             }
+            return false;
         }
 
-        public void ResetWaktuTerbang()
+        private void StopWatchTerbang_Tick(object sender, EventArgs e)
         {
-
-        }
-
-        private void TickTerbang(object sender, EventArgs e)
-        {
-            waktuTerbang = DateTime.Now - waktuStart;
-            val_flightTime.Content = waktuTerbang.ToString(@"hh\:mm\:ss");
-            Application.Current.MainWindow.Title = "T+ " + waktuTerbang.ToString(@"hh\:mm\:ss") + " - PIGEON GCS";
-        }
-
-        #endregion
-
-        #region window control
-
-        private void clickedWindow(object sender, MouseButtonEventArgs e) 
-        { 
-            try {
-                if (WindowState != WindowState.Normal) WindowState = WindowState.Normal;
-                DragMove(); 
-            } catch { return; } }
-
-        /// <summary>
-        /// Cek apakah wahana aman (eg. sudah mendarat)
-        /// </summary>
-        public bool isWahanaLanded()
-        {
-            Effect = new BlurEffect() { Radius = 5 };
-            flight_Ctrl.hideAvionics();
-
-            var diskonekFirst = new exitPop(2);
-            diskonekFirst.Owner = this;
-            if (diskonekFirst.ShowDialog() == true)
-            {
-                Effect = null;
-                flight_Ctrl.showAvionics();
-                return true;
-            }
-            else
-            {
-                Effect = null;
-                flight_Ctrl.showAvionics();
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Cek apakah sedang terkoneksi
-        /// </summary>
-        private byte appCheck()
-        {
-            byte code = 0;
-            if (flight_Ctrl.connected) code = 1;
-            return code;
-        }
-
-        /// <summary>
-        /// Tutup aplikasi
-        /// </summary>
-        private void closeApp(object sender, RoutedEventArgs e)
-        {
-            Effect = new BlurEffect() { Radius = 15 };
-            flight_Ctrl.hideAvionics();
-
-            var exitting = new exitPop(appCheck());
-            exitting.Owner = this;
-            if (exitting.ShowDialog() == true) { flight_Ctrl.stopControl(); Application.Current.Shutdown(); }
-            else
-            {
-                Effect = null;
-                flight_Ctrl.showAvionics();
-            }
+            WaktuTerbang = DateTime.Now - WaktuStartTerbang;
+            val_flightTime.Content = WaktuTerbang.ToString(@"hh\:mm\:ss");
+            Title = "T+ " + WaktuTerbang.ToString(@"hh\:mm\:ss") + " - PIGEON GCS";
         }
 
         #endregion
@@ -508,81 +444,73 @@ namespace Pigeon_WPF_cs
         /// <summary>
         /// Kecilkan ukuran map view
         /// </summary>
-        public void MinimizeMap()
+        public void ResizeMapFlight()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
-            Grid.SetRowSpan(mapGrid, 1);
-            Grid.SetColumnSpan(mapGrid, 1);
-            mapGrid.Margin = new Thickness(0, 0, 0, 0);
+            Grid.SetColumnSpan(map_Ctrl, 1);
+            map_Ctrl.Margin = new Thickness(0,0,0,32.5);
         }
         /// <summary>
         /// Kecilkan ukuran map view ke tracker view
         /// </summary>
-        public void MinimizeMapTracker()
+        public void ResizeMapTracker()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Hidden;
-            Grid.SetRowSpan(mapGrid, 2);
-            Grid.SetColumnSpan(mapGrid, 1);
-            mapGrid.Margin = new Thickness(0, 0, -130, 0);
+            Grid.SetColumnSpan(map_Ctrl, 2);
+            map_Ctrl.Margin = new Thickness(0, 0, 0, 0);
         }
         /// <summary>
         /// Besarkan ukuran map view
         /// </summary>
-        public void MaximizeMap()
+        public void ResizeMapMax()
         {
             map_Ctrl.judul_map.Visibility = Visibility.Visible;
-            Grid.SetRowSpan(mapGrid, 2);
-            Grid.SetColumnSpan(mapGrid, 2);
-            mapGrid.Margin = new Thickness(0, 0, 0, 0);
+            Grid.SetColumnSpan(map_Ctrl, 3);
+            map_Ctrl.Margin = new Thickness(0, 0, 0, 0);
         }
-
-        #endregion
-
-        #region statistik control
-
-        #endregion
-
-        #region flight view control
 
         #endregion
 
         #region Tab Control choosing
 
-        string selectedBtn ="btn_flight";
-        private void hoverButton(object sender, MouseEventArgs e)
+        /// <summary>
+        /// Tab yang sedang dipilih/aktif
+        /// </summary>
+        string SelectedTabBtn = "btn_flight";
+
+        private void Btn_OnHover(object sender, MouseEventArgs e)
         {
-            Button it = (Button)sender;
-            if(it.Name != selectedBtn) it.Background = Brushes.DarkSlateGray;
+            if((sender as Button).Name != SelectedTabBtn)
+                (sender as Button).Background = Brushes.DarkSlateGray;
         }
 
-        private void dehoverButton(object sender, MouseEventArgs e)
+        private void Btn_OnDehover(object sender, MouseEventArgs e)
         {
-            Button it = (Button)sender;
-            if (it.Name != selectedBtn) it.Background = null;
+            if ((sender as Button).Name != SelectedTabBtn)
+                (sender as Button).Background = null;
         }
 
         /// <summary>
         /// Pilihan tab dengan button
         /// </summary>
-        private void selectTab(object sender, RoutedEventArgs e)
+        private void TabSelect(object sender, RoutedEventArgs e)
         {
-            Button the_btn = (Button)sender;
-            switch (the_btn.Name)
+            switch ((sender as Button).Name)
             {
                 case "btn_flight":
-                    setCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
-                    MinimizeMap();
+                    SetCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
+                    ResizeMapFlight();
                     break;
                 case "btn_map":
-                    setCurrentlyActive(tab_map, btn_map, map_Ctrl);
-                    MaximizeMap();
+                    SetCurrentlyActive(tab_map, btn_map, map_Ctrl);
+                    ResizeMapMax();
                     break;
                 case "btn_stats":
-                    setCurrentlyActive(tab_stats, btn_stats, stats_Ctrl);
+                    SetCurrentlyActive(tab_stats, btn_stats, stats_Ctrl);
                     break;
                 case "btn_track":
-                    setCurrentlyActive(tab_track, btn_track, track_Ctrl);
-                    MinimizeMapTracker();
+                    SetCurrentlyActive(tab_track, btn_track, track_Ctrl);
+                    ResizeMapTracker();
                     break;
             }
         }
@@ -590,13 +518,13 @@ namespace Pigeon_WPF_cs
         /// <summary>
         /// Aktifkan view pada tab
         /// </summary>
-        private void setCurrentlyActive(Rectangle theBox, Button theBtn, UserControl theCtrl)
+        private void SetCurrentlyActive(Rectangle theBox, Button theBtn, UserControl theCtrl)
         {
             //sembunyikan semua box
             tab_flight.Visibility = tab_map.Visibility = tab_stats.Visibility = tab_track.Visibility = Visibility.Hidden;
 
             //transparankan semua tombol pilihan
-            btn_flight.Background = btn_map.Background = btn_stats.Background = btn_track.Background = null;
+            btn_flight.Background = btn_map.Background = btn_stats.Background = btn_track.Background = Brushes.Transparent;
 
             //sembunyikan semua control kecuali waypoint
             flight_Ctrl.Visibility = stats_Ctrl.Visibility = track_Ctrl.Visibility = Visibility.Hidden;
@@ -606,14 +534,14 @@ namespace Pigeon_WPF_cs
 
             //warnai tombol yang dipilih
             theBtn.Background = Brushes.Teal;
-            selectedBtn = theBtn.Name;
+
+            // Jadikan tombol aktif
+            SelectedTabBtn = theBtn.Name;
 
             //tampilkan box yang dipilih
             theBox.Visibility = Visibility.Visible;
         }
 
         #endregion
-
-        //private void muteVoice(object sender, RoutedEventArgs e) => MuteVoice = !MuteVoice;
     }
 }

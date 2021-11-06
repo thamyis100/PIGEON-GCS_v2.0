@@ -19,7 +19,7 @@ namespace Pigeon_WPF_cs.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -257,6 +257,15 @@ namespace Pigeon_WPF_cs.Properties {
             get {
                 object obj = ResourceManager.GetObject("pigeonnew", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TESTING BRO 1234.
+        /// </summary>
+        internal static string TestString {
+            get {
+                return ResourceManager.GetString("TestString", resourceCulture);
             }
         }
     }

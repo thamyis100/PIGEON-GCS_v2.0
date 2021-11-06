@@ -8,51 +8,58 @@
              d:DesignHeight="632" d:DesignWidth="1132">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="54.4"/>
+            <RowDefinition Height="55"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="59*"/>
-            <ColumnDefinition Width="54*"/>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="235"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
+        
         <Label x:Name="judul_track" Content="Antenna Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" />
-        <Grid Grid.Column="1" Margin="2.5,0" Grid.RowSpan="2">
+
+        <Label x:Name="conn_panel_label" Content="Menggunakan Koneksi pada Flight View" FontStretch="ExtraExpanded" FontSize="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontStyle="Oblique" FontWeight="Bold" Foreground="Black" Background="#7FFFFFFF" Panel.ZIndex="1" Grid.Column="1" Grid.ColumnSpan="2" Visibility="Collapsed"/>
+        <Border Background="Gainsboro" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="0,10" CornerRadius="4" Padding="0" VerticalAlignment="Center">
+            <DockPanel x:Name="conn_panel" Margin="10,2.5,5,2">
+                <Label x:Name="label" Content="Tracker Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway"/>
+                <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedPort}" ItemsSource="{Binding sPorts}" Width="110" SelectionChanged="Cb_ports_SelectionChanged" FontSize="14"/>
+                <ComboBox x:Name="cb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedBaud}" Width="110" VerticalContentAlignment="Center" FontSize="14">
+                    <ComboBoxItem>BAUDRATE</ComboBoxItem>
+                    <ComboBoxItem>9600</ComboBoxItem>
+                    <ComboBoxItem>19200</ComboBoxItem>
+                    <ComboBoxItem>57600</ComboBoxItem>
+                    <ComboBoxItem>115200</ComboBoxItem>
+                    <ComboBoxItem>128000</ComboBoxItem>
+                </ComboBox>
+                <Button x:Name="track_conn_bt" MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10,0,5,0" Padding="0" Click="ToggleSerial" DockPanel.Dock="Right">
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <Image x:Name="img_conn" Source="/PIGEON GCS;component/Resources/icons/icons8-disconnected-80.png"  Margin="2.5" DockPanel.Dock="Top"/>
+                        <Label x:Name="ind_conn_status" Content="Disconnected" DockPanel.Dock="Top" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="2.5,0,5,0" FontSize="16"/>
+                    </StackPanel>
+                </Button>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Column="2" Margin="2.5,0" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30*"/>
                 <RowDefinition Height="45*"/>
                 <RowDefinition Height="45*"/>
                 <RowDefinition Height="80*"/>
             </Grid.RowDefinitions>
-            <Label x:Name="conn_panel_label" Content="Menggunakan Koneksi pada Flight View" FontStretch="ExtraExpanded" FontSize="22" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontStyle="Oblique" FontWeight="Bold" Foreground="White" Background="#7F000000" Panel.ZIndex="1" Visibility="Collapsed"/>
-            <DockPanel x:Name="conn_panel" Margin="0,2.5" Background="Gainsboro">
-                <Grid Margin="10,0,0,3">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="49*"/>
-                        <RowDefinition Height="30*"/>
-                    </Grid.RowDefinitions>
-                    <DockPanel Margin="0,0,0,0.667">
-                        <Label x:Name="label" Content="Tracker Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway"/>
-                        <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedPort}" ItemsSource="{Binding sPorts}" Width="110" SelectionChanged="Cb_ports_SelectionChanged" FontSize="14"/>
-                        <ComboBox x:Name="cb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding selectedBaud}" Width="110" VerticalContentAlignment="Center" FontSize="14">
-                            <ComboBoxItem>BAUDRATE</ComboBoxItem>
-                            <ComboBoxItem>9600</ComboBoxItem>
-                            <ComboBoxItem>19200</ComboBoxItem>
-                            <ComboBoxItem>57600</ComboBoxItem>
-                            <ComboBoxItem>115200</ComboBoxItem>
-                            <ComboBoxItem>128000</ComboBoxItem>
-                        </ComboBox>
-                    </DockPanel>
-                    <TextBox x:Name="tb_received" Margin="0,0.333,0,-0.333" Grid.Row="1" IsReadOnly="True" IsUndoEnabled="False" HorizontalContentAlignment="Center" Height="24" VerticalAlignment="Top" VerticalContentAlignment="Center" IsEnabled="False"/>
-                </Grid>
-                <Button x:Name="track_conn_bt" MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0" Padding="0" Click="ToggleSerial" DockPanel.Dock="Right" Height="70" Width="80">
-                    <DockPanel>
-                        <Image x:Name="img_conn" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-disconnected-80.png"  Margin="0" HorizontalAlignment="Center" DockPanel.Dock="Top" Width="50" VerticalAlignment="Top"/>
-                        <Label x:Name="ind_conn_status" Content="Disconnected" DockPanel.Dock="Top" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" FontSize="11"/>
-                    </DockPanel>
-                </Button>
+            <DockPanel x:Name="stream_panel" Margin="0,0,0,2.5" Background="Gainsboro" IsEnabled="False">
+                <DockPanel DockPanel.Dock="Top" Margin="5,5,5,2" IsEnabled="False">
+                    <TextBox x:Name="out_stream" Margin="0,0,5,0" Width="280" BorderBrush="{x:Null}" FontSize="14" AllowDrop="False"/>
+                    <Button BorderBrush="{x:Null}" Margin="-1" Width="20">
+                        <Image Source="/PIGEON GCS;component/Resources/icons/icons8-email-send-80.png" Margin="0,1,0,0"/>
+                    </Button>
+                    <Button x:Name="stream_panel_read_btn" Content="READ" DockPanel.Dock="Right" HorizontalAlignment="Right" Padding="10,0" BorderBrush="{x:Null}" Background="#FF9BECEC" Margin="0" FontSize="16" FontFamily="Tw Cen MT" FontWeight="Bold"/>
+                </DockPanel>
+                <TextBox Text="" x:Name="tb_received" DockPanel.Dock="Top" BorderBrush="{x:Null}" Margin="5" FontSize="14" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False"/>
             </DockPanel>
             <DockPanel Margin="0,2.5" Background="Gainsboro" Grid.Row="1">
-                <Label Content="Koordinat Wahana" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0"/>
+                <Label Content="Koordinat Wahana" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0"/>
                 <Grid Margin="25,0" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10*"/>
@@ -81,7 +88,7 @@
                     <ColumnDefinition Width="150*"/>
                     <ColumnDefinition Width="30*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Koordinat Tracker" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0" Grid.ColumnSpan="2"/>
+                <Label Content="Koordinat Tracker" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0" Grid.ColumnSpan="2"/>
                 <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,25">
                     <Grid Margin="10,0,0,0" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -104,14 +111,14 @@
                     </Grid>
                 </DockPanel>
                 <Button x:Name="btn_postracker" Margin="0" Grid.Column="1" Height="40" VerticalAlignment="Center" Background="#FF9BECEC" BorderBrush="{x:Null}" HorizontalAlignment="Center" Width="40" Click="pasangTracker" IsEnabled="False">
-                    <Image Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-email-send-80.png" Width="30" Height="30"/>
+                    <Image Source="/PIGEON GCS;component/Resources/icons/icons8-email-send-80.png" Width="30" Height="30"/>
                 </Button>
             </Grid>
             <Grid Margin="0,2.5" Background="Gainsboro" Grid.Row="3">
-                <Label Content="Status Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="28" FontFamily="/Pigeon_WPF_cs;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" Margin="15,5,0,0"/>
+                <Label Content="Status Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="28" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" Margin="15,5,0,0"/>
                 <Button x:Name="btn_tracking" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,25,0" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="toggleTracking" IsEnabled="False">
                     <DockPanel>
-                        <Image x:Name="ico_start_stop" Source="/Pigeon_WPF_cs;component/Resources/icons/icons8-play-50.png" Height="25"/>
+                        <Image x:Name="ico_start_stop" Source="/PIGEON GCS;component/Resources/icons/icons8-play-50.png" Height="25"/>
                         <Label x:Name="lbl_start_stop" Content="Start Tracking" FontSize="14" FontFamily="Century Gothic" FontWeight="Bold"/>
                     </DockPanel>
                 </Button>

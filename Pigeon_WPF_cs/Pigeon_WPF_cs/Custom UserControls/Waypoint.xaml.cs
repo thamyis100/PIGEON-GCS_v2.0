@@ -75,15 +75,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void mapView_Loaded(object sender, RoutedEventArgs e)
         {
-            MainWindow win = (MainWindow)Window.GetWindow(this);
-
             mapView.ShowCenter = false;
-            mapView.CacheLocation = System.IO.Path.GetDirectoryName(win.flight_Ctrl.Path + "/MapCache/");
+            mapView.CacheLocation = System.IO.Path.GetDirectoryName(App.DocsPath + "/MapCache/");
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
             mapView.MultiTouchEnabled = true;
-            mapView.MapProvider = GoogleSatelliteMapProvider.Instance;
+            ChooseMap(null, null);
             mapView.MinZoom = 3;
-            mapView.MaxZoom = 20;
+            mapView.MaxZoom = 25;
             mapView.MouseWheelZoomType = MouseWheelZoomType.MousePositionAndCenter;
             mapView.CanDragMap = true;
             mapView.DragButton = MouseButton.Left;
@@ -150,11 +148,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
         }
 
-        private void chooseMap(object sender, SelectionChangedEventArgs e)
+        private void ChooseMap(object sender, SelectionChangedEventArgs e)
         {
-            ComboBox mapChoose = (ComboBox)sender;
-
-            switch (mapChoose.SelectedIndex)
+            switch (cb_map_type.SelectedIndex)
             {
                 case 0:
                     mapView.MapProvider = ArcGIS_World_Topo_MapProvider.Instance;
@@ -421,38 +417,38 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
 
         //Flight Mode
-        internal void SetMode(byte fmode)
-        {
-            switch (fmode)
-            {
-                case 0x00:
-                    fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 255, 255, 80));
-                    fmode_lbl.Content = "MANUAL MODE";
-                    break;
-                case 0x08:
-                    fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 12, 161, 166));
-                    fmode_lbl.Content = "STABILIZER MODE";
-                    break;
-                case 0x80:
-                    fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 200, 140, 0));
-                    fmode_lbl.Content = "AUTO MODE";
-                    break;
-            }
-        }
+        //internal void SetMode(byte fmode)
+        //{
+        //    switch (fmode)
+        //    {
+        //        case 0x00:
+        //            fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 255, 255, 80));
+        //            fmode_lbl.Content = "MANUAL MODE";
+        //            break;
+        //        case 0x08:
+        //            fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 12, 161, 166));
+        //            fmode_lbl.Content = "STABILIZER MODE";
+        //            break;
+        //        case 0x80:
+        //            fmode_view.Background = new SolidColorBrush(Color.FromArgb(50, 200, 140, 0));
+        //            fmode_lbl.Content = "AUTO MODE";
+        //            break;
+        //    }
+        //}
 
         //Disable things that require connection
-        internal void FmodeEnable(bool stat)
-        {
-            switch (stat)
-            {
-                case false:
-                    fmode_view.Visibility = Visibility.Hidden;
-                    break;
-                case true:
-                    fmode_view.Visibility = Visibility.Visible;
-                    break;
-            }
-        }
+        //internal void FmodeEnable(bool stat)
+        //{
+        //    switch (stat)
+        //    {
+        //        case false:
+        //            fmode_view.Visibility = Visibility.Hidden;
+        //            break;
+        //        case true:
+        //            fmode_view.Visibility = Visibility.Visible;
+        //            break;
+        //    }
+        //}
 
         #endregion
 
