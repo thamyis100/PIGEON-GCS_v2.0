@@ -62,7 +62,7 @@
                 <Label Content="Kamera :" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" FontFamily="Consolas" Padding="5,0"/>
                 <ComboBox x:Name="cb_cams" DisplayMemberPath="Name" Margin="0" VerticalAlignment="Center" SelectedItem="{Binding CurrentCamera}" ItemsSource="{Binding Cameras}" SelectedIndex="0" Text="Tidak ada kamera, refresh &gt;&gt;" IsEditable="True" HorizontalAlignment="Left" IsEnabled="False" FontSize="14" Width="220"/>
                 <Button x:Name="btn_refreshcam" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="RefreshCameras" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" Margin="5,0">
-                    <Image x:Name="img_refreshcam" Source="/PIGEON GCS;component/Resources/icons/refresh.png" RenderTransformOrigin="0.5,0.5" />
+                    <Image x:Name="img_refreshcam" RenderOptions.BitmapScalingMode="HighQuality" Source="/PIGEON GCS;component/Resources/icons/refresh.png" RenderTransformOrigin="0.5,0.5" />
                 </Button>
                 <Button x:Name="btn_livestream" Content="Start Stream" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="14" BorderBrush="{x:Null}" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="0" Background="#FF9BECEC" Click="ToggleCamStream" Padding="10,5"/>
             </DockPanel>
@@ -82,9 +82,9 @@
                     <ComboBoxItem Content="115200"/>
                     <ComboBoxItem Content="128000"/>
                 </ComboBox>
-                <Button MouseEnter="img_conn_0" MouseLeave="img_conn_1" Background="#FF9BECEC" BorderBrush="{x:Null}" VerticalAlignment="Center" Margin="5,0,0,0" Padding="0" Click="ToggleConnection" HorizontalContentAlignment="Stretch" HorizontalAlignment="Right" Width="150">
+                <Button x:Name="btn_conn" MouseEnter="OnConnHover" MouseLeave="OnConnDehover" Background="#FF9BECEC" BorderBrush="{x:Null}" VerticalAlignment="Center" Margin="5,0,0,0" Padding="0" Click="ToggleConnection" HorizontalContentAlignment="Stretch" HorizontalAlignment="Right" Width="150">
                     <DockPanel>
-                        <Image x:Name="img_conn" Source="/PIGEON GCS;component/Resources/icons/icons8-disconnected-80.png"  Margin="4,0" HorizontalAlignment="Left"/>
+                        <Image x:Name="img_conn" RenderOptions.BitmapScalingMode="HighQuality" Source="/PIGEON GCS;component/Resources/icons/icons8-disconnected-80.png"  Margin="4,0" HorizontalAlignment="Left"/>
                         <Label x:Name="ind_conn_status" Content="Disconnected" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="16" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
                     </DockPanel>
                 </Button>

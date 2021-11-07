@@ -123,6 +123,16 @@ namespace Pigeon_WPF_cs.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap home_ico {
+            get {
+                object obj = ResourceManager.GetObject("home_ico", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_connected_80 {
             get {
                 object obj = ResourceManager.GetObject("icons8_connected_80", resourceCulture);
@@ -223,6 +233,16 @@ namespace Pigeon_WPF_cs.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap ikon_quadcopter {
+            get {
+                object obj = ResourceManager.GetObject("ikon_quadcopter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap marker_waypoint {
             get {
                 object obj = ResourceManager.GetObject("marker_waypoint", resourceCulture);
@@ -266,6 +286,16 @@ namespace Pigeon_WPF_cs.Properties {
         internal static string TestString {
             get {
                 return ResourceManager.GetString("TestString", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tracker_ico {
+            get {
+                object obj = ResourceManager.GetObject("tracker_ico", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

@@ -20,14 +20,19 @@ namespace Pigeon_WPF_cs
         /// <summary>
         /// Flight Data untuk wahana saat ini
         /// </summary>
-        public static FlightData CurrWahana;
+        public static FlightData Wahana = new FlightData();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public static TrackerData Tracker = new TrackerData();
 
         /// <summary>
         /// User Document path to save dataw
         /// </summary>
         public static string DocsPath => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Pigeon GCS/";
 
-        public static string EmbeddedResx = "pack://application:,,,/PIGEON GCS;component/Resources/";
+        public static string ResourcePackUri = "pack://application:,,,/PIGEON GCS;component/Resources/";
 
         public App()
         {

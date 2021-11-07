@@ -25,16 +25,20 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         public WaypointItem(GMapMarker marker)
         {
             InitializeComponent();
+
             TheMarkerHolder = marker;
+
             Image img;
+
             try
             {
-                img = ((CustomMarker)(marker.Shape)).GetImage;
+                img = ((CustomMarker)marker.Shape).GetImage;
             }catch(Exception exc)
             {
                 Console.WriteLine("Not using custommarker, use normal image shape instead");
                 img = (Image)marker.Shape;
             }
+
             wp_ikon.Source = img.Source;
             wp_name.Text = '#' + marker.Tag.ToString();
             wp_lat.Text = marker.Position.Lat.ToString("0.#########");

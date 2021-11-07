@@ -42,6 +42,7 @@ namespace Pigeon_WPF_cs
         {
             SetBaterai((float)75.25);
 
+            SetCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
             ResizeMapFlight();
 
             SetConnStat(TipeDevice.WAHANA, false); //offline wahana
@@ -79,7 +80,7 @@ namespace Pigeon_WPF_cs
             int persen_px = (int)kapasitas.Map(0.0f, 100.0f, 70.0f, 640.0f);
 
             icon_bat_1.Source = new CroppedBitmap(new BitmapImage(
-                new Uri(App.EmbeddedResx + "icons/bat-full.png")),
+                new Uri(App.ResourcePackUri + "icons/bat-full.png")),
                 new Int32Rect(0, 0, persen_px, 396));
 
             val_batt.Content = volt.ToString("0.00") + " V | "
@@ -92,7 +93,12 @@ namespace Pigeon_WPF_cs
         /// <param name="signal">Kualitas sinyal dalam satuan Persen (%)</param>
         internal void SetSignal(float signal)
         {
-            //int persen_py = signal.Map
+            int persen_px = (int)signal.Map(0.0f, 100.0f, 8.0f, 44.0f);
+
+            icon_signal_1.Source = new CroppedBitmap(Properties.Resources.icons8_wi_fi_filled_50.ToBitmapSource(),
+                new Int32Rect(0, 50 - persen_px, 50, persen_px));
+
+            val_signal.Content = signal.ToString("0") + "%";
         }
 
         #endregion
@@ -131,7 +137,7 @@ namespace Pigeon_WPF_cs
 
             if (exitPop.ShowDialog() == true)
             {
-                flight_Ctrl.stopControl();
+                flight_Ctrl.StopCam();
                 Close();
             }
             else
