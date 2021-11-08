@@ -68,6 +68,11 @@
         LOITER,
 
         /// <summary>
+        /// Terbang secara autopilot
+        /// </summary>
+        AUTO,
+
+        /// <summary>
         /// Sedang takeoff
         /// </summary>
         TAKEOFF
