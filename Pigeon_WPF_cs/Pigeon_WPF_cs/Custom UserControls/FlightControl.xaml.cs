@@ -77,7 +77,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 ind_conn_status.Content = "Disconnecting";
 
                 if (Sp_Used != null) Sp_Used.Dispose();
-                if (WIFISocket != null) WIFISocket.Close();
+                if (WIFISocket != null)
+                {
+                    WIFIAsyncEvent.Dispose();
+                    WIFISocket.Close();
+                }
                 if (WIFIAsyncEvent != null) WIFIAsyncEvent.Dispose();
 
                 IsConnected = false;
@@ -116,6 +120,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
 
             cb_ports.IsEnabled = cb_bauds.IsEnabled = btn_conn.IsEnabled = stream_panel.IsEnabled = IsConnected = true;
+
+            // activate async mavlink parser walker
+            MavLinkParser.PacketReceived += MavlinkPacketReceived;
 
             img_conn.Source = Properties.Resources.icons8_connected_80.ToBitmapSource();
             ind_conn_status.Content = "Connected";
@@ -311,9 +318,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void WIFIAsyncEvent_Completed(object sender, SocketAsyncEventArgs e)
         {
-            Task.Run(() => ParseData(e.Buffer, e.BytesTransferred));
+            try
+            {
+                if(!IsUsingMavlink)
+                    Task.Run(() => ParseData(e.Buffer, e.BytesTransferred));
 
-            WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
+                WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
+            }catch(ArgumentException arg_exc)
+            {
+                Debug.WriteLine("[WIFI ASYNC EVENT] : " + arg_exc.Message);
+            }
         }
 
         #endregion
@@ -374,10 +388,15 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             var rxPort = (SerialPort)sender;
 
-            byte[] rxBuf = new byte[rxPort.BytesToRead];
-            int bufLength = await rxPort.BaseStream.ReadAsync(rxBuf, 0, rxPort.BytesToRead);
+            int bufLen = rxPort.BytesToRead;
 
-            Task.Run(() => ParseData(rxBuf, bufLength));
+            byte[] rxBuf = new byte[bufLen];
+
+            await rxPort.BaseStream.ReadAsync(rxBuf, 0, bufLen);
+
+            MavLinkParser.ProcessReceivedBytes(rxBuf, 0, bufLen);
+
+            //Task.Run(() => ParseData(rxBuf, bufLength));
         }
 
         #endregion
@@ -393,12 +412,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private void ParseData(byte[] RxBuf, int BufLen)
         {
             #region Debugging Purpose
-            Debug.Write("ParseData : HEX-> ");
-            for (int i = 0; i < BufLen; i++)
-            {
-                Debug.Write(RxBuf[i].ToString("X2") + ' ');
-            }
-            Debug.WriteLine("");
+
+            //Debug.Write("ParseData : HEX-> ");
+            //for (int i = 0; i < BufLen; i++)
+            //{
+            //    Debug.Write(RxBuf[i].ToString("X2") + ' ');
+            //}
+            //Debug.WriteLine("");
+
             #endregion
 
             if (!Enum.IsDefined(typeof(BufferHeader), (BufferHeader)RxBuf[0])) return;
@@ -450,7 +471,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 App.Wahana.GPS.Latitude = BitConverter.ToSingle(RxBuf, 24);
                 App.Wahana.GPS.Longitude = BitConverter.ToSingle(RxBuf, 28);
 
-                //Dispatcher.Invoke(DispatcherPriority.Send, new UpdateUIDelegate(UpdateUIWahana));
                 Dispatcher.BeginInvoke(new ThreadStart(delegate { UpdateUIWahana(); }));
             }
 
@@ -475,9 +495,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             #endregion
         }
 
+        #endregion
+
         #region MAVLINK PARSING
 
-        MavLinkAsyncWalker MavLinkParser;
+        MavLinkAsyncWalker MavLinkParser = new MavLinkAsyncWalker();
+
+        bool IsUsingMavlink = false;
 
         private void MavlinkPacketReceived(object sender, MavLinkPacketBase packet)
         {
@@ -496,36 +520,36 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                             App.Wahana.FlightMode = FlightMode.LOITER;
                             break;
                     }
-                    //UpdateFlightModeMavlink();
+
                     break;
 
                 case UasSysStatus SysMsg:
                     App.Wahana.Battery = (byte)SysMsg.BatteryRemaining;
                     App.Wahana.Signal = 100 - SysMsg.DropRateComm;
-                    //UpdateSysStatusMavlink();
+
                     break;
 
                 case UasAttitude AttMsg:
                     App.Wahana.IMU.Yaw = (float)(AttMsg.Yaw * 180 / Math.PI);
                     App.Wahana.IMU.Pitch = (float)(AttMsg.Pitch * 180 / Math.PI);
                     App.Wahana.IMU.Roll = (float)(AttMsg.Roll * 180 / Math.PI);
-                    //UpdateAttitudeMavlink();
+
                     break;
 
                 case UasGlobalPositionInt PosMsg:
                     App.Wahana.GPS.Latitude = PosMsg.Lat / 10000000.0;
                     App.Wahana.GPS.Longitude = PosMsg.Lon / 10000000.0;
                     App.Wahana.Altitude = PosMsg.Alt;
-                    //UpdateGPSMavlink();
+
                     break;
 
                 default:
                     Debug.WriteLine($"Mavlink {packet.Message.GetType().Name} message is not supported by this GCS");
-                    break;
+                    return;
             }
-        }
 
-        #endregion
+            Dispatcher.BeginInvoke(new ThreadStart(delegate { UpdateUIWahana(packet.Message); }));
+        }
 
         #endregion
 
@@ -595,6 +619,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(App.Wahana.IMU.Yaw));
 
             tb_pitch.Text = App.Wahana.IMU.Pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+
             tb_roll.Text = App.Wahana.IMU.Roll.ToString("0.00", CultureInfo.InvariantCulture) + "°";
             ind_attitude.SetAttitudeIndicatorParameters(App.Wahana.IMU.Pitch, -App.Wahana.IMU.Roll);
 
@@ -702,6 +727,15 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             };
 
             WhiteBoxWriter.WriteRow(baris);
+        }
+
+        #endregion
+
+        #region MAVLink Update UI
+
+        private void UpdateUIWahana(UasMessage Message)
+        {
+
         }
 
         #endregion

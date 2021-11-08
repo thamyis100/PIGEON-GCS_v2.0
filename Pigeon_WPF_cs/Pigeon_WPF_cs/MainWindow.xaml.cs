@@ -77,7 +77,7 @@ namespace Pigeon_WPF_cs
             float ampere = arus / 1000;
 
             //int persen_px = (int)volt.Map(2.9f, 4.2f, 70.0f, 640.0f);
-            int persen_px = (int)kapasitas.Map(0.0f, 100.0f, 70.0f, 640.0f);
+            int persen_px = (int)kapasitas.Map(0.0f, 255.0f, 70.0f, 640.0f);
 
             icon_bat_1.Source = new CroppedBitmap(new BitmapImage(
                 new Uri(App.ResourcePackUri + "icons/bat-full.png")),
