@@ -76,6 +76,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 img_conn.Source = Properties.Resources.icons8_connected_80.ToBitmapSource();
                 ind_conn_status.Content = "Disconnecting";
 
+                if (test != null) test.Dispose();
                 if (Sp_Used != null) Sp_Used.Dispose();
                 if (WIFISocket != null)
                 {
@@ -123,9 +124,17 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             // activate async mavlink parser walker
             MavLinkParser.PacketReceived += MavlinkPacketReceived;
+            MavLinkParser.PacketDiscarded += MavlinkPacketDiscarded;
 
             img_conn.Source = Properties.Resources.icons8_connected_80.ToBitmapSource();
             ind_conn_status.Content = "Connected";
+        }
+
+        
+
+        private void MavlinkPacketDiscarded(object sender, MavLinkPacketBase packet)
+        {
+            Debug.WriteLine($"Mavlink Discarded");
         }
 
         private void ResetConnection()
@@ -346,6 +355,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 ConnList.Add(new ComboBoxItem { Content = ports[indeks] });
         }
 
+        MavLinkSerialPortTransport test;
+
         private Task<bool> ConnectSerialPort(ComboBoxItem comPort, ComboBoxItem baud)
         {
             if (!SerialPort.GetPortNames().Any(port => port == comPort.Content.ToString()))
@@ -362,11 +373,20 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             try
             {
+                test = new MavLinkSerialPortTransport();
+                test.SerialPortName = SelectedConn.Content as string;
+                test.BaudRate = int.Parse(SelectedBaud.Content as string);
+                test.WireProtocolVersion = WireProtocolVersion.v10;
+                test.OnPacketReceived += MavlinkPacketReceived;
+                test.OnPacketReceived += MavlinkPacketDiscarded;
+                test.Initialize();
+
+                /*
                 Sp_Used = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
                 Sp_Used.DataReceived += new SerialDataReceivedEventHandler(Sp_DataReceived);
                 Sp_Used.NewLine = "\n";
 
-                Sp_Used.Open();
+                Sp_Used.Open();*/
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -505,6 +525,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void MavlinkPacketReceived(object sender, MavLinkPacketBase packet)
         {
+            Debug.WriteLine($"Received Mavlink {packet.Message}");
+
             switch (packet.Message)
             {
                 case UasHeartbeat HrtMsg:
@@ -743,9 +765,35 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         #region Sending Data
 
-        private void sendCommand(object sender, RoutedEventArgs e)
+        private void SendSelectedCommand(object sender, RoutedEventArgs e)
         {
-            switch (out_stream.Text)
+            var UasCommand = new UasCommandLong()
+            {
+                Command = MavCmd.SetMessageInterval,
+                Param1 = new UasAttitude().MessageId,
+                Param2 = 1000000,
+                TargetSystem = 1,
+                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1
+            };
+
+            test.SendMessage(UasCommand);
+
+            return;
+
+            byte[] temp_buf = MavLinkParser.SerializeMessage(UasCommand, 255, 1, true);
+
+            Debug.Write("Command HEX -> ");
+            temp_buf.ToList().ForEach(hex => Debug.Write(' ' + hex.ToString("X2") + ' '));
+            Debug.WriteLine("");
+            Debug.Write("Command NUM -> ");
+            temp_buf.ToList().ForEach(hex => Debug.Write(' ' + hex.ToString("D") + ' '));
+            Debug.WriteLine("");
+
+            MavLinkParser.ProcessReceivedBytes(temp_buf, 0, 0);
+
+            //Sp_Used.Write(temp_buf, 0, temp_buf.Length);
+
+            /*switch ()
             {
                 case "TAKEOFF":
                     SendToConnection(Command.TAKE_OFF, TipeDevice.WAHANA);
@@ -757,7 +805,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     SendToConnection(Command.BATALKAN, TipeDevice.WAHANA);
                     break;
             }
-            out_stream.Text = "";
+            out_stream.Text = "";*/
         }
 
         public void SendToConnection(Command cmd, TipeDevice tujuan, string track = "")

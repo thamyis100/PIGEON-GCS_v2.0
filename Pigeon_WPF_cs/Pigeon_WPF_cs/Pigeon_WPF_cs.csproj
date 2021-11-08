@@ -147,8 +147,9 @@
     <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="MavLinkNet">
-      <HintPath>DLLs\MavLinkNet.dll</HintPath>
+    <Reference Include="MavLinkNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\mavlink.net-protocol_upgrade\mavlink.net\bin\Debug\MavLinkNet.dll</HintPath>
     </Reference>
     <Reference Include="MessagePack, Version=2.2.0.0, Culture=neutral, PublicKeyToken=b4a0369545f0a1be, processorArchitecture=MSIL">
       <HintPath>..\packages\MessagePack.2.2.60\lib\netstandard2.0\MessagePack.dll</HintPath>

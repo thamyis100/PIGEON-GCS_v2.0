@@ -38,8 +38,10 @@
         </Grid>
         <DockPanel x:Name="stream_panel" Grid.Row="1" Grid.Column="2" Margin="2.5,0,2.5,2.5" Background="Gainsboro" IsEnabled="False">
             <DockPanel DockPanel.Dock="Top" Margin="5,5,5,2">
-                <TextBox x:Name="out_stream" Margin="0,0,5,0" Width="280" BorderBrush="{x:Null}" FontSize="14" AllowDrop="False"/>
-                <Button BorderBrush="{x:Null}" Margin="-1" Width="20" Click="sendCommand">
+                <ComboBox x:Name="out_stream" Margin="0,0,5,0" Width="280" BorderBrush="{x:Null}" FontSize="14" AllowDrop="False" SelectedIndex="0">
+                    <ComboBoxItem Content="Mavlink Test Set Param Time"/>
+                </ComboBox>
+                <Button BorderBrush="{x:Null}" Margin="-1" Width="20" Click="SendSelectedCommand">
                     <Image Source="/PIGEON GCS;component/Resources/icons/icons8-email-send-80.png" Margin="0,1,0,0"/>
                 </Button>
                 <Button x:Name="stream_panel_read_btn" Content="READ" DockPanel.Dock="Right" HorizontalAlignment="Right" Padding="10,0" BorderBrush="{x:Null}" Background="#FF9BECEC" Margin="0" FontSize="16" FontFamily="Tw Cen MT" FontWeight="Bold"/>
