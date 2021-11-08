@@ -530,6 +530,17 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             switch (packet.Message)
             {
                 case UasHeartbeat HrtMsg:
+                    switch (HrtMsg.Type)
+                    {
+                        case MavType.Quadrotor:
+                            App.Wahana.Tipe = TipeDevice.WAHANA;
+                            break;
+                        case MavType.AntennaTracker:
+                            // TODO: Implementasi MavLink pada TRITON
+                            App.Wahana.Tipe = TipeDevice.TRACKER;
+                            break;
+                    }
+
                     switch (HrtMsg.BaseMode)
                     {
                         case MavModeFlag.ManualInputEnabled:
@@ -539,7 +550,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                             App.Wahana.FlightMode = FlightMode.STABILIZER;
                             break;
                         case MavModeFlag.AutoEnabled:
-                            App.Wahana.FlightMode = FlightMode.LOITER;
+                            App.Wahana.FlightMode = FlightMode.AUTO;
                             break;
                     }
 
@@ -609,7 +620,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 win.map_Ctrl.StartPosWahana();
                 win.SetConnStat(TipeDevice.WAHANA, true);
 
-                WhiteBoxWriter = new CsvFileWriter(new FileStream(App.DocsPath + "BlackBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
+                WhiteBoxWriter = new CsvFileWriter(new FileStream(App.DocsPath + "WhiteBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
             }
 
             switch (App.Wahana.FlightMode)
@@ -757,8 +768,103 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void UpdateUIWahana(UasMessage Message)
         {
+            var win = (MainWindow)App.Current.MainWindow;
 
-        }
+            in_stream.Text =
+                        ((byte)App.Wahana.FlightMode).ToString("X2") + " | "
+
+                        + App.Wahana.Battery + " | "
+
+                        + App.Wahana.Signal + " | "
+
+                        + App.Wahana.IMU.Yaw + " | "
+                        + App.Wahana.IMU.Pitch + " | "
+                        + App.Wahana.IMU.Roll + " | "
+
+                        + App.Wahana.Altitude + " | "
+
+                        + App.Wahana.Speed + " | "
+
+                        + App.Wahana.GPS.Latitude + " | "
+                        + App.Wahana.GPS.Longitude + " | ";            
+
+            switch (Message)
+            {
+                case UasHeartbeat HrtMsg:
+                    if (IsFirstDataWahana)
+                    {
+                        IsFirstDataWahana = false;
+
+                        win.StartWaktuTerbang();
+                        win.map_Ctrl.StartPosWahana();
+                        win.SetConnStat(TipeDevice.WAHANA, true);
+
+                        WhiteBoxWriter = new CsvFileWriter(new FileStream(App.DocsPath + "WhiteBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
+                    }
+
+                    switch (HrtMsg.BaseMode)
+                    {
+                        case MavModeFlag.SafetyArmed:
+                            lbl_fmode.Content = "{ARMED}";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.DarkOrange;
+                            break;
+                        case MavModeFlag.ManualInputEnabled:
+                            lbl_fmode.Content = "<MANUAL>";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.DarkRed;
+                            break;
+                        case MavModeFlag.StabilizeEnabled:
+                            lbl_fmode.Content = "[STABILIZE]";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.LawnGreen;
+                            break;
+                        case MavModeFlag.AutoEnabled:
+                            lbl_fmode.Content = "*AUTO*";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.BlueViolet;
+                            break;
+                    }
+
+                    break;
+
+                case UasSysStatus SysMsg:
+                    win.SetBaterai(App.Wahana.Battery);
+                    win.SetSignal(App.Wahana.Signal);
+
+                    break;
+
+                case UasAttitude AttMsg:
+                    tb_yaw.Text = App.Wahana.IMU.Yaw.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(App.Wahana.IMU.Yaw));
+
+                    tb_pitch.Text = App.Wahana.IMU.Pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+
+                    tb_roll.Text = App.Wahana.IMU.Roll.ToString("0.00", CultureInfo.InvariantCulture) + "°";
+                    ind_attitude.SetAttitudeIndicatorParameters(App.Wahana.IMU.Pitch, -App.Wahana.IMU.Roll);
+
+                    tb_airspeed.Text = App.Wahana.Speed.ToString(CultureInfo.InvariantCulture) + " km/j";
+                    ind_airspeed.SetAirSpeedIndicatorParameters((int)App.Wahana.Speed * 50);
+
+                    tb_alti.Text =
+                        win.track_Ctrl.tb_alti_wahana.Text =
+                        (App.Wahana.Altitude / 1000.0).ToString("0.00", CultureInfo.InvariantCulture) + " m";
+
+                    win.stats_Ctrl.addToStatistik(App.Wahana.IMU.Yaw, App.Wahana.IMU.Pitch, App.Wahana.IMU.Roll, win.WaktuTerbang);
+
+                    break;
+
+                case UasGlobalPositionInt PosMsg:
+                    tb_lat.Text =
+                        win.track_Ctrl.tb_lat_wahana.Text =
+                        App.Wahana.GPS.Latitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+                    tb_longt.Text =
+                        win.track_Ctrl.tb_longt_wahana.Text =
+                        App.Wahana.GPS.Longitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+
+                    win.map_Ctrl.UpdatePosWahana();
+
+                    break;
+            }
+
+            WriteWhiteBox();
+        }      
 
         #endregion
 
