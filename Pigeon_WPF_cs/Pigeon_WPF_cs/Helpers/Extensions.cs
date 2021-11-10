@@ -23,6 +23,11 @@ namespace Pigeon_WPF_cs
             return ((value - in_min) * (out_max - out_min) / (in_max - in_min)) + out_min;
         }
 
+        public static float Map(this ushort value, ushort in_min, ushort in_max, float out_min, float out_max)
+        {
+            return (float)(((value - in_min) * (out_max - out_min) / (in_max - in_min)) + out_min);
+        }
+
         #region Custom Bitmap to BitmapSource
 
         /// <summary>

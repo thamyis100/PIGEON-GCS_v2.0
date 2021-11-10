@@ -153,6 +153,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         /// </summary>
         public void UpdatePosWahana()
         {
+            if (WahanaMarker == null) StartPosWahana();
+
             WahanaMarker.Position = new PointLatLng(App.Wahana.GPS.Latitude, App.Wahana.GPS.Longitude);
 
             if (IsIkutiWahana)
@@ -166,6 +168,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         /// </summary>
         internal void UpdatePosTracker()
         {
+            if (TrackerMarker == null) StartPosTracker();
+
             TrackerMarker.Position = new PointLatLng(App.Tracker.GPS.Latitude, App.Tracker.GPS.Longitude);
 
             TrackerMarker.Shape.RenderTransform = new RotateTransform(App.Tracker.IMU.Yaw);

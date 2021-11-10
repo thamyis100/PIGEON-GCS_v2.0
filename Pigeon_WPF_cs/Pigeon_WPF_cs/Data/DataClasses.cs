@@ -50,17 +50,14 @@ namespace Pigeon_WPF_cs.Data_Classes
     {
         public FlightMode FlightMode { get; set; } = FlightMode.MANUAL;
 
-        /// <summary>
-        /// Persentase baterai yang tersisa.<br/>
-        /// Nilai dalam satuan <b>Persen</b> (<i>%</i>).
-        /// </summary>
-        public byte Battery { get; set; } = 0;
+        public UInt16 BatteryVolt { get; set; } = 0;
+        public UInt16 BatteryCurr { get; set; } = 0;
 
         /// <summary>
         /// Kualitas sinyal dari perhitungan paket data yang dibuang.<br/>
-        /// Nilai dalam satuan <b>Persen</b> (<i>%</i>).
+        /// Nilai dalam satuan <b>Persen</b> (<i>%</i>) dengan rentang 0-255.
         /// </summary>
-        public float Signal { get; set; } = 0;
+        public byte Signal { get; set; } = 0;
 
         /// <summary>
         /// Data sensor IMU

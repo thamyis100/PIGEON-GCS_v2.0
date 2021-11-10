@@ -20,21 +20,27 @@ namespace Pigeon_WPF_cs
     /// </summary>
     public partial class MessagePop : Window
     {
-        public MessagePop()
-        {
-        }
-
-        public MessagePop(string message, bool isLanjut = true)
+        public MessagePop(Window owner, string message, bool isLanjut = true)
         {
             InitializeComponent();
+
+            Owner = owner;
+
+            Width = Owner.Width / 5;
+            Height = Owner.Height / 5;
 
             tb_info.Text = message;
             btn_lanjut.Visibility = isLanjut ? Visibility.Visible : Visibility.Hidden;
         }
 
-        public MessagePop(string message, int delayMs)
+        public MessagePop(Window owner, string message, int delayMs)
         {
             InitializeComponent();
+
+            Owner = owner;
+
+            Width = Owner.Width / 5;
+            Height = Owner.Height / 5;
 
             tb_info.Text = message;
             AddDelay(delayMs);
@@ -44,11 +50,12 @@ namespace Pigeon_WPF_cs
         {
             btn_lanjut.IsEnabled = false;
 
-            for (int i = delayMs; i > 0; i++)
+            for (int i = delayMs / 1000; i > 0; i--)
             {
                 btn_lanjut.Content = "Lanjut (" + i + ")";
                 await Task.Delay(1000);
             }
+            await Task.Delay(delayMs % 1000);
 
             btn_lanjut.Content = "Lanjut";
             btn_lanjut.IsEnabled = true;

@@ -90,32 +90,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         /// <param name="BufLen">Buffer's length</param>
         public void ParseData(byte[] RxBuf, int BufLen)
         {
-            #region Urutan data Triton
-            /* (angka terakhir itu index)
-            * 
-            * [Header]      = HEADER_BUF uint8          (1 byte) 0
-            * 
-            * [Yaw]		    = derajat float32		    (4 byte) 1
-            * [Pitch]	    = derajat float32		    (4 byte) 5
-            *
-            * [Altitude]    = milimeter int32		    (4 byte) 9
-            * 
-            * [Lat]		    = decimal degrees float32	(4 byte) 13
-            * [Lon]         = decimal degrees float32	(4 byte) 17
-            */
-            #endregion
-
-            App.Tracker.Tipe = TipeDevice.TRACKER;
-
-            App.Tracker.IMU.Yaw = BitConverter.ToSingle(RxBuf, 1);
-            App.Tracker.IMU.Pitch = BitConverter.ToSingle(RxBuf, 5);
-
-            App.Tracker.Altitude = BitConverter.ToInt32(RxBuf, 9);
-
-            App.Tracker.GPS.Latitude = BitConverter.ToSingle(RxBuf, 13);
-            App.Tracker.GPS.Longitude = BitConverter.ToSingle(RxBuf, 17);
-
-            Dispatcher.BeginInvoke(new ThreadStart(delegate { UpdateUITracker(); }));
+            
         }
 
         #endregion
@@ -126,34 +101,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             var win = (MainWindow)App.Current.MainWindow;
 
-            tb_received.Text =
-                        App.Wahana.FlightMode.ToString("X2") + " | "
+            //tb_received.Text =
+            //            App.Wahana.FlightMode.ToString("X2") + " | "
 
-                        + App.Wahana.Battery + " | "
+            //            + App.Wahana.Battery + " | "
 
-                        + App.Wahana.Signal + " | "
+            //            + App.Wahana.Signal + " | "
 
-                        + App.Wahana.IMU.Yaw + " | "
-                        + App.Wahana.IMU.Pitch + " | "
-                        + App.Wahana.IMU.Roll + " | "
+            //            + App.Wahana.IMU.Yaw + " | "
+            //            + App.Wahana.IMU.Pitch + " | "
+            //            + App.Wahana.IMU.Roll + " | "
 
-                        + App.Wahana.Altitude + " | "
+            //            + App.Wahana.Altitude + " | "
 
-                        + App.Wahana.Speed + " | "
+            //            + App.Wahana.Speed + " | "
 
-                        + App.Wahana.GPS.Latitude + " | "
-                        + App.Wahana.GPS.Longitude + " | ";
+            //            + App.Wahana.GPS.Latitude + " | "
+            //            + App.Wahana.GPS.Longitude + " | ";
 
             if (win.flight_Ctrl.IsFirstDataTracker)
             {
                 win.flight_Ctrl.IsFirstDataTracker = false;
 
                 Integration(true);
-
-                win.map_Ctrl.StartPosTracker();
             }
-
-            win.map_Ctrl.UpdatePosTracker();
 
             if (win.flight_Ctrl.IsConnected)
                 btn_tracking.IsEnabled = true;
@@ -161,8 +132,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             tb_bearing.Text = App.Tracker.IMU.Yaw.ToString("0.00", CultureInfo.InvariantCulture) + "°";
             tb_pitch.Text = App.Tracker.IMU.Pitch.ToString("0.00", CultureInfo.InvariantCulture) + "°";
 
-            tb_lat_tracker.Text = App.Tracker.GPS.Latitude.ToString("0.00000000", CultureInfo.InvariantCulture);
-            tb_longt_tracker.Text = App.Tracker.GPS.Longitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+            if (App.Tracker.GPS.Latitude != 0 || App.Tracker.GPS.Longitude != 0)
+            {
+                win.map_Ctrl.UpdatePosTracker();
+
+                tb_lat_tracker.Text = App.Tracker.GPS.Latitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+                tb_longt_tracker.Text = App.Tracker.GPS.Longitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+            }
 
             tb_tinggi_tracker.Text = App.Tracker.Altitude.ToString("0.00", CultureInfo.InvariantCulture) + " m";
         }

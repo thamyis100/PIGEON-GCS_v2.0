@@ -182,7 +182,7 @@
                 <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
                     <Grid DockPanel.Dock="Left" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image x:Name="icon_signal_0" HorizontalAlignment="Center" Margin="0" VerticalAlignment="Center" Source="Resources/icons/icons8-wi-fi-50.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
-                        <Image x:Name="icon_signal_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Bottom" Source="Resources/icons/icons8-wi-fi-filled-50.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image x:Name="icon_signal_1" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Bottom" Source="Resources/icons/icons8-wi-fi-filled-50.png" RenderTransformOrigin="0.5,0.5" RenderOptions.BitmapScalingMode="HighQuality" StretchDirection="DownOnly"/>
                     </Grid>
                     <DockPanel DockPanel.Dock="Right" Margin="4,3,0,2">
                         <Label x:Name="lbl_signal" Content=" Sinyal" Margin="0" Padding="0" VerticalContentAlignment="Center" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway" DockPanel.Dock="Top"/>

@@ -55,7 +55,17 @@
         /// <summary>
         /// Terbang secara manual
         /// </summary>
+        DISARMED,
+
+        /// <summary>
+        /// Terbang secara manual
+        /// </summary>
         MANUAL,
+
+        /// <summary>
+        /// Terbang secara manual
+        /// </summary>
+        HOLD_ALTITUDE,
 
         /// <summary>
         /// Terbang dengan stabilisasi

@@ -5,13 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Pigeon_WPF_cs"
         mc:Ignorable="d"
-        Title="Keluar dari Pigeon" Height="120" Width="250" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner" Background="{x:Null}" AllowsTransparency="True" ShowInTaskbar="False" VerticalAlignment="Center" HorizontalAlignment="Center">
-    <Border Background="#7FFFFFFF" CornerRadius="4" BorderThickness="2" BorderBrush="{DynamicResource WindowColor}">
-        <DockPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock x:Name="tb_info" TextWrapping="Wrap" Text="Anda yakin ingin keluar dari Pigeon?" TextAlignment="Center" Foreground="White" FontWeight="Bold" FontFamily="Segoe UI Black" FontSize="18" VerticalAlignment="Center" Margin="15,10,15,15" DockPanel.Dock="Top"/>
-            <DockPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,10" DockPanel.Dock="Top">
-                <Button x:Name="btn_batal" Content="Batal" Margin="0,0,15,0" Width="75" Click="Batal"/>
-                <Button x:Name="btn_lanjut" Content="Lanjut" Margin="15,0,0,0" Width="75" Click="Lanjut"/>
+        Title="Keluar dari Pigeon" Height="120" Width="250" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterOwner"
+        AllowsTransparency="True" ShowInTaskbar="False" VerticalAlignment="Center" HorizontalAlignment="Center"
+        Background="{x:Null}">
+    <Border Background="{DynamicResource WindowColor}" CornerRadius="4" BorderThickness="2" BorderBrush="White">
+        <DockPanel VerticalAlignment="Center">
+            <TextBlock x:Name="tb_info" TextWrapping="Wrap" Margin="15" Text="Anda yakin ingin keluar dari Pigeon?" TextAlignment="Center" Foreground="White" FontWeight="Bold" FontFamily="Segoe UI Black" FontSize="18" VerticalAlignment="Center" DockPanel.Dock="Top" HorizontalAlignment="Center"/>
+            <DockPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10" DockPanel.Dock="Top">
+                <Button x:Name="btn_batal" Content="Batal" Margin="0,0,10,0" Width="75" Click="Batal"/>
+                <Button x:Name="btn_lanjut" Content="Lanjut" Margin="10,0,0,0" Width="75" Click="Lanjut"/>
             </DockPanel>
         </DockPanel>
     </Border>

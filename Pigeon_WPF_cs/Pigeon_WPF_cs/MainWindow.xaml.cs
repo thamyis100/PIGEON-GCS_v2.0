@@ -71,20 +71,16 @@ namespace Pigeon_WPF_cs
         /// </summary>
         /// <param name="tegangan">Tegangan baterai dalam satuan Mili Volt (mV)</param>
         /// <param name="arus">Tegangan baterai dalam satuan Mili Ampere (mA)</param>
-        internal void SetBaterai(float kapasitas, int tegangan = 0, int arus = 0)
+        internal void SetBaterai(float kapasitas, ushort tegangan = 0, ushort arus = 0)
         {
-            float volt = tegangan / 1000;
-            float ampere = arus / 1000;
-
-            //int persen_px = (int)volt.Map(2.9f, 4.2f, 70.0f, 640.0f);
             int persen_px = (int)kapasitas.Map(0.0f, 255.0f, 70.0f, 640.0f);
 
             icon_bat_1.Source = new CroppedBitmap(new BitmapImage(
                 new Uri(App.ResourcePackUri + "icons/bat-full.png")),
                 new Int32Rect(0, 0, persen_px, 396));
 
-            val_batt.Content = volt.ToString("0.00") + " V | "
-                + ampere.ToString("0.00") + " A";
+            val_batt.Content = tegangan.Map(0, 4095, 0, 3.3f).ToString("0.00") + " V | "
+                + arus.Map(0, 4095, -20, 8).ToString("0.00") + " A";
         }
 
         /// <summary>
@@ -93,12 +89,12 @@ namespace Pigeon_WPF_cs
         /// <param name="signal">Kualitas sinyal dalam satuan Persen (%)</param>
         internal void SetSignal(float signal)
         {
-            int persen_px = (int)signal.Map(0.0f, 100.0f, 8.0f, 44.0f);
+            int persen_px = (int)signal.Map(0, 255.0f, 8.0f, 44.0f);
 
             icon_signal_1.Source = new CroppedBitmap(Properties.Resources.icons8_wi_fi_filled_50.ToBitmapSource(),
                 new Int32Rect(0, 50 - persen_px, 50, persen_px));
 
-            val_signal.Content = signal.ToString("0") + "%";
+            val_signal.Content = signal.Map(0, 255.0f, 0, 100).ToString("0") + "%";
         }
 
         #endregion
@@ -120,16 +116,14 @@ namespace Pigeon_WPF_cs
         /// </summary>
         private void BtnExit_Clicked(object sender, RoutedEventArgs e)
         {
-            var exitPop = new MessagePop();
+            MessagePop exitPop;
             if (flight_Ctrl.IsConnected)
             {
-                exitPop = new MessagePop("Wahana masih terkoneksi! Silakan disconnect untuk melanjutkan!", false);
-                exitPop.Owner = this;
+                exitPop = new MessagePop(this, "Wahana masih terkoneksi! Silakan disconnect untuk melanjutkan!", false);
             }
             else
             {
-                exitPop = new MessagePop("Anda menekan tombol EXIT, dan akan keluar dari PIGEON GCS", 5000);
-                exitPop.Owner = this;
+                exitPop = new MessagePop(this, "Anda menekan tombol EXIT, dan akan keluar dari PIGEON GCS");
             }
 
             Effect = new BlurEffect() { Radius = 15 };
@@ -420,20 +414,17 @@ namespace Pigeon_WPF_cs
             }
         }
 
-        public bool ResetWaktuTerbang()
+        public void ResetWaktuTerbang()
         {
-            if (!StopWatchTerbang.IsEnabled) return false;
-            else
-            {
-                StopWatchTerbang.Stop();
+            StopWatchTerbang.Stop();
 
-                WaktuTerbang = TimeSpan.Zero;
-                
-                val_flightTime.Content = WaktuTerbang.ToString(@"hh\:mm\:ss");
+            WaktuTerbang = TimeSpan.Zero;
 
-                Title = "PIGEON GCS";
-            }
-            return false;
+            val_flightTime.Content = WaktuTerbang.ToString(@"hh\:mm\:ss");
+
+            Title = "PIGEON GCS";
+
+            return;
         }
 
         private void StopWatchTerbang_Tick(object sender, EventArgs e)

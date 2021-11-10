@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <TextBox x:Name="tb1" Text="{Binding konten}" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="670" Height="267" Margin="0,120,0,0" IsReadOnly="True"/>
+        <TextBox x:Name="tb1" Text="" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Width="670" Height="267" Margin="0,120,0,0" />
         <TextBox x:Name="send_tb" HorizontalAlignment="Left" Margin="65,54,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="552"/>
         <Label Content="press enter to send" HorizontalAlignment="Left" Margin="622,50,0,0" VerticalAlignment="Top" Width="113"/>
 
