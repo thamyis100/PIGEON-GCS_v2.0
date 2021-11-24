@@ -36,23 +36,30 @@ namespace Pigeon_WPF_cs.CsvReadWrite
         /// <param name="row">The row to be written</param>
         public void WriteRow(CsvRow row)
         {
-            StringBuilder builder = new StringBuilder();
-            bool firstColumn = true;
-            foreach (string value in row)
+            try
             {
-                // Add separator if this isn't the first value
-                if (!firstColumn)
-                    builder.Append(';');
-                // Implement special handling for values that contain comma or quote
-                // Enclose in quotes and double up any double quotes
-                if (value.IndexOfAny(new char[] { '"', ',' }) != -1)
-                    builder.AppendFormat("\"{0}\"", value.Replace("\"", "\"\""));
-                else
-                    builder.Append(value);
-                firstColumn = false;
+                StringBuilder builder = new StringBuilder();
+                bool firstColumn = true;
+                foreach (string value in row)
+                {
+                    // Add separator if this isn't the first value
+                    if (!firstColumn)
+                        builder.Append(';');
+                    // Implement special handling for values that contain comma or quote
+                    // Enclose in quotes and double up any double quotes
+                    if (value.IndexOfAny(new char[] { '"', ',' }) != -1)
+                        builder.AppendFormat("\"{0}\"", value.Replace("\"", "\"\""));
+                    else
+                        builder.Append(value);
+                    firstColumn = false;
+                }
+                row.LineText = builder.ToString();
+                WriteLine(row.LineText);
             }
-            row.LineText = builder.ToString();
-            WriteLine(row.LineText);
+            catch (Exception)
+            {
+                return;
+            }
         }
     }
 

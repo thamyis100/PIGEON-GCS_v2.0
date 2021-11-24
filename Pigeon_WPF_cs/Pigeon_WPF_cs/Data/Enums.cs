@@ -85,7 +85,7 @@
         /// <summary>
         /// Sedang takeoff
         /// </summary>
-        TAKEOFF
+        TAKEOFF,
     }
 
     /// <summary>

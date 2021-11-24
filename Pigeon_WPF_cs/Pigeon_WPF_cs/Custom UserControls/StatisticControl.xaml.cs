@@ -108,24 +108,24 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             IsReading = !IsReading;
         }
 
-        public void addToStatistik(float yaw, float pitch, float roll, TimeSpan waktuAmbil)
+        public void addToStatistik()
         {
-            if (yaw > 180) yaw -= 360;
+            var waktuAmbil = (App.Current.MainWindow as MainWindow).WaktuTerbang;
 
             YawValues.Add(new MeasureModel
             {
                 TimeSpan = waktuAmbil,
-                Value = yaw
+                Value = App.Wahana.IMU.Yaw,
             });
             PitchValues.Add(new MeasureModel
             {
                 TimeSpan = waktuAmbil,
-                Value = pitch
+                Value = App.Wahana.IMU.Pitch,
             });
             RollValues.Add(new MeasureModel
             {
                 TimeSpan = waktuAmbil,
-                Value = roll
+                Value = App.Wahana.IMU.Roll,
             });
 
             SetAxisLimits(waktuAmbil);
@@ -133,9 +133,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         
         private void SetAxisLimits(TimeSpan now)
         {
-            AxisMax = now.Ticks + TimeSpan.FromMilliseconds(100).Ticks; // lets force the axis to be 100 milisecond ahead
+            AxisMax = now.Ticks + TimeSpan.FromMilliseconds(1000).Ticks; // lets force the axis to be 1000 milisecond ahead
             AxisMin = now.Ticks - TimeSpan.FromSeconds(8).Ticks; // and 8 seconds behind
-            
         }
 
         #region INotifyPropertyChanged implementation

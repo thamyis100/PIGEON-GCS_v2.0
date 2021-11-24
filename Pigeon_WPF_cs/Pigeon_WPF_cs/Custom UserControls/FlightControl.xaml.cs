@@ -58,10 +58,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             DataContext = this;
             InitializeComponent();
 
-            // activate async mavlink parser walker
-            //MavLinkParser.PacketReceived += MavlinkPacketReceived;
-            //MavLinkParser.PacketDiscarded += MavlinkPacketDiscarded;
-
             PrepConnection(); //Cari usb
             PrepareWebcam(); //Cari webcam
         }
@@ -78,9 +74,17 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 ind_conn_status.Content = "Disconnecting";
 
                 if (Sp_Used != null) Sp_Used.Dispose();
+
                 if (WIFIAsyncEvent != null) WIFIAsyncEvent.Dispose();
                 if (WIFISocket != null) WIFISocket.Close();
+
+                if (MavLinkParser != null) MavLinkParser.Dispose();
+
+                if (DataLogTimer != null) DataLogTimer.Dispose();
+
                 if (WhiteBoxWriter != null) WhiteBoxWriter.Dispose();
+
+                (App.Current.MainWindow as MainWindow).map_Ctrl.ResetMarkers();
 
                 (App.Current.MainWindow as MainWindow).ResetWaktuTerbang();
 
@@ -115,15 +119,6 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     break;
             }
 
-            //if (!await CheckMavLinkValid())
-            //{
-            //    IsMavLinkConnValid = false;
-
-            //    ResetConnection();
-            //}
-
-            IsMavLinkConnValid = false;
-
             cb_ports.IsEnabled = cb_bauds.IsEnabled = false;
             btn_conn.IsEnabled = stream_panel.IsEnabled = IsConnected = true;
 
@@ -137,9 +132,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         //    {
         //        await GetMavLinkStreams();
 
-        //        if(MavLinkValidHandle.WaitOne(5000))
+        //        if (MavLinkValidHandle.WaitOne(5000))
         //    }
-        //        return true;
+        //    return true;
         //    else
         //        return false;
         //}
@@ -217,21 +212,38 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private Task<bool> GetMavLinkStreams()
         {
-            //if (!MavLinkValidHandle.WaitOne(5000))
-            //    return false;
-
             var UasCommand = new UasCommandLong()
             {
                 TargetSystem = 1,
                 TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
                 Command = MavCmd.SetMessageInterval,
-                Param1 = new UasSysStatus().MessageId,
-                Param2 = 5000000
+                Param1 = new UasHeartbeat().MessageId,
+                Param2 = 2000000
             };
 
-            byte[] temp_buf = MavLinkParser.SerializeMessage(UasCommand, 255, (byte)MavComponent.MavCompIdMissionplanner, true);
+            MavLinkParser.SendMessage(UasCommand);
 
-            SendRequest(temp_buf);
+            UasCommand = new UasCommandLong()
+            {
+                TargetSystem = 1,
+                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
+                Command = MavCmd.SetMessageInterval,
+                Param1 = new UasSysStatus().MessageId,
+                Param2 = 2000000
+            };
+
+            MavLinkParser.SendMessage(UasCommand);
+
+            UasCommand = new UasCommandLong()
+            {
+                TargetSystem = 1,
+                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
+                Command = MavCmd.SetMessageInterval,
+                Param1 = new UasGlobalPositionInt().MessageId,
+                Param2 = 1000000
+            };
+
+            MavLinkParser.SendMessage(UasCommand);
 
             UasCommand = new UasCommandLong()
             {
@@ -242,22 +254,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 Param2 = 200000
             };
 
-            temp_buf = MavLinkParser.SerializeMessage(UasCommand, 255, (byte)MavComponent.MavCompIdMissionplanner, true);
-
-            SendRequest(temp_buf);
-
-            UasCommand = new UasCommandLong()
-            {
-                TargetSystem = 1,
-                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
-                Command = MavCmd.SetMessageInterval,
-                Param1 = new UasGlobalPositionInt().MessageId,
-                Param2 = 2000000
-            };
-
-            temp_buf = MavLinkParser.SerializeMessage(UasCommand, 255, (byte)MavComponent.MavCompIdMissionplanner, true);
-
-            SendRequest(temp_buf);
+            MavLinkParser.SendMessage(UasCommand);
 
             UasCommand = new UasCommandLong()
             {
@@ -268,9 +265,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 Param2 = 200000
             };
 
-            temp_buf = MavLinkParser.SerializeMessage(UasCommand, 255, (byte)MavComponent.MavCompIdMissionplanner, true);
-
-            SendRequest(temp_buf);
+            MavLinkParser.SendMessage(UasCommand);
 
             return Task.FromResult(true);
         }
@@ -294,12 +289,20 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void ResetConnection()
         {
-            cb_ports.IsEnabled = cb_bauds.IsEnabled = btn_conn.IsEnabled = stream_panel.IsEnabled = false;
+            cb_ports.IsEnabled = true;
+            cb_bauds.IsEnabled = true;
+            btn_conn.IsEnabled = true;
+
+            stream_panel.IsEnabled = false;
 
             IsConnected = false;
 
-            MavLinkValidHeartbeat.Reset();
-            IsMavLinkConnValid = true;
+            IsMavLinkNotConnected = true;
+            IsFirstDataWahana = true;
+            IsFirstDataTracker = true;
+
+            cb_ports.SelectedIndex = 0;
+            cb_bauds.SelectedIndex = 0;
 
             img_conn.Source = Properties.Resources.icons8_disconnected_80.ToBitmapSource();
             ind_conn_status.Content = "Disconnected";
@@ -335,7 +338,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         #region WIFI Connect
 
         TcpClient WIFISocket;
-        SocketAsyncEventArgs WIFIAsyncEvent;
+        SocketAsyncEventArgs WIFIAsyncEvent, WIFISendAsyncEvent;
+
+        byte[] WifiRxBuf = new byte[1024];
 
         private async Task<bool> ConnectWIFIAsync()
         {
@@ -385,6 +390,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             WIFIAsyncEvent.SetBuffer(new byte[1024], 0, 1024);
             WIFIAsyncEvent.Completed += WIFIAsyncEvent_Completed;
 
+            WIFISendAsyncEvent = new SocketAsyncEventArgs();
+            WIFISendAsyncEvent.SetBuffer(new byte[1024], 0, 1024);
+            WIFISendAsyncEvent.Completed += WIFIAsyncEvent_Completed;
+
             List<NetworkInterface> interfaces = new List<NetworkInterface>(NetworkInterface.GetAllNetworkInterfaces().Where(intf => intf.OperationalStatus == OperationalStatus.Up && intf.NetworkInterfaceType == NetworkInterfaceType.Wireless80211));
             if (interfaces.Count == 0)
             {
@@ -402,8 +411,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     Debug.WriteLine($"Try Connecting to [ {gatewayIP.Address}:61258 ]");
                     if (await Task.WhenAny(WIFISocket.ConnectAsync(gatewayIP.Address, 61258), Task.Delay(1000)) != null && WIFISocket.Connected)
                     {
-                        WIFIAsyncEvent.RemoteEndPoint = WIFISocket.Client.RemoteEndPoint;
-                        WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
+                        MavLinkParser = new MavLinkTCPClientTransport()
+                        {
+                            Socket = WIFISocket.Client,
+                            MavlinkSystemId = 255,
+                            MavlinkComponentId = (byte)MavComponent.MavCompIdMissionplanner,
+                            WireProtocolVersion = WireProtocolVersion.v10,
+                            HeartBeatUpdateRateMs = 5000,
+                        };
+
+                        MavLinkParser.OnPacketReceived += MavlinkPacketReceived;
+                        MavLinkParser.OtherPacketReceived += MavLinkParser_OtherPacketReceived;
+                        MavLinkParser.Initialize();
+
+                        GetMavLinkStreams();
+
+                        //if (!MavLinkValidHandle.WaitOne(1000))
+                        //{
+                        //    MavLinkParser.Dispose();
+
+                        //    WIFIAsyncEvent.RemoteEndPoint = WIFISocket.Client.RemoteEndPoint;
+                        //    WIFISendAsyncEvent.RemoteEndPoint = WIFISocket.Client.RemoteEndPoint;
+
+                        //    WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
+                        //}
 
                         Debug.WriteLine($"Connected to {WIFISocket.Client.RemoteEndPoint}");
 
@@ -417,19 +448,39 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             return false;
         }
 
+        private void MavLinkParser_OtherPacketReceived(object sender, byte[] Buffer)
+        {
+            ParseData(Buffer, Buffer.Length);
+        }
+
         private void WIFIAsyncEvent_Completed(object sender, SocketAsyncEventArgs e)
         {
-            try
+            switch (e.LastOperation)
             {
-                if (IsMavLinkConnValid)
-                    MavLinkParser.ProcessReceivedBytes(e.Buffer, 0, e.BytesTransferred);
-                else
-                    ParseData(e.Buffer, e.BytesTransferred);
+                case SocketAsyncOperation.Receive:
+                    try
+                    {
+                        //if (IsMavLinkConnValid)
+                        //    MavLinkParser.ProcessReceivedBytes(e.Buffer, 0, e.BytesTransferred);
+                        //else
+                        ParseData(e.Buffer, e.BytesTransferred);
 
-                WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
-            }catch(ArgumentException arg_exc)
-            {
-                Debug.WriteLine("[WIFI ASYNC EVENT] : " + arg_exc.Message);
+                        WIFISocket.Client.ReceiveAsync(WIFIAsyncEvent);
+                    }
+                    catch (Exception exc)
+                    {
+                        Debug.WriteLine("[WIFI ASYNC EVENT] : " + exc.Message);
+                    }
+
+                    break;
+
+                case SocketAsyncOperation.Send:
+                    //WIFISocket.Client.Send(e.Buffer);
+                    //Debug.WriteLine("Tracker command Sent");
+                    break;
+
+                default:
+                    break;
             }
         }
 
@@ -465,11 +516,32 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             try
             {
-                Sp_Used = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
-                Sp_Used.DataReceived += Sp_DataReceived;
-                Sp_Used.NewLine = "\n";
+                MavLinkParser = new MavLinkSerialPortTransport()
+                {
+                    SerialPortName = SelectedConn.Content as string,
+                    BaudRate = int.Parse(SelectedBaud.Content as string),
+                    MavlinkSystemId = 255,
+                    MavlinkComponentId = (byte)MavComponent.MavCompIdMissionplanner,
+                    WireProtocolVersion = WireProtocolVersion.v10,
+                    HeartBeatUpdateRateMs = 5000,
+                };
 
-                Sp_Used.Open();
+                MavLinkParser.OnPacketReceived += MavlinkPacketReceived;
+                MavLinkParser.OtherPacketReceived += MavLinkParser_OtherPacketReceived;
+                MavLinkParser.Initialize();
+
+                GetMavLinkStreams();
+
+                //if (!MavLinkValidHandle.WaitOne(1000))
+                //{
+                //    MavLinkParser.Dispose();
+
+                //    Sp_Used = new SerialPort(comPort.Content.ToString(), int.Parse(baud.Content.ToString()), Parity.None, 8, StopBits.One);
+                //    Sp_Used.DataReceived += Sp_DataReceived;
+                //    Sp_Used.NewLine = "\n";
+
+                //    Sp_Used.Open();
+                //}
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -492,15 +564,19 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             var rxPort = (SerialPort)sender;
 
-            int bufLen = rxPort.BytesToRead;
-            byte[] rxBuf = new byte[bufLen];
+            try
+            {
+                int bufLen = rxPort.BytesToRead;
+                byte[] rxBuf = new byte[bufLen];
 
-            rxPort.BaseStream.Read(rxBuf, 0, bufLen);
+                rxPort.BaseStream.Read(rxBuf, 0, bufLen);
 
-            if (IsMavLinkConnValid)
-                MavLinkParser.ProcessReceivedBytes(rxBuf, 0, rxPort.BytesToRead);
-            else     
                 ParseData(rxBuf, bufLen);
+            }
+            catch (Exception)
+            {
+                return;
+            }
         }
 
         #endregion
@@ -515,131 +591,145 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         /// <param name="BufLen">Buffer's length</param>
         private void ParseData(byte[] RxBuf, int BufLen)
         {
-            #region Debugging Purpose
-
-            Debug.Write("ParseData : HEX-> ");
-            for (int i = 0; i < BufLen; i++)
+            try
             {
-                Debug.Write(RxBuf[i].ToString("X2") + ' ');
-            }
-            Debug.WriteLine("");
+                #region Debugging Purpose
 
-            #endregion
+                //Debug.Write("ParseData : HEX-> ");
+                //for (int i = 0; i < BufLen; i++)
+                //{
+                //    Debug.Write(RxBuf[i].ToString("X2") + ' ');
+                //}
+                //Debug.WriteLine("");
 
-            #region EFALCON 4.0
-
-            if (RxBuf[0] == (byte)BufferHeader.EFALCON4)
-            {
-                #region Urutan data Efalcon Wahana
-                /* (angka terakhir itu index)
-                * 
-                * [Header]      = HEADER_BUF uint8          (1 byte)
-                *
-                * [Flight M.]   = FLAG uint8                (1 byte)
-                *
-                * [Bat. Volt]   = ADC value uint16          (2 byte)
-                * [Bat. Curr]   = ADC value uint16          (2 byte)
-                *
-                * [Sign. Str.]  = persen uint8              (1 byte)
-                * 
-                * [Yaw]		    = derajat float32		    (4 byte)
-                * [Pitch]	    = derajat float32		    (4 byte)
-                * [Roll]	    = derajat float32		    (4 byte)
-                *
-                * [Altitude]    = milimeter int32		    (4 byte)
-                * 
-                * [Speed]       = meter/sec float32         (4 byte)
-                *
-                * [Lat]		    = decimal degrees float32	(4 byte)
-                * [Lon]         = decimal degrees float32	(4 byte)
-                */
                 #endregion
 
-                if (BufLen < 34)
+                #region EFALCON 4.0
+
+                if (RxBuf[0] == (byte)BufferHeader.EFALCON4)
                 {
-                    Debug.WriteLine("EFALCON data not valid");
-                    return;
+                    #region Urutan data Efalcon Wahana
+                    /* (angka terakhir itu index)
+                    * 
+                    * [Header]      = HEADER_BUF uint8          (1 byte)
+                    *
+                    * [Flight M.]   = FLAG uint8                (1 byte)
+                    *
+                    * [Bat. Volt]   = ADC value uint16          (2 byte)
+                    * [Bat. Curr]   = ADC value uint16          (2 byte)
+                    *
+                    * [Sign. Str.]  = persen uint8              (1 byte)
+                    * 
+                    * [Yaw]		    = derajat float32		    (4 byte)
+                    * [Pitch]	    = derajat float32		    (4 byte)
+                    * [Roll]	    = derajat float32		    (4 byte)
+                    *
+                    * [Altitude]    = milimeter int32		    (4 byte)
+                    * 
+                    * [Speed]       = meter/sec float32         (4 byte)
+                    *
+                    * [Lat]		    = decimal degrees float32	(4 byte)
+                    * [Lon]         = decimal degrees float32	(4 byte)
+                    */
+                    #endregion
+
+                    if (BufLen < 34)
+                    {
+                        Debug.WriteLine("EFALCON data not valid");
+                        return;
+                    }
+
+                    App.Wahana.Tipe = TipeDevice.WAHANA;
+
+                    App.Wahana.FlightMode = (FlightMode)RxBuf[1];
+
+                    App.Wahana.BatteryVolt = BitConverter.ToUInt16(RxBuf, 2);
+                    App.Wahana.BatteryCurr = BitConverter.ToUInt16(RxBuf, 4);
+
+                    App.Wahana.Signal = RxBuf[6];
+
+                    App.Wahana.IMU.Yaw = BitConverter.ToSingle(RxBuf, 7) * -1;  
+                    App.Wahana.IMU.Pitch = BitConverter.ToSingle(RxBuf, 11) * -1;
+                    App.Wahana.IMU.Roll = BitConverter.ToSingle(RxBuf, 15) * -1;
+
+                    App.Wahana.AltitudeFloat = BitConverter.ToSingle(RxBuf, 19);
+
+                    App.Wahana.Speed = BitConverter.ToSingle(RxBuf, 23);
+
+                    App.Wahana.GPS.Latitude = (int)(BitConverter.ToSingle(RxBuf, 27) * 10000000.0);
+                    App.Wahana.GPS.Longitude = (int)(BitConverter.ToSingle(RxBuf, 31) * 10000000.0);
+
+                    Dispatcher.Invoke(() => UpdateUIWahana());
                 }
 
-                App.Wahana.Tipe = TipeDevice.WAHANA;
-
-                App.Wahana.FlightMode = (FlightMode)RxBuf[1];
-
-                App.Wahana.BatteryVolt = BitConverter.ToUInt16(RxBuf, 2);
-                App.Wahana.BatteryCurr = BitConverter.ToUInt16(RxBuf, 4);
-
-                App.Wahana.Signal = RxBuf[6];
-
-                App.Wahana.IMU.Yaw = BitConverter.ToSingle(RxBuf, 7) * -1;
-                App.Wahana.IMU.Pitch = BitConverter.ToSingle(RxBuf, 11) * -1;
-                App.Wahana.IMU.Roll = BitConverter.ToSingle(RxBuf, 15) * -1;
-
-                App.Wahana.Altitude = BitConverter.ToInt32(RxBuf, 19);
-
-                App.Wahana.Speed = BitConverter.ToSingle(RxBuf, 23);
-
-                App.Wahana.GPS.Latitude = BitConverter.ToSingle(RxBuf, 27);
-                App.Wahana.GPS.Longitude = BitConverter.ToSingle(RxBuf, 31);
-
-                Dispatcher.BeginInvoke(new ThreadStart(delegate { UpdateUIWahana(); }));
-            }
-
-            #endregion
-
-            #region TRITON
-
-            else if (RxBuf[0] == (byte)BufferHeader.TRITON)
-            {
-                #region Urutan data Triton
-                /* (angka terakhir itu index)
-                * 
-                * [Header]      = HEADER_BUF uint8          (1 byte)
-                * 
-                * [Yaw]		    = derajat float32		    (4 byte)
-                * [Pitch]	    = derajat float32		    (4 byte)
-                *
-                * [Altitude]    = milimeter int32		    (4 byte
-                * 
-                * [Lat]		    = decimal degrees float32	(4 byte)
-                * [Lon]         = decimal degrees float32	(4 byte)
-                */
                 #endregion
 
-                if (BufLen < 21)
+                #region TRITON
+
+                else if (RxBuf[0] == (byte)BufferHeader.TRITON)
                 {
-                    Debug.WriteLine("TRITON data not valid");
-                    return;
+                    #region Urutan data Triton
+                    /* (angka terakhir itu index)
+                    * 
+                    * [Header]      = HEADER_BUF uint8          (1 byte)
+                    * 
+                    * [Yaw]		    = derajat float32		    (4 byte)
+                    * [Pitch]	    = derajat float32		    (4 byte)
+                    *
+                    * [Altitude]    = milimeter int32		    (4 byte)
+                    * 
+                    * [Lat]		    = decimal degrees float32	(4 byte)
+                    * [Lon]         = decimal degrees float32	(4 byte)
+                    */
+                    #endregion
+
+                    if (BufLen < 21)
+                    {
+                        Debug.WriteLine("TRITON data not valid");
+                        return;
+                    }
+
+                    App.Tracker.Tipe = TipeDevice.TRACKER;
+
+                    App.Tracker.IMU.Yaw = BitConverter.ToSingle(RxBuf, 1);
+                    App.Tracker.IMU.Pitch = BitConverter.ToSingle(RxBuf, 5);
+
+                    App.Tracker.Altitude = BitConverter.ToSingle(RxBuf, 9);
+
+                    App.Tracker.GPS.Latitude = (int)(BitConverter.ToSingle(RxBuf, 13) * 10000000.0);
+                    App.Tracker.GPS.Longitude = (int)(BitConverter.ToSingle(RxBuf, 17) * 10000000.0);
+
+                    Dispatcher.Invoke(() => (App.Current.MainWindow as MainWindow).track_Ctrl.UpdateUITracker());
                 }
 
-                App.Tracker.Tipe = TipeDevice.TRACKER;
-
-                App.Tracker.IMU.Yaw = BitConverter.ToSingle(RxBuf, 1);
-                App.Tracker.IMU.Pitch = BitConverter.ToSingle(RxBuf, 5);
-
-                App.Tracker.Altitude = BitConverter.ToInt32(RxBuf, 9);
-
-                App.Tracker.GPS.Latitude = BitConverter.ToSingle(RxBuf, 13);
-                App.Tracker.GPS.Longitude = BitConverter.ToSingle(RxBuf, 17);
-
-                Dispatcher.BeginInvoke(new ThreadStart(delegate { (App.Current.MainWindow as MainWindow).track_Ctrl.UpdateUITracker(); }));
+                #endregion
             }
-
-            #endregion
+            catch (Exception exc)
+            {
+                Debug.WriteLine($"[DATA PARSING] : {exc.Message}");
+            }
         }
 
         #endregion
 
         #region MAVLINK PARSING
 
-        MavLinkAsyncWalker MavLinkParser = new MavLinkAsyncWalker();
+        MavLinkGenericTransport MavLinkParser;
 
-        bool IsMavLinkConnValid = true;
+        bool IsMavLinkNotConnected = true;
 
         private void MavlinkPacketReceived(object sender, MavLinkPacketBase packet)
         {
-            Debug.WriteLine($"Received Mavlink {packet.Message}");
+            //Debug.WriteLine($"Received Mavlink {packet.Message}");
 
-            MavLinkValidHeartbeat.Set();
+            if (IsMavLinkNotConnected)
+            {
+                IsMavLinkNotConnected = false;
+
+                MavLinkValidHandle.Set();
+
+                //GetMavLinkStreams();
+            }
 
             switch (packet.Message)
             {
@@ -654,6 +744,30 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                             App.Wahana.Tipe = TipeDevice.TRACKER;
                             break;
                     }
+
+                    //switch (HrtMsg.BaseMode)
+                    //{
+                    //    case MavModeFlag.SafetyArmed:
+                    //        break;
+                    //    case MavModeFlag.ManualInputEnabled:
+                    //        break;
+                    //    case MavModeFlag.HilEnabled:
+                    //        break;
+                    //    case MavModeFlag.StabilizeEnabled:
+                    //        App.Wahana.FlightMode = FlightMode.STABILIZER;
+                    //        break;
+                    //    case MavModeFlag.GuidedEnabled:
+                    //        break;
+                    //    case MavModeFlag.AutoEnabled:
+                    //        App.Wahana.FlightMode = FlightMode.AUTO;
+                    //        break;
+                    //    case MavModeFlag.TestEnabled:
+                    //        break;
+                    //    case MavModeFlag.CustomModeEnabled:
+                    //        break;
+                    //    default:
+                    //        break;
+                    //}
 
                     switch (HrtMsg.BaseMode)
                     {
@@ -671,9 +785,9 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     break;
 
                 case UasSysStatus SysMsg:
-                    App.Wahana.BatteryVolt = SysMsg.VoltageBattery;
-                    App.Wahana.BatteryCurr = (ushort)SysMsg.CurrentBattery;
-                    App.Wahana.Signal = (byte)(100 - SysMsg.DropRateComm);
+                    App.Wahana.MavlinkMiliVolt = SysMsg.VoltageBattery;
+                    App.Wahana.MavlinkCentiAmp = SysMsg.CurrentBattery;
+                    App.Wahana.Signal = (byte)(100 - (SysMsg.DropRateComm / 100));
 
                     break;
 
@@ -685,8 +799,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     break;
 
                 case UasGlobalPositionInt PosMsg:
-                    App.Wahana.GPS.Latitude = PosMsg.Lat / 10000000.0;
-                    App.Wahana.GPS.Longitude = PosMsg.Lon / 10000000.0;
+                    App.Wahana.GPS.Latitude = PosMsg.Lat;
+                    App.Wahana.GPS.Longitude = PosMsg.Lon;
 
                     App.Wahana.Altitude = PosMsg.Alt;
 
@@ -697,12 +811,22 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
                     break;
 
+                case UasStatustext StatTxt:
+                    if(StatTxt.Severity == MavSeverity.Critical)
+                        Dispatcher.Invoke(() => in_stream.Text = new string(StatTxt.Text));
+                    break;
+
+                case UasCommandAck CmdAck:
+                    if (CmdAck.Result == MavResult.Unsupported)
+                        Dispatcher.Invoke(() => new MessagePop(App.Current.MainWindow, "Perintah tidak di support oleh Wahana").Show());
+                    break;
+
                 default:
                     Debug.WriteLine($"Mavlink {packet.Message.GetType().Name} message is not supported by this GCS");
                     return;
             }
 
-            Dispatcher.BeginInvoke(new ThreadStart(delegate { UpdateUIWahana(packet.Message); }));
+            Dispatcher.Invoke(() => UpdateUIWahana(packet.Message));
         }
 
         private void MavlinkPacketDiscarded(object sender, MavLinkPacketBase packet)
@@ -732,7 +856,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                         + App.Wahana.IMU.Pitch + " | "
                         + App.Wahana.IMU.Roll + " | "
 
-                        + App.Wahana.Altitude + " | "
+                        + App.Wahana.AltitudeFloat + " | "
 
                         + App.Wahana.Speed + " | "
 
@@ -745,34 +869,50 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
                 win.StartWaktuTerbang();
                 win.SetConnStat(TipeDevice.WAHANA, true);
+                win.SetUsingEfalcon(true);
 
                 WhiteBoxWriter = new CsvFileWriter(new FileStream(App.DocsPath + "WhiteBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
+
+                DataLogTimer = new System.Timers.Timer()
+                {
+                    AutoReset = true,
+                    Interval = 250,
+                };
+                DataLogTimer.Elapsed += DataLogTimer_Elapsed;
+                DataLogTimer.Start();
             }
 
             switch (App.Wahana.FlightMode)
             {
+                case FlightMode.DISARMED:
+                    lbl_fmode.Content = "{ DISARMED }";
+                    lbl_fmode.Background = System.Windows.Media.Brushes.DarkOrange;
+                    break;
+
                 case FlightMode.MANUAL:
-                    lbl_fmode.Content = "<MANUAL>";
+                    lbl_fmode.Content = "< MANUAL >";
                     lbl_fmode.Background = System.Windows.Media.Brushes.DarkRed;
                     break;
 
                 case FlightMode.STABILIZER:
-                    lbl_fmode.Content = "[STABILIZE]";
+                    lbl_fmode.Content = "[ STABILIZE ]";
                     lbl_fmode.Background = System.Windows.Media.Brushes.LawnGreen;
                     break;
 
                 case FlightMode.LOITER:
-                    lbl_fmode.Content = "*AUTO*";
+                    lbl_fmode.Content = "* AUTO *";
                     lbl_fmode.Background = System.Windows.Media.Brushes.BlueViolet;
                     break;
 
-                case FlightMode.TAKEOFF:
+                case FlightMode.HOLD_ALTITUDE:
+                    lbl_fmode.Content = "[ HOLD ALTI ]";
+                    lbl_fmode.Background = System.Windows.Media.Brushes.LawnGreen;
                     break;
             }
 
             win.SetBaterai(225, App.Wahana.BatteryVolt, App.Wahana.BatteryCurr);
 
-            win.SetSignal(App.Wahana.Signal);
+            win.SetSignal((float)App.Wahana.Signal);
 
             tb_yaw.Text = ((App.Wahana.IMU.Yaw + 360.0) % 360.0).ToString("0.00", CultureInfo.InvariantCulture) + "°";
             ind_heading.SetHeadingIndicatorParameters(Convert.ToInt32(((App.Wahana.IMU.Yaw + 360.0) % 360.0)));
@@ -787,23 +927,22 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             tb_alti.Text =
                 win.track_Ctrl.tb_alti_wahana.Text =
-                (App.Wahana.Altitude / 1000.0).ToString("0.00", CultureInfo.InvariantCulture) + " m";
+                App.Wahana.AltitudeFloat.ToString("0.00", CultureInfo.InvariantCulture) + " m";
 
-            if (App.Wahana.GPS.Latitude != 0 || App.Wahana.GPS.Longitude != 0)
+            if (App.Wahana.GPS.IsValid)
             {
                 win.map_Ctrl.UpdatePosWahana();
 
                 tb_lat.Text =
                     win.track_Ctrl.tb_lat_wahana.Text =
-                    App.Wahana.GPS.Latitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+                    (App.Wahana.GPS.Latitude / 10000000.0).ToString("0.00000000", CultureInfo.InvariantCulture);
                 tb_longt.Text =
                     win.track_Ctrl.tb_longt_wahana.Text =
-                    App.Wahana.GPS.Longitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+                    (App.Wahana.GPS.Longitude / 10000000.0).ToString("0.00000000", CultureInfo.InvariantCulture);
             }
 
-            //win.stats_Ctrl.addToStatistik(App.Wahana.IMU.Yaw, App.Wahana.IMU.Pitch, App.Wahana.IMU.Roll, win.WaktuTerbang);
-
-            //WriteWhiteBox();
+            win.stats_Ctrl.addToStatistik();
+            WriteWhiteBox();
         }
 
         public bool IsFirstDataTracker { get; set; } = true;
@@ -833,6 +972,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         }
         */
         #endregion
+
+        #region WhiteBox Data Logging
+
+        System.Timers.Timer DataLogTimer;
+
+        private void DataLogTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            Dispatcher.Invoke(() => (App.Current.MainWindow as MainWindow).stats_Ctrl.addToStatistik());
+            WriteWhiteBox();
+        }
 
         /// <summary>
         /// CSV Writer for flight data white box
@@ -867,104 +1016,144 @@ namespace Pigeon_WPF_cs.Custom_UserControls
              *  Latitude
              *  Longitude
             */
-
-            CsvRow baris = new CsvRow()
+            Dispatcher.Invoke(() =>
             {
-                ((MainWindow)App.Current.MainWindow).WaktuTerbang.Ticks.ToString(),
+                CsvRow baris = new CsvRow()
+                {
+                    ((MainWindow)App.Current.MainWindow).WaktuTerbang.Ticks.ToString(),
 
-                App.Wahana.Tipe.ToString(),
+                    App.Wahana.Tipe.ToString(),
 
-                App.Wahana.FlightMode.ToString(),
+                    App.Wahana.FlightMode.ToString(),
 
-                //App.Wahana.Battery.ToString(),
+                    App.Wahana.BatteryCurr.ToString(),
+                    App.Wahana.BatteryVolt.ToString(),
 
-                App.Wahana.Signal.ToString(),
+                    App.Wahana.MavlinkMiliVolt.ToString(),
+                    App.Wahana.MavlinkCentiAmp.ToString(),
 
-                App.Wahana.IMU.Yaw.ToString(),
-                App.Wahana.IMU.Pitch.ToString(),
-                App.Wahana.IMU.Roll.ToString(),
+                    App.Wahana.Signal.ToString(),
 
-                App.Wahana.GPS.Latitude.ToString("0.########", CultureInfo.CurrentUICulture),
-                App.Wahana.GPS.Longitude.ToString("0.########", CultureInfo.CurrentUICulture)
-            };
+                    App.Wahana.IMU.Yaw.ToString(),
+                    App.Wahana.IMU.Pitch.ToString(),
+                    App.Wahana.IMU.Roll.ToString(),
 
-            WhiteBoxWriter.WriteRow(baris);
+                    App.Wahana.Speed.ToString(),
+                    App.Wahana.Altitude.ToString(),
+
+                    App.Wahana.AltitudeFloat.ToString(),
+
+                    (App.Wahana.GPS.Latitude  / 10000000.0).ToString("0.########", CultureInfo.CurrentUICulture),
+                    (App.Wahana.GPS.Longitude / 10000000.0).ToString("0.########", CultureInfo.CurrentUICulture)
+                };
+
+                WhiteBoxWriter.WriteRow(baris);
+            });
         }
+
+        #endregion
 
         #endregion
 
         #region MAVLink Update UI
 
+        bool IsLoitering = false;
+        bool IsLanding = false;
+
         private void UpdateUIWahana(UasMessage Message)
         {
-            var win = (MainWindow)App.Current.MainWindow;         
+            var win = (MainWindow)App.Current.MainWindow;
+
+            if (IsFirstDataWahana)
+            {
+                IsFirstDataWahana = false;
+
+                win.StartWaktuTerbang();
+                win.SetConnStat(TipeDevice.WAHANA, true);
+                win.SetUsingEfalcon(false);
+
+                WhiteBoxWriter = new CsvFileWriter(new FileStream(App.DocsPath + "WhiteBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
+
+                DataLogTimer = new System.Timers.Timer()
+                {
+                    AutoReset = true,
+                    Interval = 250,
+                };
+                DataLogTimer.Elapsed += DataLogTimer_Elapsed;
+                DataLogTimer.Start();
+            }
 
             switch (Message)
             {
                 case UasHeartbeat HrtMsg:
-                    if (IsFirstDataWahana)
-                    {
-                        IsFirstDataWahana = false;
-
-                        win.StartWaktuTerbang();
-                        win.map_Ctrl.StartPosWahana();
-                        win.SetConnStat(TipeDevice.WAHANA, true);
-
-                        WhiteBoxWriter = new CsvFileWriter(new FileStream(App.DocsPath + "WhiteBox_" + DateTime.Now.ToString("(HH.mm)(G\\MTz)_[dd-MM-yy]") + ".csv", FileMode.Create, FileAccess.Write));
-                    }
-
-                    switch ((byte)HrtMsg.BaseMode)
-                    {
-                        case (byte)MavMode.Preflight:
-                            break;
-                        case (byte)MavMode.StabilizeDisarmed:
-                            break;
-                        case (byte)MavMode.StabilizeArmed:
-                            break;
-                        case (byte)MavMode.ManualDisarmed:
-                            break;
-                        case (byte)MavMode.ManualArmed:
-                            break;
-                        case (byte)MavMode.GuidedDisarmed:
-                            break;
-                        case (byte)MavMode.GuidedArmed:
-                            break;
-                        case (byte)MavMode.AutoDisarmed:
-                            break;
-                        case (byte)MavMode.AutoArmed:
-                            break;
-                        case (byte)MavMode.TestDisarmed:
-                            break;
-                        case (byte)MavMode.TestArmed:
-                            break;
-                        default:
-                            break;
-                    }
-
-                    //switch ()
+                    //switch ((byte)HrtMsg.BaseMode)
                     //{
-                    //    case MavModeFlag.SafetyArmed:
-                    //        lbl_fmode.Content = "{ARMED}";
-                    //        lbl_fmode.Background = System.Windows.Media.Brushes.DarkOrange;
-                    //        break;
-                    //    case MavModeFlag.ManualInputEnabled:
-                    //        lbl_fmode.Content = "<MANUAL>";
-                    //        lbl_fmode.Background = System.Windows.Media.Brushes.DarkRed;
-                    //        break;
-                    //    case MavModeFlag.StabilizeEnabled:
-                    //        lbl_fmode.Content = "[STABILIZE]";
+                    //    case (byte)MavMode.StabilizeArmed:
+                    //        lbl_fmode.Content = "[ STABILIZE ]";
                     //        lbl_fmode.Background = System.Windows.Media.Brushes.LawnGreen;
                     //        break;
-                    //    case MavModeFlag.AutoEnabled:
-                    //        lbl_fmode.Content = "*AUTO*";
+                    //    case (byte)MavMode.ManualArmed:
+                    //        lbl_fmode.Content = "< MANUAL >";
+                    //        lbl_fmode.Background = System.Windows.Media.Brushes.DarkRed;
+                    //        break;
+                    //    case (byte)MavMode.GuidedArmed:
+                    //        lbl_fmode.Content = "/ GUIDED /";
+                    //        lbl_fmode.Background = System.Windows.Media.Brushes.Orange;
+                    //        break;
+                    //    case (byte)MavMode.AutoArmed:
+                    //        lbl_fmode.Content = "* AUTO *";
                     //        lbl_fmode.Background = System.Windows.Media.Brushes.BlueViolet;
                     //        break;
+                    //    case (byte)MavMode.TestArmed:
+                    //        lbl_fmode.Content = "! TEST !";
+                    //        lbl_fmode.Background = System.Windows.Media.Brushes.ForestGreen;
+                    //        break;
+                    //    default:
+                    //        lbl_fmode.Content = "{ DISARMED }";
+                    //        lbl_fmode.Background = System.Windows.Media.Brushes.DarkOrange;
+                    //        break;
                     //}
+
+                    if(((byte)HrtMsg.BaseMode & (byte)MavModeFlag.SafetyArmed) != (byte)MavModeFlag.SafetyArmed)
+                    {
+                        lbl_fmode.Content = "{ DISARMED }";
+                        lbl_fmode.Background = System.Windows.Media.Brushes.DarkOrange;
+
+                        IsLoitering = IsLanding = false;
+                    }
+                    else
+                    {
+                        if (IsLoitering)
+                        {
+                            lbl_fmode.Content = "* LOITERING *";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.BlueViolet;
+                        }
+                        else if (IsLanding)
+                        {
+                            lbl_fmode.Content = "* LANDING *";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.ForestGreen;
+                        }
+                        //if(((byte)HrtMsg.BaseMode & (byte)MavModeFlag.ManualInputEnabled) == (byte)MavModeFlag.ManualInputEnabled)
+                        //{
+                        //    lbl_fmode.Content = "< MANUAL >";
+                        //    lbl_fmode.Background = System.Windows.Media.Brushes.DarkRed;
+                        //}
+                        else if(((byte)HrtMsg.BaseMode & (byte)MavModeFlag.StabilizeEnabled) == (byte)MavModeFlag.StabilizeEnabled)
+                        {
+                            lbl_fmode.Content = "[ STABILIZE ]";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.LawnGreen;
+                        }
+                        else if (((byte)HrtMsg.BaseMode & (byte)MavModeFlag.AutoEnabled) == (byte)MavModeFlag.AutoEnabled)
+                        {
+                            lbl_fmode.Content = "* AUTO *";
+                            lbl_fmode.Background = System.Windows.Media.Brushes.BlueViolet;
+                        }
+                    }
 
                     break;
 
                 case UasSysStatus SysMsg:
-                    win.SetBaterai(50, App.Wahana.BatteryVolt, App.Wahana.BatteryCurr);
+                    win.SetBaterai(App.Wahana.MavlinkMiliVolt, App.Wahana.MavlinkCentiAmp);
                     win.SetSignal(App.Wahana.Signal);
 
                     break;
@@ -985,12 +1174,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     {
                         tb_lat.Text =
                             win.track_Ctrl.tb_lat_wahana.Text =
-                            App.Wahana.GPS.Latitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+                            (App.Wahana.GPS.Latitude / 10000000.0).ToString("0.00000000", CultureInfo.InvariantCulture);
                         tb_longt.Text =
                             win.track_Ctrl.tb_longt_wahana.Text =
-                            App.Wahana.GPS.Longitude.ToString("0.00000000", CultureInfo.InvariantCulture);
+                            (App.Wahana.GPS.Longitude / 10000000.0).ToString("0.00000000", CultureInfo.InvariantCulture);
 
                         win.map_Ctrl.UpdatePosWahana();
+
+                        tb_alti.Text =
+                        win.track_Ctrl.tb_alti_wahana.Text =
+                        (App.Wahana.Altitude / 1000.0).ToString("0.00", CultureInfo.InvariantCulture) + " m";
                     }
                     break;
 
@@ -998,16 +1191,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     tb_airspeed.Text = (App.Wahana.Speed * 3.6).ToString("0.00", CultureInfo.InvariantCulture) + " km/j";
                     ind_airspeed.SetAirSpeedIndicatorParameters((int)(App.Wahana.Speed * 200));
 
-                    tb_alti.Text =
-                        win.track_Ctrl.tb_alti_wahana.Text =
-                        (App.Wahana.Altitude / 1000.0).ToString("0.00", CultureInfo.InvariantCulture) + " m";
-
                     break;
             }
-
-            //win.stats_Ctrl.addToStatistik(App.Wahana.IMU.Yaw, App.Wahana.IMU.Pitch, App.Wahana.IMU.Roll, win.WaktuTerbang);
-
-            //WriteWhiteBox();
         }      
 
         #endregion
@@ -1017,20 +1202,78 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void SendSelectedCommand(object sender, RoutedEventArgs e)
         {
-            var UasCommand = new UasCommandLong()
+            //var UasCommand = new UasCommandLong()
+            //{
+            //    TargetSystem = 1,
+            //    TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
+            //    Command = MavCmd.ComponentArmDisarm,
+            //    Param1 = 1,
+            //    Param2 = 0
+            //};
+            if (!App.Wahana.GPS.IsValid) return;
+
+            UasMessage UasCommand;
+
+            if ((out_stream.SelectedItem as ComboBoxItem).Content as string == "Land")
             {
-                TargetSystem = 1,
-                TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
-                Command = MavCmd.SetMessageInterval,
-                Param1 = new UasAttitude().MessageId,
-                Param2 = 200000
-            };
+                UasCommand = new UasCommandLong()
+                {
+                    TargetSystem = 1,
+                    TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
+                    Command = MavCmd.NavLand,
+                    Param1 = 0,
+                    Param2 = (float)PrecisionLandMode.Opportunistic,
 
-            var temp_buf = MavLinkParser.SerializeMessage(UasCommand, 255, (byte)MavComponent.MavCompIdMissionplanner, true);
+                };
 
-            SendRequest(temp_buf);
+                MavLinkParser.SendMessage(UasCommand);
 
-            Debug.WriteLine("Command send");
+                IsLanding = true;
+                IsLoitering = false;
+
+                Debug.WriteLine("Command sent");
+            }
+            else if ((out_stream.SelectedItem as ComboBoxItem).Content as string == "Loiter")
+            {
+                UasCommand = new UasCommandLong()
+                {
+                    TargetSystem = 1,
+                    TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
+                    Command = MavCmd.NavLoiterUnlim,
+                    Param3 = 0,
+                    Param4 = float.NaN,
+                    Param5 = (float)(App.Wahana.GPS.Latitude * 10000000.0),
+                    Param6 = (float)(App.Wahana.GPS.Longitude * 10000000.0),
+                    Param7 = App.Wahana.Altitude,
+                };
+
+                MavLinkParser.SendMessage(UasCommand);
+
+                IsLoitering = true;
+                IsLanding = false;
+
+                Debug.WriteLine("Command sent");
+            }
+            //else if ((out_stream.SelectedItem as ComboBoxItem).Content as string == "Stabilize")
+            //{
+            //    UasCommand = new UasCommandLong()
+            //    {
+            //        TargetSystem = 1,
+            //        TargetComponent = (byte)MavComponent.MavCompIdAutopilot1,
+            //        Command = MavCmd.DoSetMode,
+            //        Param1 = (float)MavMode.StabilizeDisarmed,
+            //    };
+
+            //    MavLinkParser.SendMessage(UasCommand);
+
+            //    IsLanding = IsLoitering = false;
+
+            //    Debug.WriteLine("Command sent");
+            //}
+            else
+            {
+                IsLanding = IsLoitering = false;
+            }
         }
 
         public void SendToConnection(Command cmd, TipeDevice tujuan, string track = "")
@@ -1066,10 +1309,23 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             //}
         }
 
-        //dont forget to change to gateway
-        public async void SendToConnection(byte[] data) { 
-            //if (isUsingWifi) 
-            //    udpSocket.Send(data, data.Length, new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12727));
+        public void SendBytesToConnection(byte[] data) {
+            switch (ConnectionType)
+            {
+                case ConnType.Internet:
+                    break;
+
+                case ConnType.WIFI:
+                    WIFISendAsyncEvent.SetBuffer(data, 0, data.Length);
+                    WIFISocket.Client.SendAsync(WIFISendAsyncEvent);
+                    break;
+
+                case ConnType.SerialPort:
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         #endregion
@@ -1122,7 +1378,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             cb_cams.IsEnabled = btn_livestream.IsEnabled = btn_take_picture.IsEnabled = false;
 
-            if (!ListCameras()) return;
+            if (!ListCameras())
+                return;
 
             cb_cams.SelectedIndex = 0;
             cb_cams.IsEditable = false;
@@ -1157,37 +1414,50 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         {
             if(liveStream != null)
             {
-                liveStream.SignalToStop();
-                liveStream.NewFrame -= new NewFrameEventHandler(NewFrame_Available);
+                liveCam.Visibility = Visibility.Hidden;
+
+                new Thread(() => 
+                {
+                    liveStream.Stop();
+                    liveStream.NewFrame -= new NewFrameEventHandler(NewFrame_Available);
+                    IsLiveStreaming = false;
+                }).Start();
+                
                 btn_livestream.Content = "Start Stream";
-                liveStream.Stop();
             }
         }
 
         private IVideoSource liveStream;
+
+        bool IsLiveStreaming = false;
+
         private void ToggleCamStream(object sender, RoutedEventArgs e)
         {
-            if (liveStream != null) StopCam();
+            if (IsLiveStreaming) StopCam();
             else if (CurrentCamera != null)
             {
                 liveStream = new VideoCaptureDevice(CurrentCamera.MonikerString);
                 liveStream.NewFrame += NewFrame_Available;
                 liveStream.Start();
                 btn_livestream.Content = "Stop Stream";
+                IsLiveStreaming = true;
+
+                liveCam.Visibility = Visibility.Visible;
             }
         }
 
+        BitmapSource bi;
+
         private void NewFrame_Available(object sender, NewFrameEventArgs eventArgs)
         {
-            BitmapSource bi;
             try
             {
                 using (var bitmap = (Bitmap)eventArgs.Frame.Clone())
                 {
                     bi = bitmap.ToBitmapSource();
+                    bi.Freeze();
+                    Dispatcher.Invoke(() => { liveCam.Source = bi; });
                 }
-                bi.Freeze(); // avoid cross thread operations and prevents leaks
-                Dispatcher.BeginInvoke(new ThreadStart(delegate { liveCam.Source = bi; }));
             }
             catch (Exception exc)
             {
@@ -1230,7 +1500,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             catch { file = new FileStream(CapFolder + "Capture_" + DateTime.Now.ToString("HH.mm.ss_") + (i++).ToString() + ".jpeg", FileMode.CreateNew); }
 
             var saveFile = new JpegBitmapEncoder();
-            saveFile.Frames.Add(BitmapFrame.Create((BitmapImage)liveCam.Source));
+            saveFile.Frames.Add(BitmapFrame.Create((CachedBitmap)liveCam.Source));
             saveFile.Save(file);
             file.Dispose();
         }

@@ -19,6 +19,7 @@
     </NuGetPackageImportStamp>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <ContentSQLiteInteropFiles>true</ContentSQLiteInteropFiles>
+    <TargetFrameworkProfile />
     <PublishUrl>F:\Downloads\Share Download\Pigeonku\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -34,7 +35,6 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -155,10 +155,6 @@
     </Reference>
     <Reference Include="MavLink4Net.Messages.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MavLink4Net.Messages.Serialization.0.4.0\lib\netstandard2.0\MavLink4Net.Messages.Serialization.dll</HintPath>
-    </Reference>
-    <Reference Include="MavLinkNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\mavlink.net-protocol_upgrade\mavlink.net\bin\Debug\MavLinkNet.dll</HintPath>
     </Reference>
     <Reference Include="MessagePack, Version=2.2.0.0, Culture=neutral, PublicKeyToken=b4a0369545f0a1be, processorArchitecture=MSIL">
       <HintPath>..\packages\MessagePack.2.2.60\lib\netstandard2.0\MessagePack.dll</HintPath>
@@ -317,6 +313,7 @@
     <Compile Include="Custom UserControls\FlightControl.xaml.cs">
       <DependentUpon>FlightControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MavLinkTCPClientTransport.cs" />
     <Compile Include="MessagePop.xaml.cs">
       <DependentUpon>MessagePop.xaml</DependentUpon>
     </Compile>
@@ -505,6 +502,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\icons8_wi_fi_filled_50.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj">
+      <Project>{2dff5e5b-eb22-4c03-bec9-994b112b8e78}</Project>
+      <Name>mavlink.net</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

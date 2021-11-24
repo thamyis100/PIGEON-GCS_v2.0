@@ -48,6 +48,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private GMapRoute Tracker_Wahana, FlightTrail;
 
         private List<PointLatLng> TrailPoints;
+        private List<PointLatLng> TrackingPoints;
 
         /// <summary>
         /// Set koordinat awal titik Home sejak terbang pertama
@@ -115,11 +116,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         /// </summary>
         public void StartPosWahana()
         {
-            SetHomePos(App.Wahana.GPS.Latitude, App.Wahana.GPS.Longitude);
-
             TrailPoints = new List<PointLatLng>();
 
-            WahanaMarker = new GMapMarker(new PointLatLng(App.Wahana.GPS.Latitude, App.Wahana.GPS.Longitude))
+            if (WahanaMarker != null)
+                mapView.Markers.Remove(WahanaMarker);
+
+            WahanaMarker = new GMapMarker(new PointLatLng(App.Wahana.GPS.Latitude / 10000000.0, App.Wahana.GPS.Longitude / 10000000.0))
             {
                 Tag = "Posisi Wahana",
                 Shape = new Image
@@ -153,26 +155,25 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         /// </summary>
         public void UpdatePosWahana()
         {
-            if (WahanaMarker == null) StartPosWahana();
+            if (WahanaMarker == null)
+            {
+                SetHomePos(App.Wahana.GPS.Latitude / 10000000.0, App.Wahana.GPS.Longitude / 10000000.0);
+                StartPosWahana();
+            }
 
-            WahanaMarker.Position = new PointLatLng(App.Wahana.GPS.Latitude, App.Wahana.GPS.Longitude);
+            WahanaMarker.Position = new PointLatLng(App.Wahana.GPS.Latitude / 10000000.0, App.Wahana.GPS.Longitude / 10000000.0);
+
+            WahanaMarker.Shape.RenderTransform = new RotateTransform(App.Wahana.IMU.Yaw);
 
             if (IsIkutiWahana)
                 mapView.CenterPosition = mapView.Position = WahanaMarker.Position;
 
-            FlightTrail.Points.Add(new PointLatLng(App.Wahana.GPS.Latitude, App.Wahana.GPS.Longitude));
+            FlightTrail.Points.Add(new PointLatLng(App.Wahana.GPS.Latitude / 10000000.0, App.Wahana.GPS.Longitude / 10000000.0));
         }
 
-        /// <summary>
-        /// Set koordinat & posisi tracker
-        /// </summary>
-        internal void UpdatePosTracker()
+        public void ResetMarkers()
         {
-            if (TrackerMarker == null) StartPosTracker();
 
-            TrackerMarker.Position = new PointLatLng(App.Tracker.GPS.Latitude, App.Tracker.GPS.Longitude);
-
-            TrackerMarker.Shape.RenderTransform = new RotateTransform(App.Tracker.IMU.Yaw);
         }
 
         /// <summary>
@@ -180,7 +181,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         /// </summary>
         public void StartPosTracker()
         {
-            TrackerMarker = new GMapMarker(new PointLatLng(App.Tracker.GPS.Latitude, App.Tracker.GPS.Longitude))
+            if (TrackerMarker != null)
+                mapView.Markers.Remove(TrackerMarker);
+
+            TrackerMarker = new GMapMarker(new PointLatLng(App.Tracker.GPS.Latitude / 10000000.0, App.Tracker.GPS.Longitude / 10000000.0))
             {
                 Tag = "Tracker",
                 Shape = new Image
@@ -197,6 +201,31 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             RenderOptions.SetBitmapScalingMode(TrackerMarker.Shape, BitmapScalingMode.HighQuality);
 
             mapView.Markers.Add(TrackerMarker);
+        }
+
+        /// <summary>
+        /// Set koordinat & posisi tracker
+        /// </summary>
+        internal void UpdatePosTracker()
+        {
+            if (TrackerMarker == null)
+            {
+                StartPosTracker();
+            }
+
+            TrackerMarker.Position = new PointLatLng(App.Tracker.GPS.Latitude / 10000000.0, App.Tracker.GPS.Longitude / 10000000.0);
+
+            TrackerMarker.Shape.RenderTransform = new RotateTransform(App.Tracker.IMU.Yaw);
+
+            if (WahanaMarker != null && TrackingPoints == null)
+            {
+                TrackingPoints = new List<PointLatLng>();
+                TrackingPoints.Add(TrackerMarker.Position);
+                TrackingPoints.Add(WahanaMarker.Position);
+
+                Tracker_Wahana = new GMapRoute(TrackingPoints);
+                mapView.Markers.Add(Tracker_Wahana);
+            }
         }
 
         public void SetArahTracker(float bearing)
@@ -339,7 +368,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     {
                         Stroke = Brushes.Orange,
                         StrokeThickness = 3,
-                        Effect = new DropShadowEffect() { Color = Color.FromRgb(0, 0, 0) }
+                        //Effect = new DropShadowEffect() { Color = Color.FromRgb(0, 0, 0) }
                     },
                     Tag = "WP_Trail"
                 };

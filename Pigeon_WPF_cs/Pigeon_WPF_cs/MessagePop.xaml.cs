@@ -63,14 +63,28 @@ namespace Pigeon_WPF_cs
 
         private void Batal(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
-            Close();
+            try
+            {
+                DialogResult = false;
+                Close();
+            }
+            catch (Exception)
+            {
+                Close();
+            }
         }
 
         private void Lanjut(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
-            Close();
+            try
+            {
+                DialogResult = true;
+                Close();
+            }
+            catch (Exception)
+            {
+                Close();
+            }
         }
     }
 }

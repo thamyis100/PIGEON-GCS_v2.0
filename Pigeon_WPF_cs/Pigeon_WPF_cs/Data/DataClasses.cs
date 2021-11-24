@@ -36,14 +36,19 @@ namespace Pigeon_WPF_cs.Data_Classes
     public class GPSData
     {
         /// <summary>
+        /// Apakah data valid?
+        /// </summary>
+        public bool IsValid { get { if (Latitude != 0 && Longitude != 0) { return true; } else { return false; } } }
+
+        /// <summary>
         /// Koordinat Latitude dalam format Decimal Degrees
         /// </summary>
-        public double Latitude { get; set; } = 0;
+        public int Latitude { get; set; } = 0;
 
         /// <summary>
         /// Koordinat Longitude dalam format Decimal Degrees
         /// </summary>
-        public double Longitude { get; set; } = 0;
+        public int Longitude { get; set; } = 0;
     }
 
     public class FlightData : TipeWahana
@@ -52,6 +57,9 @@ namespace Pigeon_WPF_cs.Data_Classes
 
         public UInt16 BatteryVolt { get; set; } = 0;
         public UInt16 BatteryCurr { get; set; } = 0;
+
+        public ushort MavlinkMiliVolt { get; set; } = 0;
+        public short MavlinkCentiAmp { get; set; } = 0;
 
         /// <summary>
         /// Kualitas sinyal dari perhitungan paket data yang dibuang.<br/>
@@ -69,6 +77,8 @@ namespace Pigeon_WPF_cs.Data_Classes
         /// Nilai dalam satuan <b>Milimeter</b> (<i>mm</i>).
         /// </summary>
         public int Altitude { get; set; } = 0;
+
+        public float AltitudeFloat { get; set; } = 0;
 
         /// <summary>
         /// Kecepatan wahana terhadap tanah.<br/>
@@ -90,6 +100,9 @@ namespace Pigeon_WPF_cs.Data_Classes
 
         public GPSData GPS { get; set; } = new GPSData();
 
+        /// <summary>
+        /// Ketinggian tracker (Meter)
+        /// </summary>
         public float Altitude { get; set; } = 0;
     }
 }

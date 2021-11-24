@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:Pigeon_WPF_cs"
         xmlns:controls="clr-namespace:Pigeon_WPF_cs.Custom_UserControls"
         mc:Ignorable="d"
-        Title="PIGEON GCS" KeyUp="toggleRecog" MinWidth="1280" MinHeight="720" WindowStartupLocation="CenterScreen"  Icon="Resources/logo/pigeonlogo.png" 
-        Width="1366" Height="768" SnapsToDevicePixels="True" WindowStyle="None">
+        Title="PIGEON GCS" KeyUp="toggleRecog" MinWidth="1280" MinHeight="800" WindowStartupLocation="CenterScreen"  Icon="Resources/logo/pigeonlogo.png" 
+        Width="1280" Height="800" SnapsToDevicePixels="True" WindowStyle="None">
     <Window.Resources>
         <Style TargetType="{x:Type Button}" x:Key="leftPaneButtonStyle">
             <Setter Property="Template">
@@ -33,11 +33,7 @@
         </Grid.ColumnDefinitions>
         <Grid Background="{DynamicResource WindowColor}" MouseLeftButtonDown="MainWindow_Clicked" >
             <DockPanel>
-                <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" UseLayoutRounding="False" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="4,4,4,0">
-                    <Image.Effect>
-                        <DropShadowEffect ShadowDepth="1" Direction="275" BlurRadius="3" Color="White" Opacity="0.65"/>
-                    </Image.Effect>
-                </Image>
+                <Image x:Name="logo_pigeon" Source="Resources/logo/pigeon.png" RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center" UseLayoutRounding="False" DockPanel.Dock="Top" HorizontalAlignment="Center" Margin="4,4,4,0"/>
                 <Image x:Name="logo_efalcongcs" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Source="Resources/logo/efalcon-gcs.png" HorizontalAlignment="Center" Margin="4,0,4,4" DockPanel.Dock="Bottom" UseLayoutRounding="False"/>
             </DockPanel>
         </Grid>
@@ -186,7 +182,7 @@
                     </Grid>
                     <DockPanel DockPanel.Dock="Right" Margin="4,3,0,2">
                         <Label x:Name="lbl_signal" Content=" Sinyal" Margin="0" Padding="0" VerticalContentAlignment="Center" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway" DockPanel.Dock="Top"/>
-                        <Label x:Name="val_signal" Content="(N/A dBm)" Padding="0" VerticalContentAlignment="Center" FontFamily="./#Raleway SemiBold" Margin="0" FontWeight="Bold" DockPanel.Dock="Bottom" HorizontalContentAlignment="Center" FontSize="14"/>
+                        <Label x:Name="val_signal" Content="(N/A%)" Padding="0" VerticalContentAlignment="Center" FontFamily="./#Raleway SemiBold" Margin="0" FontWeight="Bold" DockPanel.Dock="Bottom" HorizontalContentAlignment="Center" FontSize="14"/>
                     </DockPanel>
                 </DockPanel>
                 <DockPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" >

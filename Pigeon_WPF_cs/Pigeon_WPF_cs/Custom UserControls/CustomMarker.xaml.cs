@@ -34,12 +34,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             gmapctrl = ctrl;
             Marker = marker;
-            Effect = new DropShadowEffect()
-            {
-                Color = Color.FromRgb(255, 255, 200),
-                Opacity = 20,
-                BlurRadius = 15
-            };
+            //
+            //= new DropShadowEffect()
+            //{
+            //    Color = Color.FromRgb(255, 255, 200),
+            //    Opacity = 20,
+            //    BlurRadius = 15
+            //};
             wp_img.Source = img;
             GetImage = wp_img;
             wp_img.Source.Freeze();

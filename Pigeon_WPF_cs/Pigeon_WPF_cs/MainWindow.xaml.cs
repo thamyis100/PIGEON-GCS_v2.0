@@ -40,8 +40,6 @@ namespace Pigeon_WPF_cs
 
         private Task<bool> InitializeFirstTimeOpen()
         {
-            SetBaterai((float)75.25);
-
             SetCurrentlyActive(tab_flight, btn_flight, flight_Ctrl);
             ResizeMapFlight();
 
@@ -66,11 +64,21 @@ namespace Pigeon_WPF_cs
         /// </summary>
         private void SetBahasa(CultureInfo Language) => Thread.CurrentThread.CurrentUICulture = Language;
 
+        internal void SetUsingEfalcon(bool status)
+        {
+            if (status)
+            {
+                logo_efalcon_status.Source = Properties.Resources.efalcon.ToBitmapSource();
+            }
+            else
+            {
+                logo_efalcon_status.Source = Properties.Resources.ikon_quadcopter.ToBitmapSource();
+            }
+        }
+
         /// <summary>
-        /// Set kapasitas baterai
+        /// Set kapasitas baterai EFALCON
         /// </summary>
-        /// <param name="tegangan">Tegangan baterai dalam satuan Mili Volt (mV)</param>
-        /// <param name="arus">Tegangan baterai dalam satuan Mili Ampere (mA)</param>
         internal void SetBaterai(float kapasitas, ushort tegangan = 0, ushort arus = 0)
         {
             int persen_px = (int)kapasitas.Map(0.0f, 255.0f, 70.0f, 640.0f);
@@ -81,6 +89,29 @@ namespace Pigeon_WPF_cs
 
             val_batt.Content = tegangan.Map(0, 4095, 0, 3.3f).ToString("0.00") + " V | "
                 + arus.Map(0, 4095, -20, 8).ToString("0.00") + " A";
+        }
+
+        internal void SetBaterai(ushort milivolt, short centiampere)
+        {
+            //voltage
+            if (milivolt != UInt16.MaxValue)
+            {
+                val_batt.Content = (milivolt / 1000.0).ToString("0.00") + " V";
+            }
+            else
+            {
+                val_batt.Content = "ERR V";
+            }
+
+            //arus
+            if (centiampere > -1)
+            {
+                val_batt.Content += "| " + (centiampere / 100.0).ToString("0.00") + " A";
+            }
+            else
+            {
+                val_batt.Content += " |  ERR A";
+            }
         }
 
         /// <summary>
@@ -95,6 +126,11 @@ namespace Pigeon_WPF_cs
                 new Int32Rect(0, 50 - persen_px, 50, persen_px));
 
             val_signal.Content = signal.Map(0, 255.0f, 0, 100).ToString("0") + "%";
+        }
+
+        internal void SetSignal(byte percent)
+        {
+            val_signal.Content = percent.ToString("0") + "%";
         }
 
         #endregion
@@ -119,7 +155,7 @@ namespace Pigeon_WPF_cs
             MessagePop exitPop;
             if (flight_Ctrl.IsConnected)
             {
-                exitPop = new MessagePop(this, "Wahana masih terkoneksi! Silakan disconnect untuk melanjutkan!", false);
+                exitPop = new MessagePop(this, "Wahana masih terkoneksi!", false);
             }
             else
             {

@@ -33,20 +33,74 @@ namespace WPF_NETCore_Testing_purposes
 
             DataContext = this;
 
-            List<byte> buf = new List<byte>()
-            {
-                0xFE ,0x06 ,0x1C ,0xFF ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00 ,0x02 ,0x01 ,0xA7 ,0x1B ,0xFE ,0x06 ,0x1D ,0xFF ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00
-                ,0x02 ,0x01 ,0x36 ,0x4E ,0xFE ,0x06 ,0x1E ,0xFF ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00 ,0x06 ,0x01 ,0xE4 ,0xD3 ,0xFE ,0x06 ,0x1F ,0xFF ,0xBE ,0x42
-                ,0x02 ,0x00 ,0x00 ,0x00 ,0x06 ,0x01 ,0x75 ,0x86 ,0xFE ,0x06 ,0x20 ,0xFF ,0xBE ,0x42 ,0x04 ,0x00 ,0x00 ,0x00 ,0x0A ,0x01 ,0x98 ,0xF4 ,0xFE ,0x06
-                ,0x21 ,0xFF ,0xBE ,0x42 ,0x04 ,0x00 ,0x00 ,0x00 ,0x0A ,0x01 ,0x09 ,0xA1 ,0xFE ,0x06 ,0x22 ,0xFF ,0xBE ,0x42 ,0x04 ,0x00 ,0x00 ,0x00 ,0x0B ,0x01
-                ,0x66 ,0x05 ,0xFE ,0x06 ,0x23 ,0xFF ,0xBE ,0x42 ,0x04 ,0x00 ,0x00 ,0x00 ,0x0B ,0x01 ,0xF7 ,0x50 ,0xFE ,0x06 ,0x24 ,0xFF ,0xBE ,0x42 ,0x02 ,0x00
-                ,0x00 ,0x00 ,0x0C ,0x01 ,0xD9 ,0x24 ,0xFE ,0x06 ,0x25 ,0xFF ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00 ,0x0C ,0x01 ,0x48 ,0x71 ,0xFE ,0x06 ,0x26 ,0xFF
-                ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00 ,0x01 ,0x01 ,0x84 ,0x70 ,0xFE ,0x06 ,0x27 ,0xFF ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00 ,0x01 ,0x01 ,0x15 ,0x25
-                ,0xFE ,0x06 ,0x28 ,0xFF ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00 ,0x03 ,0x01 ,0xE1 ,0x8C ,0xFE ,0x06 ,0x29 ,0xFF ,0xBE ,0x42 ,0x02 ,0x00 ,0x00 ,0x00
-                ,0x03 ,0x01 ,0x70 ,0xD9
-            };
+            ArahkanTracker();
+        }
 
-            buf.ForEach(item => tb1.Text+=$" {item.ToString("D")} ");
+        //tracker
+        double lat_1 = -7.276594641754208
+            , lon_1 = 112.79384655689269
+            , alti1 = 0;
+        //wahana
+        double lat_2 = -7.276480235629137
+            , lon_2 = 112.79392031765727
+            , alti2 = 20;
+
+        public void ArahkanTracker()
+        {
+            // radius bumi (Kilo Meter)
+            int R = 6371;
+
+            double lat1 = lat_1 * Math.PI / 180.0;
+            double lon1 = lon_1 * Math.PI / 180.0;
+
+            double lat2 = lat_2 * Math.PI / 180.0;
+            double lon2 = lon_2 * Math.PI / 180.0;
+
+
+            double deltaLat = lat2 - lat1;
+            double deltaLon = lon2 - lon1;
+
+            /* Jarak (Haversine) */
+            double A = Math.Pow(Math.Sin(deltaLat / 2), 2)
+                            + (Math.Cos(lat1) * Math.Cos(lat2)
+                            * Math.Pow(Math.Sin(deltaLon / 2), 2));
+
+            double B = 2 * Math.Atan2(Math.Sqrt(A), Math.Sqrt(1 - A));
+
+            double jarakDarat = R * B;
+            tb1.Text = $"Jarak Horizon = {jarakDarat} km\r\n";
+
+
+            /* Arah Horizon (Bearing) */
+            double y = Math.Sin(deltaLon) * Math.Cos(lat2);
+
+            double x = Math.Cos(lat1) * Math.Sin(lat2)
+                - Math.Sin(lat1) * Math.Cos(lat2) * Math.Cos(deltaLon);
+
+            double bearing = Math.Atan2(y, x);
+            tb1.Text += $"Bearing = {((bearing * 180.0 / Math.PI ) + 360.0) % 360.0}\r\n";
+
+
+            /* Beda altitude (Meter) */
+            double deltaTinggi = alti2 - alti1;
+
+            /* Pitch Phytagoras */
+            double ArahVerti = Math.Atan2(deltaTinggi, jarakDarat * 1000);
+            tb1.Text += $"Pitch = {ArahVerti * 180.0 / Math.PI}\r\n";
+
+
+            /* Jarak Langsung */
+            double jarakLangsung = Math.Sqrt(jarakDarat * 1000 * (jarakDarat * 1000) + deltaTinggi * deltaTinggi);
+            tb1.Text += $"Jarak Langsung = {jarakLangsung} m\r\n";
+
+
+            /* Send data to Tracker */
+            var win = (MainWindow)App.Current.MainWindow;
+
+            // The Sent Data Goes : #,00,000 {#,Pitch,Yaw}
+            string data = "#," + (ArahVerti * 180.0 / Math.PI).ToString("0") + ',' + (((bearing * 180.0 / Math.PI) + 360.0) % 360.0).ToString("0") + "\r\n";
+            tb1.Text += data;
+
         }
     }
 }
