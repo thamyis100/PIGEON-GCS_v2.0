@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeon_WPF_cs", "Pigeon_WPF_cs\Pigeon_WPF_cs.csproj", "{DCA3A20B-476F-488A-9C10-FAF22E52F18A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlink.net", "..\..\..\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj", "{2DFF5E5B-EB22-4C03-BEC9-994B112B8E78}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mavlink.net", "mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj", "{2DFF5E5B-EB22-4C03-BEC9-994B112B8E78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
