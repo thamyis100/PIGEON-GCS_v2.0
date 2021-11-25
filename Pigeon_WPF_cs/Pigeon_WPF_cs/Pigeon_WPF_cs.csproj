@@ -147,15 +147,6 @@
     <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="MAVLink, Version=1.0.0.0, Culture=neutral, PublicKeyToken=38326cb7e06851fc, processorArchitecture=MSIL">
-      <HintPath>..\packages\MAVLink.1.0.7\lib\net461\MAVLink.dll</HintPath>
-    </Reference>
-    <Reference Include="MavLink4Net.Messages, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MavLink4Net.Messages.0.4.0\lib\netstandard2.0\MavLink4Net.Messages.dll</HintPath>
-    </Reference>
-    <Reference Include="MavLink4Net.Messages.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MavLink4Net.Messages.Serialization.0.4.0\lib\netstandard2.0\MavLink4Net.Messages.Serialization.dll</HintPath>
-    </Reference>
     <Reference Include="MessagePack, Version=2.2.0.0, Culture=neutral, PublicKeyToken=b4a0369545f0a1be, processorArchitecture=MSIL">
       <HintPath>..\packages\MessagePack.2.2.60\lib\netstandard2.0\MessagePack.dll</HintPath>
     </Reference>
@@ -504,7 +495,7 @@
     <None Include="Resources\icons8_wi_fi_filled_50.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj">
+    <ProjectReference Include="..\mavlink.net-protocol_upgrade\mavlink.net\mavlink.net.csproj">
       <Project>{2dff5e5b-eb22-4c03-bec9-994b112b8e78}</Project>
       <Name>mavlink.net</Name>
     </ProjectReference>
