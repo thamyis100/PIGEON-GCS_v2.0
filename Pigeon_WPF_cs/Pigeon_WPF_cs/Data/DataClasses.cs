@@ -36,21 +36,26 @@ namespace Pigeon_WPF_cs.Data_Classes
     public class GPSData
     {
         /// <summary>
-        /// Apakah data valid?
+        /// Apakah data valid
         /// </summary>
         public bool IsValid { get { if (Latitude != 0 && Longitude != 0) { return true; } else { return false; } } }
 
         /// <summary>
         /// Koordinat Latitude dalam format Decimal Degrees
+        /// Latitude = lintang
         /// </summary>
         public int Latitude { get; set; } = 0;
 
         /// <summary>
         /// Koordinat Longitude dalam format Decimal Degrees
+        /// Longitude = Bujur
         /// </summary>
         public int Longitude { get; set; } = 0;
     }
 
+    /// <summary>
+    /// Wahana
+    /// </summary>
     public class FlightData : TipeWahana
     {
         public FlightMode FlightMode { get; set; } = FlightMode.MANUAL;
@@ -67,8 +72,22 @@ namespace Pigeon_WPF_cs.Data_Classes
         /// </summary>
         public byte Signal { get; set; } = 0;
 
+        #region Contoh getter; setter;
+
+        /*
+        public int SignalPersen { get { return SignalLoss / 255 * 100; } set { SignalLoss = (byte)(value / 100 * 255) } }
+
+        /// <summary>
+        /// 0 = ga ada loss, 255 = loss semua
+        /// </summary>
+        public byte SignalLoss = 250;
+        */
+
+        #endregion
+
         /// <summary>
         /// Data sensor IMU
+        /// IMU = Mendeteksi kemiringan objek
         /// </summary>
         public Inertial IMU { get; set; } = new Inertial();
 
