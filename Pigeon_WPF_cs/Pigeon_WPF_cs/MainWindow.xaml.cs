@@ -209,7 +209,7 @@ namespace Pigeon_WPF_cs
                     stats_Ctrl.yaw_axis_x.Title = "Waktu Terbang";
                     stats_Ctrl.pitch_axis_x.Title = "Waktu Terbang";
                     stats_Ctrl.roll_axis_x.Title = "Waktu Terbang";
-                    bhs_indo.Background = Brushes.Lime;
+                    bhs_indo.Background = Brushes.Blue;
 
                     break;
 
@@ -234,7 +234,7 @@ namespace Pigeon_WPF_cs
                     stats_Ctrl.yaw_axis_x.Title = "Flight Time";
                     stats_Ctrl.pitch_axis_x.Title = "Flight Time";
                     stats_Ctrl.roll_axis_x.Title = "Flight Time";
-                    bhs_inggris.Background = Brushes.Lime;
+                    bhs_inggris.Background = Brushes.Blue;
 
                     break;
             }
@@ -514,7 +514,7 @@ namespace Pigeon_WPF_cs
         private void Btn_OnHover(object sender, MouseEventArgs e)
         {
             if((sender as Button).Name != SelectedTabBtn)
-                (sender as Button).Background = Brushes.DarkSlateGray;
+                (sender as Button).Background = Brushes.MediumPurple;
         }
 
         private void Btn_OnDehover(object sender, MouseEventArgs e)
@@ -566,7 +566,7 @@ namespace Pigeon_WPF_cs
             theCtrl.Visibility = Visibility.Visible;
 
             //warnai tombol yang dipilih
-            theBtn.Background = Brushes.Teal;
+            theBtn.Background = Brushes.Purple;
 
             // Jadikan tombol aktif
             SelectedTabBtn = theBtn.Name;
@@ -576,5 +576,10 @@ namespace Pigeon_WPF_cs
         }
 
         #endregion
+
+        private void flight_Ctrl_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

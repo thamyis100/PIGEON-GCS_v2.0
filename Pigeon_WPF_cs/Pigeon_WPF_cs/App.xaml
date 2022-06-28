@@ -6,8 +6,9 @@
     <Application.Resources>
 
         <GridLength x:Key="MiddleColWidth">270</GridLength>
-
-        <SolidColorBrush x:Key="WindowColor" Color="#FF053C3E"/>
-        
+        <LinearGradientBrush x:Key="WindowColor2">
+            <GradientStop Color="#00CED1" Offset="1.0"/>
+            <GradientStop Color="#A32CC4" Offset="0.2"/>
+        </LinearGradientBrush>
     </Application.Resources>
 </Application>

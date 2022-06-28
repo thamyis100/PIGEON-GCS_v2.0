@@ -66,7 +66,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private async void ToggleConnection(object sender, RoutedEventArgs e)
         {
-            cb_ports.IsEnabled = cb_bauds.IsEnabled = btn_conn.IsEnabled = false;
+            cb_ports.IsEnabled = tb_bauds.IsEnabled = btn_conn.IsEnabled = false;
 
             if (IsConnected)
             {
@@ -93,7 +93,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                 return;
             }
 
-            img_conn.Source = Properties.Resources.icons8_disconnected_80.ToBitmapSource();
+            img_conn.Source = Properties.Resources.icons8_loaded_80.ToBitmapSource();
             ind_conn_status.Content = "Connecting";
 
             switch (ConnectionType)
@@ -119,11 +119,21 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     break;
             }
 
-            cb_ports.IsEnabled = cb_bauds.IsEnabled = false;
+            cb_ports.IsEnabled = tb_bauds.IsEnabled = false;
             btn_conn.IsEnabled = stream_panel.IsEnabled = IsConnected = true;
 
             img_conn.Source = Properties.Resources.icons8_connected_80.ToBitmapSource();
             ind_conn_status.Content = "Connected";
+
+            IPAddress[] ip = Dns.GetHostAddresses(Dns.GetHostName());
+            foreach (IPAddress address in ip)
+            {
+                if (address.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    serverIP.Text = address.ToString();
+
+                }
+            }
         }
 
         //private async Task<bool> CheckMavLinkValid()
@@ -158,7 +168,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void PrepConnection()
         {
-            cb_ports.IsEnabled = cb_bauds.IsEnabled = false;
+            cb_ports.IsEnabled = tb_bauds.IsEnabled = false;
 
             ConnList.Add(new ComboBoxItem { Content = "KONEKSI" });
             ConnList.Add(new ComboBoxItem { Content = "..REFRESH.." });
@@ -167,7 +177,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
             ListAllSerialPorts();
 
-            cb_ports.IsEnabled = cb_bauds.IsEnabled = true;
+            cb_ports.IsEnabled = tb_bauds.IsEnabled = true;
         }
 
         private void ConnSelection_Changed(object sender, SelectionChangedEventArgs e)
@@ -175,7 +185,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             switch (SelectedConn.Content)
             {
                 case "..REFRESH..":
-                    cb_ports.IsEnabled = cb_bauds.IsEnabled = false;
+                    cb_ports.IsEnabled = tb_bauds.IsEnabled = false;
 
                     while (ConnList.Count > 4)
                     {
@@ -185,23 +195,22 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     ListAllSerialPorts();
 
                     cb_ports.SelectedIndex = 0;
-                    cb_bauds.SelectedIndex = 0;
 
-                    cb_ports.IsEnabled = cb_bauds.IsEnabled = true;
+                    cb_ports.IsEnabled = tb_bauds.IsEnabled = true;
                     break;
 
                 case "WIFI":
-                    cb_bauds.IsEnabled = false;
+                    tb_bauds.IsEnabled = false;
                     ConnectionType = ConnType.WIFI;
                     break;
 
                 case "INTERNET":
-                    cb_bauds.IsEnabled = false;
+                    tb_bauds.IsEnabled = false;
                     ConnectionType = ConnType.Internet;
                     break;
 
                 default:
-                    cb_bauds.IsEnabled = true;
+                    tb_bauds.IsEnabled = true;
                     ConnectionType = ConnType.SerialPort;
                     break;
             }
@@ -290,7 +299,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         private void ResetConnection()
         {
             cb_ports.IsEnabled = true;
-            cb_bauds.IsEnabled = true;
+            tb_bauds.IsEnabled = true;
             btn_conn.IsEnabled = true;
 
             stream_panel.IsEnabled = false;
@@ -302,12 +311,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             IsFirstDataTracker = true;
 
             cb_ports.SelectedIndex = 0;
-            cb_bauds.SelectedIndex = 0;
 
             img_conn.Source = Properties.Resources.icons8_disconnected_80.ToBitmapSource();
             ind_conn_status.Content = "Disconnected";
 
-            cb_ports.IsEnabled = cb_bauds.IsEnabled = btn_conn.IsEnabled = true;
+            cb_ports.IsEnabled = tb_bauds.IsEnabled = btn_conn.IsEnabled = true;
         }
 
         #endregion
@@ -508,9 +516,11 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     "Atau port yang dipilih sudah tidak tersedia, Silakan refresh!");
                 return Task.FromResult(false);
             }
-            else if (cb_bauds.SelectedIndex == 0)
+            else if ( 'a'== 0)
             {
-                MessageBox.Show("Tidak ada Baudrate yang dipilih!");
+                int a;
+                a = int.Parse(tb_bauds.Text);
+                MessageBox.Show(" Baudrate belum diisi!");
                 return Task.FromResult(false);
             }
 
@@ -1547,6 +1557,14 @@ namespace Pigeon_WPF_cs.Custom_UserControls
         #region Property Binding Handler
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+        }
+
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
