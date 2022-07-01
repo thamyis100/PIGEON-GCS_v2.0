@@ -6,11 +6,15 @@
              xmlns:local="clr-namespace:Pigeon_WPF_cs.Custom_UserControls.WPF_Avionics_Indicators"
              mc:Ignorable="d" ClipToBounds="True">
     <Grid>
-        <Border Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="19*"/>
+            <ColumnDefinition Width="6*"/>
+        </Grid.ColumnDefinitions>
+        <Border Margin="15,15,15,15" Grid.ColumnSpan="2">
             <Image x:Name="img_boule" RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Horizon_GroundSky.png" Margin="0,-600"/>
         </Border>
-        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Horizon_Background.png"/>
-        <Image x:Name="img_avion" RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Maquette_Avion.png" RenderTransformOrigin="0.5,0.5">
+        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Horizon_Background.png" Grid.ColumnSpan="2"/>
+        <Image x:Name="img_avion" RenderOptions.BitmapScalingMode="HighQuality" Source="Res/Maquette_Avion.png" RenderTransformOrigin="0.5,0.5" Grid.ColumnSpan="2">
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleY="0.55" ScaleX="0.55"/>

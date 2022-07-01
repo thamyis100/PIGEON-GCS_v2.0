@@ -59,7 +59,7 @@
                 <TextBox Text="" x:Name="tb_received" DockPanel.Dock="Top" BorderBrush="{x:Null}" Margin="5" FontSize="14" AllowDrop="False" IsReadOnly="True" IsUndoEnabled="False"/>
             </DockPanel>
             <DockPanel Margin="0,2.5" Background="Gainsboro" Grid.Row="1">
-                <Label Content="Koordinat Wahana" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0"/>
+                <Label x:Name="koordinat" Content="Koordinat Wahana" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0"/>
                 <Grid Margin="25,0" VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10*"/>
@@ -88,7 +88,7 @@
                     <ColumnDefinition Width="5*"/>
                     <ColumnDefinition Width="1*"/>
                 </Grid.ColumnDefinitions>
-                <Label Content="Koordinat Tracker" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0" Grid.ColumnSpan="2"/>
+                <Label x:Name="tracker" Content="Koordinat Tracker" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="30" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" DockPanel.Dock="Top" Margin="0,5,0,0" Grid.ColumnSpan="2"/>
                 <DockPanel VerticalAlignment="Bottom" Margin="0,0,0,25">
                     <Grid Margin="10,0,0,0" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -115,7 +115,7 @@
                 </Button>
             </Grid>
             <Grid Margin="0,2.5" Background="Gainsboro" Grid.Row="3">
-                <Label Content="Status Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="28" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" Margin="15,5,0,0"/>
+                <Label x:Name="status" Content="Status Tracker" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="28" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Foreground="#FF0B7074" Margin="15,5,0,0"/>
                 <Button x:Name="btn_tracking" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,25,0" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="ToggleTracking" IsEnabled="False">
                     <DockPanel>
                         <Image x:Name="ico_start_stop" Source="/PIGEON GCS;component/Resources/icons/icons8-play-50.png" Height="25"/>

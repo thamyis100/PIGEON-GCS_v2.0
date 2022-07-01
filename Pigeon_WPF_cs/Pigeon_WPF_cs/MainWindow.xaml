@@ -134,7 +134,7 @@
                     <Image x:Name="icon_track" Margin="5,0" Source="Resources/icons/icons8-gps-antenna-100.png" DockPanel.Dock="Right" HorizontalAlignment="Right" VerticalAlignment="Center" MaxWidth="40" MaxHeight="40"/>
                 </DockPanel>
             </Button>
-            <Button x:Name="btn_help" Content="Help" Style="{StaticResource leftPaneButtonStyle}" Margin="0,10,0,0" Grid.Row="5" VerticalAlignment="Top" Background="{x:Null}" Foreground="White" FontFamily="Unispace" FontWeight="Bold" ToolTip="Help about Pigeon" MouseEnter="Btn_OnHover" MouseLeave="Btn_OnDehover" Grid.ColumnSpan="4" FontSize="9" HorizontalAlignment="Center" BorderBrush="{x:Null}" Width="30" Height="15"/>
+            <Button x:Name="btn_help" Content="Help" Style="{StaticResource leftPaneButtonStyle}" Margin="0,10,0,0" Grid.Row="5" VerticalAlignment="Top" Background="{x:Null}" Foreground="White" FontFamily="Unispace" FontWeight="Bold" ToolTip="Help about Pigeon" MouseEnter="Btn_OnHover" MouseLeave="Btn_OnDehover" Grid.ColumnSpan="4" FontSize="9" HorizontalAlignment="Center" BorderBrush="{x:Null}" Width="45" Height="15"/>
             <Rectangle x:Name="tab_flight" Grid.Column="4" Fill="#FFE5E5E5" Height="60" Margin="0" Grid.Row="1" StrokeThickness="0" VerticalAlignment="Center"/>
             <Rectangle x:Name="tab_map" Grid.Column="4" Fill="#FFE5E5E5" Height="60" Margin="0" Grid.Row="2" StrokeThickness="0" VerticalAlignment="Center"/>
             <Rectangle x:Name="tab_stats" Grid.Column="4" Fill="#FFE5E5E5" Height="60" Margin="0" Grid.Row="3" StrokeThickness="0" VerticalAlignment="Center"/>

@@ -1565,6 +1565,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         }
 
+        private void ind_attitude_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void WindowsFormsHost_ChildChanged(object sender, System.Windows.Forms.Integration.ChildChangedEventArgs e)
+        {
+
+        }
+
         private void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -40,10 +40,10 @@
                 <Label x:Name="follow_wahana_label" Content="Klik untuk mengikuti Wahana >>" DockPanel.Dock="Right" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="White" Visibility="Collapsed"/>
             </DockPanel>
         </Grid>
-        <Label x:Name="judul_map" Content="Map View" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="196" Grid.RowSpan="2"/>
+        <Label x:Name="judul_map" Content="Map View" HorizontalAlignment="Left" VerticalAlignment="Top" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="318" Grid.ColumnSpan="2"/>
 
         <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
-            <Label Content="Pilih Peta :"/>
+            <Label x:Name="peta" Content="Pilih Peta :"/>
             <ComboBox x:Name="cb_map_type" SelectionChanged="ChooseMap" SelectedIndex="4" Width="120">
                 <ComboBoxItem Content="ArcGIS Topografi"/>
                 <ComboBoxItem Content="ArcGIS Imagery"/>
@@ -54,11 +54,16 @@
                 <ComboBoxItem Content="Google Hybrid"/>
             </ComboBox>
         </DockPanel>
-        
+
         <DockPanel x:Name="wp_dock" Grid.Row="1" Margin="5,0,0,2.5" Height="25" VerticalAlignment="Bottom" Grid.RowSpan="2" Width="350" HorizontalAlignment="Left" Grid.ColumnSpan="2">
-            <Grid DockPanel.Dock="Top">
-                <Polygon Points="0,22.5 20,0 100,0 120,22.5" Fill="#CC000000" VerticalAlignment="Top" HorizontalAlignment="Center"/>
-                <Button x:Name="wp_dock_btn" Content="Markers &#9650;" Padding="2" DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Top" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" Click="ToggleWPDock"/>
+            <Grid DockPanel.Dock="Top" Height="28" Width="396">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="0*"/>
+                </Grid.ColumnDefinitions>
+                <Polygon Points="0,22.5 20,0 100,0 120,22.5" Fill="#CC000000" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="70,0,0,0"/>
+                <Button x:Name="wp_dock_btn" Content="Markers &#9650;" Padding="2" HorizontalAlignment="Left" VerticalAlignment="Center" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" Click="ToggleWPDock" Margin="99,0,0,0"/>
+                <Button x:Name="reset_mark" Content="Reset Markers" Margin="265,0,51,0" Click="Button_Click" Background="Black" FontFamily="Raleway SemiBold" Foreground="White" BorderBrush="Black" />
             </Grid>
             <Border DockPanel.Dock="Top" BorderBrush="Black" BorderThickness="0,0,0,1" Margin="0" Background="#CC000000" CornerRadius="5, 5, 0, 0" >
                 <ScrollViewer DockPanel.Dock="Bottom" Margin="0,5,5,0" VerticalScrollBarVisibility="Auto">

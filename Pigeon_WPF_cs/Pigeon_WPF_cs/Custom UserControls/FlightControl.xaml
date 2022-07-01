@@ -23,7 +23,7 @@
             <ColumnDefinition Width="{DynamicResource MiddleColWidth}"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="judul_flight" Content="Flight View" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="207"/>
+        <Label x:Name="judul_flight" Content="Flight View" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" FontSize="36" FontFamily="Century Gothic" FontWeight="Bold" Foreground="#FF0B7074" Margin="0" Padding="10,5" Height="54" Width="257"/>
         <Grid Margin="0,0,2.5,0" Grid.Row="1" Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -66,7 +66,7 @@
             </Border>
             <Button x:Name="btn_take_picture" FontSize="14" BorderBrush="Transparent" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Margin="154,5,154,0" Background="#FF9BECEC" Content="Ambil Gambar" HorizontalAlignment="Center" VerticalAlignment="Top" Padding="3,2" Height="22" Width="103" Click="AmbilGambar"/>
             <DockPanel Margin="0,2,0,0" VerticalAlignment="Top" Height="30" Grid.Row="1" HorizontalAlignment="Center">
-                <Label Content="Kamera :" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" FontFamily="Consolas" Padding="5,0"/>
+                <Label x:Name="camera" Content="Kamera :" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="16" FontWeight="Bold" FontFamily="Consolas" Padding="5,0"/>
                 <ComboBox x:Name="cb_cams" DisplayMemberPath="Name" Margin="0" VerticalAlignment="Center" SelectedItem="{Binding CurrentCamera}" ItemsSource="{Binding Cameras}" SelectedIndex="0" Text="Tidak ada kamera, refresh &gt;&gt;" IsEditable="True" HorizontalAlignment="Left" IsEnabled="False" FontSize="14" Width="220"/>
                 <Button x:Name="btn_refreshcam" Background="#FF9BECEC" BorderBrush="{x:Null}" Click="RefreshCameras" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="5" Margin="5,0">
                     <Image x:Name="img_refreshcam" RenderOptions.BitmapScalingMode="HighQuality" Source="/PIGEON GCS;component/Resources/icons/refresh.png" RenderTransformOrigin="0.5,0.5" />
@@ -77,19 +77,20 @@
                 <WrapPanel x:Name="screenshot_List"/>
             </ScrollViewer>
         </Grid>
-        <Border VerticalAlignment="Center" Background="Gainsboro" Padding="0" CornerRadius="4" Grid.ColumnSpan="3" Margin="599,0,0,0" HorizontalAlignment="Left" Width="521" Height="34">
-            <DockPanel Margin="700,2.5,700,2" VerticalAlignment="Center">
-                <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="-690,0,110,0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway" Height="21" Width="98"/>
-                <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="-590,0,-105,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding SelectedConn}" ItemsSource="{Binding ConnList}" Width="102" SelectionChanged="ConnSelection_Changed" FontSize="14" Cursor="Hand" SelectedIndex="0" IsSynchronizedWithCurrentItem="True"/>
-                <Button x:Name="btn_conn" MouseEnter="OnConnHover" MouseLeave="OnConnDehover" Background="#FF9BECEC" BorderBrush="{x:Null}" VerticalAlignment="Center" Margin="-390,0,210,0" Padding="0" Click="ToggleConnection" HorizontalContentAlignment="Stretch" HorizontalAlignment="Right" Width="159">
-                    <DockPanel Margin="0,0,7.333,0">
+        <Border VerticalAlignment="Center" Background="Gainsboro" Padding="0" CornerRadius="4" Grid.ColumnSpan="3" Margin="482,0,0,0" HorizontalAlignment="Left" Width="748" Height="36">
+            <DockPanel Margin="10,0,258,0" VerticalAlignment="Center" Height="34">
+                <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway" Height="21" Width="98"/>
+                <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding SelectedConn}" ItemsSource="{Binding ConnList}" Width="102" SelectionChanged="ConnSelection_Changed" FontSize="14" Cursor="Hand" SelectedIndex="0" IsSynchronizedWithCurrentItem="True"/>
+                <TextBox x:Name="tb_bauds" Grid.Column="1" HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="96" Grid.ColumnSpan="2" Height="25" TextChanged="TextBox_TextChanged"/>
+                <Button x:Name="btn_conn" MouseEnter="OnConnHover" MouseLeave="OnConnDehover" Background="#FF9BECEC" BorderBrush="{x:Null}" Margin="5,0,0,0" Padding="0" Click="ToggleConnection" HorizontalContentAlignment="Stretch" Width="147" Height="27">
+                    <DockPanel Margin="0,0,-2,0" Height="24">
                         <Image x:Name="img_conn" RenderOptions.BitmapScalingMode="HighQuality" Source="/PIGEON GCS;component/Resources/icons/icons8-disconnected-80.png"  Margin="4,0" HorizontalAlignment="Left"/>
-                        <Label x:Name="ind_conn_status" Content="Disconnected" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="16" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                        <Label x:Name="ind_conn_status" Content="Disconnected" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Margin="0,0,5,0" FontSize="16" DockPanel.Dock="Right" Height="20"/>
                     </DockPanel>
                 </Button>
             </DockPanel>
         </Border>
-        <DockPanel HorizontalAlignment="Right" VerticalAlignment="Center" Grid.ColumnSpan="2">
+        <DockPanel Margin="500,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2">
             <Label Content="Server IP :" FontWeight="Bold" Background="#d6b4fc" Margin="490,0,-435,0" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway SemiBold"/>
             <TextBox Height="23" HorizontalAlignment="Left" Margin="440,0,-420,0" Name="serverIP" VerticalAlignment="Center" Width="97"/>
         </DockPanel>
@@ -137,9 +138,9 @@
                     </DockPanel>
                 </Grid>
                 <DockPanel Grid.Column="1" Grid.Row="2" Background="Gainsboro" VerticalAlignment="Bottom" Margin="0,5,0,0" DockPanel.Dock="Bottom">
-                    <indikator:AttitudeIndicator x:Name="ind_attitude" Margin="5" DockPanel.Dock="Top"/>
+                    <indikator:AttitudeIndicator x:Name="ind_attitude" Margin="5" DockPanel.Dock="Top" Loaded="ind_attitude_Loaded" Height="252" Width="254"/>
                     <DockPanel x:Name="avInst" Margin="5">
-                        <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="105" Height="105">
+                        <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="105" Height="105" ChildChanged="WindowsFormsHost_ChildChanged">
                             <indicator:HeadingIndicatorInstrumentControl x:Name="ind_heading"/>
                         </WindowsFormsHost>
                         <WindowsFormsHost VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="105" Height="105" Grid.ColumnSpan="2" Grid.Column="1">
@@ -149,6 +150,6 @@
                 </DockPanel>
             </Grid>
         </ScrollViewer>
-        <TextBox x:Name="tb_bauds" Grid.Column="1" HorizontalAlignment="Left" Margin="206,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="96" Grid.ColumnSpan="2" Height="25" TextChanged="TextBox_TextChanged"/>
+
     </Grid>
 </UserControl>

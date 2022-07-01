@@ -173,7 +173,8 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         public void ResetMarkers()
         {
-
+            
+               
         }
 
         /// <summary>
@@ -294,6 +295,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             mapView.MouseWheelZoomType = MouseWheelZoomType.MousePositionAndCenter;
             mapView.CanDragMap = true;
             mapView.DragButton = MouseButton.Left;
+            
             mapView.IgnoreMarkerOnMouseWheel = true;
             mapView.Markers.CollectionChanged += UpdateWaypointList;
 
@@ -359,7 +361,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             addedMarker.Shape = new CustomMarker(mapView, addedMarker, (BitmapImage)GetWaypointIkon(Properties.Resources.marker_waypoint.ToBitmapSource(), WaypointNum));
             
             mapView.Markers.Add(addedMarker);
-
+           
             if (WP_Trail == null)
             {
                 WP_Trail = new GMapRoute(WP_Points)
@@ -404,6 +406,12 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             });
 
             wp_dock.Height = nextHeight;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            mapView.Markers.RemoveAt(0);
+            WaypointNum = 0;
         }
 
         short CurrRouteIndex = 0;

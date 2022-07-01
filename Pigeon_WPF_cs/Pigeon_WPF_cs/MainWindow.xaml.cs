@@ -195,6 +195,12 @@ namespace Pigeon_WPF_cs
                     lbl_signal.Content = "Sinyal";
                     lbl_flightTime.Content = "Waktu Terbang";
                     lbl_batt.Content = "Baterai";
+                    lbl_map.Content = "Peta";
+                    lbl_flight.Content = "Terbang";
+                    lbl_stats.Content = "Statistik";
+                    lbl_track.Content = "Pelacak";
+                    btn_help.Content = "Bantuan";
+
 
                     // Flight
                     flight_Ctrl.judul_flight.Content = "Tampilan Terbang";
@@ -203,12 +209,27 @@ namespace Pigeon_WPF_cs
                     flight_Ctrl.btn_livestream.Content = "Mulai Siaran";
                     flight_Ctrl.label.Content = "Koneksi :";
                     flight_Ctrl.ind_conn_status.Content = "Terputus";
+                    flight_Ctrl.camera.Content = "Kamera";
+                    flight_Ctrl.lbl_fmode.Content = "Mode Penerbanganf";
 
                     // Stats 
                     stats_Ctrl.judul_stats.Content = "Statistik Data IMU";
                     stats_Ctrl.yaw_axis_x.Title = "Waktu Terbang";
                     stats_Ctrl.pitch_axis_x.Title = "Waktu Terbang";
                     stats_Ctrl.roll_axis_x.Title = "Waktu Terbang";
+                    
+
+                    //maps
+                    map_Ctrl.judul_map.Content = "Tampilan Peta";
+                    map_Ctrl.peta.Content = "Pilih Peta";
+
+                    //tracker
+                    track_Ctrl.judul_track.Content = "Pelacak Antenna";
+                    track_Ctrl.conn_panel_label.Content = "Terintrigasi dengan tampilan penerbangan";
+                    track_Ctrl.koordinat.Content = "Koordinat Wahana";
+                    track_Ctrl.tracker.Content = "Koordinat Pelacak";
+                    track_Ctrl.status.Content = "Status Pelacak";
+
                     bhs_indo.Background = Brushes.Blue;
 
                     break;
@@ -221,6 +242,11 @@ namespace Pigeon_WPF_cs
                     lbl_signal.Content = "Signal";
                     lbl_flightTime.Content = "Flight Time";
                     lbl_batt.Content = "Battery";
+                    lbl_map.Content = "Peta";
+                    lbl_flight.Content = "Flight";
+                    lbl_stats.Content = "Stats";
+                    lbl_track.Content = "Tracker";
+                    btn_help.Content = "Help";
 
                     // Flight
                     flight_Ctrl.judul_flight.Content = "Flight View";
@@ -228,12 +254,26 @@ namespace Pigeon_WPF_cs
                     flight_Ctrl.btn_take_picture.Content = "Take Picture";
                     flight_Ctrl.label.Content = "Connection :";
                     flight_Ctrl.ind_conn_status.Content = "Disconnected";
+                    flight_Ctrl.camera.Content = "Camera";
+                    flight_Ctrl.btn_livestream.Content = "Start Stream";
+                    flight_Ctrl.lbl_fmode.Content = "Flight Mode";
 
                     // Stats
                     stats_Ctrl.judul_stats.Content = "IMU Data Statistics";
                     stats_Ctrl.yaw_axis_x.Title = "Flight Time";
                     stats_Ctrl.pitch_axis_x.Title = "Flight Time";
                     stats_Ctrl.roll_axis_x.Title = "Flight Time";
+
+                    //maps
+                    map_Ctrl.judul_map.Content = "Map View";
+                    map_Ctrl.peta.Content = "select map";
+
+                    //tracker
+                    track_Ctrl.judul_track.Content = "Antenna Tracker";
+                    track_Ctrl.conn_panel_label.Content = "Integrated with flight view";
+                    track_Ctrl.koordinat.Content = "Vehicle Coordinates";
+                    track_Ctrl.tracker.Content = "Tracker Coordinates";
+                    track_Ctrl.status.Content = "Tracker Status";
                     bhs_inggris.Background = Brushes.Blue;
 
                     break;
