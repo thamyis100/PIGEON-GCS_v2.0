@@ -1,7 +1,16 @@
+<<<<<<< HEAD
 ﻿<?xml version='1.0' encoding='utf-8'?>
 <SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
   <Profiles>
     <Profile Name="(Default)" />
   </Profiles>
   <Settings />
+=======
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="uri:settings" CurrentProfile="(Default)">
+  <Profiles>
+    <Profile Name="(Default)" />
+  </Profiles>
+  <Settings />
+>>>>>>> f87166dbc6562111662283ba9b9b3b865afc5862
 </SettingsFile>

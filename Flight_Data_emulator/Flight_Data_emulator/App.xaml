@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿<Application x:Class="Flight_Data_emulator.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,3 +8,14 @@
          
     </Application.Resources>
 </Application>
+=======
+﻿<Application x:Class="Flight_Data_emulator.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Flight_Data_emulator"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+         
+    </Application.Resources>
+</Application>
+>>>>>>> f87166dbc6562111662283ba9b9b3b865afc5862
