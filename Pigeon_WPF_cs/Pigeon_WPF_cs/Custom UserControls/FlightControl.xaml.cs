@@ -44,6 +44,8 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using Pigeon_WPF_cs.Enums;
 using System.Collections.Concurrent;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
@@ -195,6 +197,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     ListAllSerialPorts();
 
                     cb_ports.SelectedIndex = 0;
+                    tb_bauds.SelectedIndex = 0;
 
                     cb_ports.IsEnabled = tb_bauds.IsEnabled = true;
                     break;
@@ -311,6 +314,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             IsFirstDataTracker = true;
 
             cb_ports.SelectedIndex = 0;
+            tb_bauds.SelectedIndex = 0;
 
             img_conn.Source = Properties.Resources.icons8_disconnected_80.ToBitmapSource();
             ind_conn_status.Content = "Disconnected";
@@ -516,13 +520,19 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     "Atau port yang dipilih sudah tidak tersedia, Silakan refresh!");
                 return Task.FromResult(false);
             }
-            else if ( 'a'== 0)
+            else if (tb_bauds.SelectedIndex == 0)
             {
-                int a;
-                a = int.Parse(tb_bauds.Text);
-                MessageBox.Show(" Baudrate belum diisi!");
+                MessageBox.Show("Tidak ada Baudrate yang dipilih!");
                 return Task.FromResult(false);
             }
+
+            //else if ( 'a'== 0)
+            //{
+            //    int a;
+            //    a = int.Parse(tb_bauds.Text);
+            //    MessageBox.Show(" Baudrate belum diisi!");
+            //    return Task.FromResult(false);
+            //}
 
             try
             {
@@ -740,7 +750,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
                 //GetMavLinkStreams();
             }
-
+            var todb = new Dictionary<string, string>();
             switch (packet.Message)
             {
                 case UasHeartbeat HrtMsg:
@@ -798,6 +808,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     App.Wahana.MavlinkMiliVolt = SysMsg.VoltageBattery;
                     App.Wahana.MavlinkCentiAmp = SysMsg.CurrentBattery;
                     App.Wahana.Signal = (byte)(100 - (SysMsg.DropRateComm / 100));
+                    // message json to server
+                    todb.Add("voltagebattery", SysMsg.VoltageBattery.ToString());
+                    todb.Add("currentbattery", SysMsg.CurrentBattery.ToString());
+                    todb.Add("packetdrop", SysMsg.DropRateComm.ToString());
 
                     break;
 
@@ -805,6 +819,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     App.Wahana.IMU.Yaw = (float)(AttMsg.Yaw * 180 / Math.PI);
                     App.Wahana.IMU.Pitch = (float)(AttMsg.Pitch * 180 / Math.PI);
                     App.Wahana.IMU.Roll = (float)(AttMsg.Roll * 180 / Math.PI);
+                    // message json to server
+                    todb.Add("yaw", AttMsg.Yaw.ToString());
+                    todb.Add("pitch", AttMsg.Pitch.ToString());
+                    todb.Add("roll", AttMsg.Roll.ToString());
 
                     break;
 
@@ -813,11 +831,18 @@ namespace Pigeon_WPF_cs.Custom_UserControls
                     App.Wahana.GPS.Longitude = PosMsg.Lon;
 
                     App.Wahana.Altitude = PosMsg.Alt;
+                    // message json to server
+                    todb.Add("latitude", PosMsg.Lat.ToString());
+                    todb.Add("longitude", PosMsg.Lon.ToString());
+                    todb.Add("altitude", PosMsg.Alt.ToString());
+                    todb.Add("bearing", PosMsg.Hdg.ToString());
 
                     break;
 
                 case UasVfrHud VfrMsg:
                     App.Wahana.Speed = VfrMsg.Groundspeed;
+                    // message json to server
+                    todb.Add("speed", VfrMsg.Groundspeed.ToString());
 
                     break;
 
@@ -837,6 +862,13 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             }
 
             Dispatcher.Invoke(() => UpdateUIWahana(packet.Message));
+
+            // to ep(end point)
+            const string linkserver = "http://13.48.56.46/api/auth/mavdump";
+            var converter = JsonConvert.SerializeObject(todb);
+            var str = new StringContent(converter, System.Text.Encoding.UTF8, "application/json");
+            str.Headers.Add("x-access-token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNjg4NzgzODM2LCJleHAiOjE2ODg4NzAyMzZ9.3hP9mRyq-kNX-MLOIeWHdlr61B6EmrPhPcFyYNifFfA");
+            var to_ep = new HttpClient().PostAsync(linkserver, str);
         }
 
         private void MavlinkPacketDiscarded(object sender, MavLinkPacketBase packet)
@@ -1558,12 +1590,16 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        
 
-        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void tb_bauds_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
         }
+
+        //private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        //{
+        //    SelectedBaud.Content = tb_bauds.Text;
+        //}
 
         private void ind_attitude_Loaded(object sender, RoutedEventArgs e)
         {
@@ -1580,7 +1616,7 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             switch (propertyName)
             {
-                case "CurrentCamera":
+                case "CurrentCamera": 
                     if (liveStream != null)
                     {
                         btn_livestream.Content = "Ubah Stream";

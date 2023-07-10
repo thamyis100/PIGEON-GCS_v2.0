@@ -81,7 +81,14 @@
             <DockPanel Margin="10,0,258,0" VerticalAlignment="Center" Height="34">
                 <Label x:Name="label" Content="Connection :" HorizontalAlignment="Left" Margin="0" VerticalAlignment="Center" Padding="0" FontSize="16" FontWeight="Bold" FontFamily="/PIGEON GCS;component/Resources/fonts/Raleway/#Raleway" Height="21" Width="98"/>
                 <ComboBox x:Name="cb_ports" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding SelectedConn}" ItemsSource="{Binding ConnList}" Width="102" SelectionChanged="ConnSelection_Changed" FontSize="14" Cursor="Hand" SelectedIndex="0" IsSynchronizedWithCurrentItem="True"/>
-                <TextBox x:Name="tb_bauds" Grid.Column="1" HorizontalAlignment="Left" Margin="10,0,0,0" TextWrapping="Wrap" VerticalAlignment="Center" Width="96" Grid.ColumnSpan="2" Height="25" TextChanged="TextBox_TextChanged"/>
+				<ComboBox x:Name="tb_bauds" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center" BorderBrush="{x:Null}" Background="{x:Null}" SelectedItem="{Binding SelectedBaud}" Width="120" FontSize="14" SelectedIndex="0" Cursor="Hand" IsSynchronizedWithCurrentItem="True" SelectionChanged="tb_bauds_SelectionChanged">
+					<ComboBoxItem Content="BAUDRATE"/>
+					<ComboBoxItem Content="9600"/>
+					<ComboBoxItem Content="19200"/>
+					<ComboBoxItem Content="57600"/>
+					<ComboBoxItem Content="115200"/>
+					<ComboBoxItem Content="128000"/>
+				</ComboBox>
                 <Button x:Name="btn_conn" MouseEnter="OnConnHover" MouseLeave="OnConnDehover" Background="#FF9BECEC" BorderBrush="{x:Null}" Margin="5,0,0,0" Padding="0" Click="ToggleConnection" HorizontalContentAlignment="Stretch" Width="147" Height="27">
                     <DockPanel Margin="0,0,-2,0" Height="24">
                         <Image x:Name="img_conn" RenderOptions.BitmapScalingMode="HighQuality" Source="/PIGEON GCS;component/Resources/icons/icons8-disconnected-80.png"  Margin="4,0" HorizontalAlignment="Left"/>
