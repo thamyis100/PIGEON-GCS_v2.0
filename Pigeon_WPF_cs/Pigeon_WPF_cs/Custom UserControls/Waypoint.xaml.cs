@@ -24,6 +24,7 @@ using GMap;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsPresentation;
+using MavLinkNet;
 
 namespace Pigeon_WPF_cs.Custom_UserControls
 {
@@ -40,6 +41,10 @@ namespace Pigeon_WPF_cs.Custom_UserControls
             DataContext = this;
 
             InitializeComponent();
+        }
+        private void SendwaypointCommand(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         #region Predefined markers functions
@@ -410,9 +415,37 @@ namespace Pigeon_WPF_cs.Custom_UserControls
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            mapView.Markers.RemoveAt(0);
-            WaypointNum = 0;
+            GMapMarker highestNumberedMarker = null;
+            int highestNumber = 0;
+
+            foreach (var marker in mapView.Markers)
+            {
+                if (marker.Tag.ToString().StartsWith("WP"))
+                {
+                    int markerNumber;
+                    if (int.TryParse(marker.Tag.ToString().Substring(2), out markerNumber))
+                    {
+                        if (markerNumber > highestNumber)
+                        {
+                            highestNumber = markerNumber;
+                            highestNumberedMarker = marker;
+                        }
+                    }
+                }
+                if(WaypointNum!=0)
+                {
+                    WaypointNum = highestNumber - 1;
+                }
+            }
+
+            if (highestNumberedMarker != null)
+            {
+                mapView.Markers.Remove(highestNumberedMarker);
+            }
+
+            
         }
+
 
         short CurrRouteIndex = 0;
         short CurrWayIndex = 0;

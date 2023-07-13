@@ -53,6 +53,16 @@
                 <ComboBoxItem Content="Google Terrain"/>
                 <ComboBoxItem Content="Google Hybrid"/>
             </ComboBox>
+            <Label Content="Command:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <ComboBox x:Name="cb_command" Width="100" Margin="0,0,5,0">
+                <!-- Add ComboBox items here -->
+                <ComboBoxItem Content="waypoint"/>
+            </ComboBox>
+            <Label Content="Height:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox x:Name="tb_height" Width="50" Margin="0,0,5,0"/>
+            <Button BorderBrush="{x:Null}" Width="20" Click="SendwaypointCommand" Margin="0">
+                <Image Source="/PIGEON GCS;component/Resources/icons/icons8-email-send-80.png" Margin="0,1,0,0"/>
+            </Button>
         </DockPanel>
 
         <DockPanel x:Name="wp_dock" Grid.Row="1" Margin="5,0,0,2.5" Height="25" VerticalAlignment="Bottom" Grid.RowSpan="2" Width="350" HorizontalAlignment="Left" Grid.ColumnSpan="2">
